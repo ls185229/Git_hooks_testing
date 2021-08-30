@@ -27,4 +27,6 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint `find . -cmin -2 |grep .py$|xargs`
+        pylint `ls -R|grep .py$|xargs`
+
+# pylint `find . -cmin -2 |grep .py$|xargs`
