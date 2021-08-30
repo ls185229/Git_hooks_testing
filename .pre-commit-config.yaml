@@ -3,6 +3,7 @@
 
 
 # Autopep8 hook : runs for python files
+repos:
 -   repo: https://github.com/pre-commit/mirrors-autopep8
     rev: v1.5.7
     hooks:
