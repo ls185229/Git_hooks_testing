@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 '''
-doc string
+Doc string
 '''
-
 
 print("Hello world")
 print("New test ")
