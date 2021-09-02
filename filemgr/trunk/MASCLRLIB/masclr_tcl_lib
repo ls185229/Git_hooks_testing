@@ -1,0 +1,2722 @@
+#!/usr/local/bin/tclsh
+
+# $Id: masclr_tcl_lib 4910 2019-10-21 18:47:22Z smiller $
+
+################################################################################
+# MASCLR TCL library
+#
+# this should normally be imported in a tcl script by
+# source $env(MASCLR_LIB)/masclr_tcl_lib
+#
+# by sourcing this file and using the procs in the MASCLR namespace, you get
+# free functionality such as standardized logging, debug logging control,
+# email functions, standard variables, utility functions, argument parsing,
+# and more robust usage of oratcl
+################################################################################
+
+
+if { [info exists MASCLR_LIB_LOADED] } {
+    return
+}
+
+if {[info nameofexecutable] != "/usr/bin/expect"} {
+    package require Oratcl
+}
+
+##################################################
+# write_log_message
+##################################################
+proc write_log_message { log_msg_text } {
+
+    global log_file
+
+    if { [catch {puts $log_file "[clock format [clock seconds] -format "%D %T"] $log_msg_text"} ]} {
+        puts stderr "[clock format [clock seconds] -format "%D %T"] $log_msg"
+    }
+    flush $log_file
+};# end log_message
+
+namespace eval MASCLR {
+    namespace export log_message
+    namespace export open_log_file
+    namespace export set_log_file_name
+    namespace export set_debug_level
+    namespace export send_alert_email
+    namespace export send_info_email
+    namespace export send_quick_info_email
+    namespace export set_mail_subject
+    namespace export set_mail_file_list
+    namespace export set_mail_body
+    namespace export set_mail_to
+    namespace export get_command_string
+    namespace export set_command_string
+    namespace export close_all_and_exit_with_code
+    namespace export parse_arguments
+    namespace export add_argument
+    namespace export usage_statement
+    namespace export open_file
+    namespace export close_file
+    namespace export open_db_connection
+    namespace export close_db_connections
+    namespace export insert_record
+    namespace export insert_bind_record
+    namespace export update_record
+    namespace export update_bind_record
+    namespace export delete_record
+    namespace export delete_bind_record
+    namespace export clear_database_logon_handles
+    namespace export add_database_logon_handle
+    namespace export fetch_single_value
+    namespace export fetch_single_bind_value
+    namespace export fetch_single_record_as_array
+    namespace export fetch_single_bind_record_as_array
+    namespace export open_cursor
+    namespace export close_cursor
+    namespace export start_fetch
+    namespace export start_bind_fetch
+    namespace export fetch_record
+    namespace export fetch_record_as_list
+    namespace export get_cursor_status
+    namespace export set_cursor_status
+    namespace export get_rows_fetched
+    namespace export increment_rows_fetched
+    namespace export get_affected_rows
+    namespace export set_affected_rows
+    namespace export live_updates
+    namespace export save_updates_to_file
+    namespace export print_to_file_name
+    namespace export print_to_channel
+    namespace export get_next_line
+    namespace export get_next_line_from_file_name
+    namespace export clearing_amount
+    namespace export get_date_with_format
+    namespace export get_julian_date
+    namespace export set_up_dates
+    namespace export split_list_surround_quotes
+    namespace export masclr_error
+	namespace export mutt_send_mail 
+
+        ###########################################
+        ### used internally by the library
+        ###########################################
+    variable FAILURE_CONDITION 13
+    variable SUCCESS_CONDITION 1
+    variable SCRIPT_SUCCESS 0
+    variable PROC_SUCCESS 1
+    variable TRUE 1
+    variable FALSE 0
+
+    variable OPEN_FILES
+    array set OPEN_FILES {}
+    variable DATABASE_LOGON_HANDLES
+    array set DATABASE_LOGON_HANDLES {}
+    variable OPEN_DATABASE_CURSORS
+    array set OPEN_DATABASE_CURSORS {}
+    variable CURSOR_INFO
+    array set CURSOR_INFO {}
+    variable LIVE_UPDATES 0
+    variable LOGGED_PRINT_ERROR 0
+    variable COMMAND_STRING ""
+
+    variable REQUIRED_ARGUMENTS
+    array set REQUIRED_ARGUMENTS {}
+    variable OPTIONAL_ARGUMENTS
+    array set OPTIONAL_ARGUMENTS {}
+
+    variable ARG_ALT_SPELL_INDEX 0
+    variable ARG_HAS_VAL_INDEX 1
+    variable ARG_DEFAULT_INDEX 2
+    variable ARG_FORMAT_INDEX 3
+
+    variable CURSOR_STATUS_INDEX 0
+    variable CURSOR_NUM_ROWS_INDEX 1
+    variable CURSOR_AFFECTED_ROWS_INDEX 1
+
+    variable LOG_FILE_NAME
+    variable LOG_FILE_CHANNEL stdout
+    variable OUT_SQL_FILE_NAME ""
+
+
+    variable CRITICAL
+    array set CRITICAL { SUBJECT "$env(EFFECTIVE_USER)@$env(SYS_BOX) :: Priority : Critical - Clearing on-call" BODY "ASSIST :: \nContact On-Call Engr. (15 minutes or Escalate) - Open Ticket \n\n" }
+
+    variable URGENT
+    array set URGENT { SUBJECT "$env(EFFECTIVE_USER)@$env(SYS_BOX) :: Priority : Urgent - Clearing on-call" BODY "ASSIST :: \nContact On-Call Engr . (60 minutes or Escalate) - Open Ticket \n\n" }
+
+    variable HIGH
+    array set HIGH { SUBJECT "$env(EFFECTIVE_USER)@$env(SYS_BOX) :: Priority : High - Clearing on-call" BODY "ASSIST :: \nInform On-Call/Available Engr. (Day Time 7 days of the week) - Open Ticket \n\n" }
+
+    variable MEDIUM
+    array set MEDIUM { SUBJECT "$env(EFFECTIVE_USER)@$env(SYS_BOX) :: Priority : Medium - Clearing on-call" BODY "ASSIST :: \nInform Available Engr. (Day Time 5 working days of week) - Open Ticket \n\n" }
+
+    variable LOW
+    array set LOW { SUBJECT "$env(EFFECTIVE_USER)@$env(SYS_BOX) :: Priority : Low - Clearing on-call" BODY "ASSIST :: \nAssign Ticket to the appropriate Engr. (24/7 - 365 days) - Open Ticket \n\n" }
+
+
+    variable DEFAULT
+    array set DEFAULT {SUBJECT "DEFAULT MASCLR EMAIL SUBJECT" BODY "DEFAULT MASCLR EMAIL BODY"}
+
+    variable SCRIPT_EMAIL_SUBJECT $CRITICAL(SUBJECT)
+    variable SCRIPT_EMAIL_BODY $CRITICAL(BODY)
+
+
+        ###########################################
+        ### for public use
+        ###########################################
+
+################################################################################
+# variable SCRIPT_ARGUMENTS
+# array
+# holds the arguments parsed by parse_arguments with the uppercase argument
+# name as the array subscript
+################################################################################
+    variable SCRIPT_ARGUMENTS
+    array set SCRIPT_ARGUMENTS {}
+
+################################################################################
+# variable HAS_MORE_RECORDS 0
+# static scalar
+# indicates a fetch got a record, thus allowing a while loop to continue to
+# fetch records
+################################################################################
+    variable HAS_MORE_RECORDS 0
+
+################################################################################
+# variable NO_MORE_RECORDS 1403
+# static scalar
+# indicates a fetch retrieved no record, thus allowing a while loop to break
+################################################################################
+    variable NO_MORE_RECORDS 1403
+
+################################################################################
+# variable DEBUG_LEVEL
+# scalar defaults to 0
+# hold debug level set by set_debug_level
+################################################################################
+    variable DEBUG_LEVEL 0
+
+################################################################################
+# variable ARG_HAS_VAL ARG_HAS_VAL
+# static scalar
+# used when building arguments with add_argument
+################################################################################
+    variable ARG_HAS_VAL "ARG_HAS_VAL"
+
+################################################################################
+# variable ARG_NO_VAL ARG_NO_VAL
+# static scalar
+# used when building arguments with add_argument
+################################################################################
+    variable ARG_NO_VAL "ARG_NO_VAL"
+
+################################################################################
+# variable ARG_REQ ARG_REQ
+# static scalar
+# used when building arguments with add_argument
+################################################################################
+    variable ARG_REQ "ARG_REQ"
+
+################################################################################
+# variable ARG_NOT_REQ ARG_NOT_REQ
+# static scalar
+# used when building arguments with add_argument
+################################################################################
+    variable ARG_NOT_REQ "ARG_NOT_REQ"
+
+################################################################################
+# variable FLAG_ON 1
+# static scalar
+# used when building arguments with add_argument
+################################################################################
+    variable FLAG_ON 1
+
+################################################################################
+# variable FLAG_OFF 0
+# static scalar
+# used when building arguments with add_argument
+################################################################################
+    variable FLAG_OFF 0
+
+################################################################################
+# variable ARG_USE_CODE "_code"
+# static scalar
+# used when building arguments with add_argument
+################################################################################
+    variable ARG_USE_CODE "_code"
+
+################################################################################
+# variable CURRENT_EF_DB_DATE ""
+# scalar defaults to empty string
+# set to today's date in efunds database format when set_up_dates is run
+################################################################################
+    variable CURRENT_EF_DB_DATE ""
+
+################################################################################
+# variable CURRENT_EF_DB_SHORT_DATE ""
+# scalar defaults to empty string
+# set to today's date in efunds database format when set_up_dates is run
+################################################################################
+    variable CURRENT_EF_DB_SHORT_DATE ""
+
+
+################################################################################
+# variable CURRENT_AUTH_DB_DATE ""
+# scalar defaults to empty string
+# set to today's date in efunds database format when set_up_dates is run
+################################################################################
+    variable CURRENT_AUTH_DB_DATE ""
+
+################################################################################
+# variable CURRENT_EF_FILE_DATE ""
+# scalar defaults to empty string
+# set to today's date in efunds database format when set_up_dates is run
+################################################################################
+    variable CURRENT_EF_FILE_DATE ""
+
+################################################################################
+# variable CURRENT_JULIAN_DATE ""
+# scalar defaults to empty string
+# set to today's date in efunds database format when set_up_dates is run
+################################################################################
+    variable CURRENT_JULIAN_DATE ""
+
+################################################################################
+# variable TODAY ""
+# scalar defaults to empty string
+# set to today's date in tcl clock seconds format
+################################################################################
+    variable TODAY ""
+
+################################################################################
+# variable YESTERDAY ""
+# scalar defaults to empty string
+# set to yesterday's date in tcl clock seconds format
+################################################################################
+    variable YESTERDAY ""
+
+################################################################################
+# variable TOMORROW ""
+# scalar defaults to empty string
+# set to tomorrow's date in tcl clock seconds format
+################################################################################
+    variable TOMORROW ""
+
+################################################################################
+# date formats
+# these are used for shortcuts for standard formats often used with clearing
+################################################################################
+
+
+################################################################################
+# variable DT_LONG_YEAR_ONLY "%Y"
+################################################################################
+    variable DT_LONG_YEAR_ONLY "%Y"
+
+################################################################################
+# variable DT_SHORT_YEAR_ONLY "%y"
+################################################################################
+    variable DT_SHORT_YEAR_ONLY "%y"
+
+################################################################################
+# variable DT_MONTH_ABBR_ONLY "%h"
+################################################################################
+    variable DT_MONTH_ABBR_ONLY "%h"
+
+################################################################################
+# variable DT_MONTH_ABBR_LONG_YEAR "%h-%Y"
+################################################################################
+    variable DT_MONTH_ABBR_LONG_YEAR "%h-%Y"
+
+################################################################################
+# variable DT_MONTH_ABBR_YEAR "%h-%y"
+################################################################################
+    variable DT_MONTH_ABBR_YEAR "%h-%y"
+
+################################################################################
+# variable DT_DAY_OF_MONTH_ONLY "%d"
+################################################################################
+    variable DT_DAY_OF_MONTH_ONLY "%d"
+
+################################################################################
+# variable DT_JULIAN "%y%j"
+################################################################################
+    variable DT_JULIAN "%y%j"
+
+################################################################################
+# variable DT_AUTH "%Y%m%d%I%M%S"
+# results in 20090710110812
+################################################################################
+    variable DT_AUTH "%Y%m%d%I%M%S"
+
+################################################################################
+# variable DT_AUTH_TRUNC "%Y%m%d000000"
+# truncated to 0 hour: results in 20090710000000
+################################################################################
+    variable DT_AUTH_TRUNC "%Y%m%d000000"
+
+################################################################################
+# variable DT_EF_DB_DATE_TRUNC "%d-%b-%Y 12:00:00 AM"
+# truncated to 0 hour: results in 10-Jul-2009 12:00:00 AM
+################################################################################
+    variable DT_EF_DB_DATE_TRUNC "%d-%b-%Y 12:00:00 AM"
+
+################################################################################
+# variable DT_EF_DB_DATE "%d-%b-%Y %I:%M:%S %p"
+# results in 10-Jul-2009 11:08:12 AM
+################################################################################
+    variable DT_EF_DB_DATE "%d-%b-%Y %I:%M:%S %p"
+
+################################################################################
+# variable DT_EF_DB_DATE_SHORT "%d-%b-%Y"
+# truncated to 0 hour: results in 10-Jul-2009
+################################################################################
+    variable DT_EF_DB_DATE_SHORT "%d-%b-%Y"
+
+################################################################################
+# variable DT_EF_DB_DATE_TRUNC "%d-%b-%y 12:00:00 AM"
+# truncated to 0 hour: results in 10-Jul-09 12:00:00 AM
+################################################################################
+    variable DT_EF_DB_DATE_TRUNC "%d-%b-%y 12:00:00 AM"
+
+################################################################################
+# variable DT_EF_DB_DATE "%d-%b-%y %I:%M:%S %p"
+# results in 10-Jul-09 11:08:12 AM
+################################################################################
+    variable DT_EF_DB_DATE "%d-%b-%y %I:%M:%S %p"
+
+################################################################################
+# variable DT_EF_FILE_DATE_TRUNC "%Y%m%d000000"
+# truncated to 0 hour: results in 20090710000000
+################################################################################
+    variable DT_EF_FILE_DATE_TRUNC "%Y%m%d000000"
+
+################################################################################
+# variable DT_EF_FILE_DATE "%Y%m%d%I%M%S"
+# results in 20090710110812
+################################################################################
+    variable DT_EF_FILE_DATE "%Y%m%d%I%M%S"
+
+################################################################################
+# variable MAS_INSTITUTIONS [list 101 105 106 107 811]
+# use with split_list_surround_quotes to generate a list like '101','105','107','811'
+################################################################################
+    ###variable MAS_INSTITUTIONS [list 101 105 106 107 811]
+    variable MAS_INSTITUTIONS [list 101 105 107 121 129 130 134 811]
+
+################################################################################
+# variable CLEARING_SHORT_NAMES [list JETPAY JETPAYIS JETPAYSQ]
+# use with split_list_surround_quotes to generate a list like 'JETPAY','JETPAYIS','JETPAYSQ'
+################################################################################
+    variable CLEARING_SHORT_NAMES [list                                        \
+        AUTHONLY B2BILLCA CNV1500107 CNVNEXT107 CNVNORM107 CNVNORM130 DAS ECC  \
+        EMSBANK FRICKBNK JETPAY JETPAYAQ JETPAYCA JETPAYESQ JETPAYIS JETPAYMD  \
+        JETPAYSQ JETPAYUS JPSQTEST NEXTDAY107 NEXTDAY121 OKDMV PTCMDCA PTCMDUS \
+        REAUTH05 REAUTH17 SECUREBC WEPAYCA ]
+
+################################################################################
+# set_script_alert_level ?level?
+# parameters:
+#   level -- one of the predefined variable names (CRITICAL, URGENT, HIGH, etc)
+#
+# runs set_script_email_subject
+#       and set_script_email_body
+# defaults to CRITICAL if anything goes wrong
+#       or an invalid value passed in
+#
+# does not raise an error
+# tested in test_masclr_globals.test
+#
+# public use
+################################################################################
+    proc set_script_alert_level { { level CRITICAL } } {
+
+        variable CRITICAL
+        variable URGENT
+        variable HIGH
+        variable MEDIUM
+        variable LOW
+        variable DEBUG_LEVEL
+        variable DEFAULT
+
+        MASCLR::log_message "Setting script alert level to $level" 1
+
+        if { [array exists $level] == 0 } {
+            set level "CRITICAL"
+            MASCLR::log_message "Invalid level specified.  Could not set appropriate email subject.  Defaulting to $SCRIPT_EMAIL_SUBJECT"
+            MASCLR::masclr_error "Invalid level specified.  Could not set appropriate email subject. "
+        }
+
+        set_script_email_subject $level
+        set_script_email_body $level
+
+        ###
+    }   ;# set_script_alert_level
+        ###
+
+################################################################################
+# set_script_email_subject ?level?
+# parameters:
+#   level -- one of the predefined variable names (CRITICAL, URGENT, HIGH, etc)
+#
+# used internally by the library
+################################################################################
+    proc set_script_email_subject { level } {
+        variable SCRIPT_EMAIL_SUBJECT
+        variable CRITICAL
+        variable URGENT
+        variable HIGH
+        variable MEDIUM
+        variable LOW
+        variable DEBUG_LEVEL
+        variable DEFAULT
+
+        MASCLR::log_message "Setting SCRIPT_EMAIL_SUBJECT to $level" 1
+        set SCRIPT_EMAIL_SUBJECT [lindex [array get $level "SUBJECT"] 1]
+
+        ###
+    }   ;# set_script_email_subject
+        ###
+
+################################################################################
+# set_script_email_body ?level?
+# parameters:
+#   level -- one of the predefined variable names (CRITICAL, URGENT, HIGH, etc)
+#
+# used internally by the library
+################################################################################
+    proc set_script_email_body { level } {
+        variable SCRIPT_EMAIL_BODY
+        variable CRITICAL
+        variable URGENT
+        variable HIGH
+        variable MEDIUM
+        variable LOW
+        variable DEBUG_LEVEL
+        variable DEFAULT
+
+        MASCLR::log_message "Setting SCRIPT_EMAIL_BODY to $level" 1
+
+        set SCRIPT_EMAIL_BODY [lindex [array get $level "BODY"] 1]
+
+        ###
+    }   ;# set_script_email_body
+        ###
+
+################################################################################
+# LOGGING
+# publicly used logging functions include log_message, open_log_file
+#
+# for most uses, no specific log file will need to be set.
+# simply use open_log_file (with no parameters) early in the tcl script
+# this will log a "Beginning script..." message
+# after that, pass any message that you wish to log to log_message
+# log_message will include a date/time stamp
+#
+# if you chose to use a specific log file within the script, specify the log
+# file with a parameter to open_log_file.  This proc will take care of
+# opening the file for you or just continuing to use that file if it is
+# already open
+################################################################################
+
+################################################################################
+# set_log_file_name new_name
+# parameters:
+#   new_name -- the name of the log file to open/create
+#
+# If this proc is not called, then logging will go to stdout
+#
+# tested in test_masclr_globals.test
+#
+# used internally by the library
+################################################################################
+    proc set_log_file_name { new_name } {
+        variable LOG_FILE_NAME
+        variable DEBUG_LEVEL
+
+        MASCLR::log_message "Setting LOG_FILE_NAME to $new_name" 1
+        set LOG_FILE_NAME $new_name
+        ###
+    }   ;# set_log_file_name
+        ###
+
+
+################################################################################
+# set_log_file_channel new_channel
+# parameters:
+#   new_channel -- an open file channel
+#
+# tested with setLogFileChannel
+#
+# used internally by the library
+################################################################################
+    proc set_log_file_channel { new_channel } {
+        variable LOG_FILE_CHANNEL
+        set LOG_FILE_CHANNEL $new_channel
+    }
+
+
+################################################################################
+# open_log_file ?file_name ""? ?autocreate 1?
+# parameters:
+#   file_name -- (optional) the log file name
+#   autocreate -- (optional) if not 0, add CREAT option to create the file if missing
+#   -- defaults to 1 (automatically creates if missing)
+#
+# open a log file for writing, append
+#
+# when called with an empty string for the file name, or without an argument
+# sets logging to stdout and logs a Beginning script message
+#
+# public use
+################################################################################
+    proc open_log_file { {file_name ""} { autocreate 1 } } {
+        if { [string trim $file_name] != "" } {
+            if { [catch {log_message "Log file $MASCLR::LOG_FILE_NAME already open for writing."} failure] } {
+                if { $autocreate == 0 } {
+                    set options "RDWR APPEND"
+                } else {
+                    set options "RDWR APPEND CREAT"
+                }
+                if { [catch { set log_channel [open_file $file_name $options ]}  failure ] } {
+                    set log_channel stdout
+                    set $file_name "standard out"
+                    MASCLR::log_message "Could not open log file $file_name.  Directing output to stdout"
+                    puts $failure
+                }
+                MASCLR::set_log_file_channel $log_channel
+                MASCLR::set_log_file_name $file_name
+            }
+        }
+        MASCLR::log_message ""
+        MASCLR::log_message "============================================================"
+        MASCLR::log_message "Beginning [MASCLR::get_command_string]"
+        MASCLR::log_message "============================================================"
+        ###
+    }   ;# open_log_file
+        ###
+
+
+################################################################################
+# log_message the_message ?log_level?
+# parameters:
+#   the_message -- string to be logged
+#   log_level -- optional, defaults to 0
+#
+# debug level will be added if this is set above 0
+# a message will only be logged if it is >= the current DEBUG_LEVEL
+#
+# public use
+################################################################################
+    proc log_message { the_message { log_level 0 } } {
+        set log_the_message 1
+
+        if { $log_level == 0 } {
+                ### always log level 0s with no **DEBUG** message
+            set debug_level ""
+            set log_the_message 1
+        } elseif { $log_level <= $MASCLR::DEBUG_LEVEL } {
+                ### log with added **DEBUG** message
+            set debug_level "**DEBUG $log_level**"
+            set log_the_message 1
+        } else {
+                ### if DEBUG_LEVEL is 1, but a level 2 log message comes in
+                ### don't log the message at all
+            set debug_level ""
+            set log_the_message 0
+        }
+        if { $log_the_message == 1 } {
+            if { [catch {puts -nonewline $MASCLR::LOG_FILE_CHANNEL \
+                        "[clock format [clock seconds] -format "%Y/%m/%d %T"] $debug_level $the_message\n"} ]} {
+                puts -nonewline stderr "[clock format [clock seconds] -format "%Y/%m/%d %T"] $debug_level $the_message\n"
+            }
+        }
+        ###
+    }   ;# log_message
+        ###
+
+
+################################################################################
+# ARGUMENT PARSING
+#
+# the flow of argument parsing goes like this
+# 1. Define the arguments with add_argument (typically done in a setup script)
+# 2. Call parse_arguments and pass $argv to it
+# 3. Use MASCLR::SCRIPT_ARGUMENTS(ARGNAME) to get the value of the argument later
+#
+# each defined argument has the following features:
+# an argument name
+# an alternate spelling (typically 1 or 2 characters for easier use)
+# a flag indicating required or optional
+# a flag indicating whether the argument takes a value
+# an optional default value for arguments that do take a value
+# an optional block of tcl code to be used in special circumstances
+#
+# a required argument
+#   -- must be supplied or the script will exit
+#   -- cannot have a default value
+# an optional argument
+#   -- can be omitted from the command line
+#   -- should have a default value if the argument takes a value
+#   -- will default to off/0 if the argument does not take a value
+#
+# as a side utility, usage_statement will print out (not log, but to stdout)
+# a summary of the required and optional arguments
+# every script that uses parse_arguments will get a free --help argument
+# so any script that uses parse_arguments will print the usage statement
+# if either --help or -h are given at the command line.  Then the script will
+# exit with a 0
+#
+# usage_statement will evaluate the code for the default for any argument
+# with code for the default.  This is useful for determining that you have
+# set the code correctly to give the default value you are expecting
+#
+# it is recommended that every time you add an argument or make a change
+# to an existing add_argument call, you should run your tcl script with
+# the --help option to get the usage statement and make sure that evaluation
+# of your arguments has worked correctly
+#
+# arguments from the command line will take one of a few different forms
+# each argument has a normal name and an alternate name
+# Using this as an example:
+#   add_argument month m ARG_NOT_REQ ARG_TAKES_VALUE ARG_USE_CODE
+################################################################################
+
+################################################################################
+# parse_arguments arg_list
+#
+# parameters:
+#   arg_list -- parameters passed in
+#
+# parse arguments passed in by the shell
+# an argument list will look like
+# --month 2 --year 2009 --day 1
+#
+# the argument mechanism requires a long argument name to be provided,
+# which will be used as an array subscript for MASCLR::SCRIPT_ARGUMENTS
+# arguments may have a short name (such as -m instead of --month)
+#
+# any arguments given that are not set up as required or optional will
+# be ignored
+#
+# arguments can be set up to take a value or stand on their own
+#
+#
+# This will compare to the configured required and optional arguments
+# that should be set before the parse_arguments proc is called
+# throws an error if argument in the required_list is not present
+#
+#   Required takes value -- default is not an option
+#   Optional takes value -- use default passed in if no value supplied
+#
+# values in argument arrays look like this:
+# set REQUIRED_ARGUMENTS([set expanded_arg_name])  "$expanded_alt_spelling $takes_value $default_value $arg_format"
+# public use
+################################################################################
+    proc parse_arguments { arg_list } {
+        variable REQUIRED_ARGUMENTS
+        variable OPTIONAL_ARGUMENTS
+        variable SCRIPT_ARGUMENTS
+
+            ### add help argument that should always exist
+        if { ![info exists OPTIONAL_ARGUMENTS(--help)] } {
+            MASCLR::add_argument help h
+        }
+
+        MASCLR::log_message "Received arguments $arg_list" 1
+            ### if an optional is omitted, don't care, don't complain
+            ### for ease of coding, look for -h or --help here.
+            ### if help argument found, run usage_statement and exit
+        foreach {argument values } [array get OPTIONAL_ARGUMENTS] {
+                ### find the index of the argument -- look for regular and alt spelling
+            set arg_name_index [lsearch -exact $arg_list $argument]
+            set arg_alt_index [lsearch -exact $arg_list [lindex $values $MASCLR::ARG_ALT_SPELL_INDEX]]
+
+                ### used to set the array subscript
+            set normalized_argument [string toupper [string trim $argument -]]
+
+                ### set arg_index to whichever argument was given
+                ### note that this will find the full name first, so if both the --inst and -i
+                ### forms are given as parameters, --inst will be seen, but -i will not be seen
+            set arg_index [expr { $arg_name_index >= 0 ? $arg_name_index : \
+                [ expr { $arg_alt_index >= 0 ? $arg_alt_index : -1 } ] } ]
+
+                ### ignore if optional argument is not found
+                ### first, if optional argument is found...
+            if { $arg_index != -1 } {
+                    ### check to see if this argument takes a value
+                if { [lindex $values $MASCLR::ARG_HAS_VAL_INDEX] == "ARG_HAS_VAL" } {
+                        ### if so, check to see if a value was supplied for the argument
+                        ### by looking at the element with the next index in the arg_list
+                        ### DO complain with an error if optional argument given without a value
+                    if { [string index [lindex $arg_list [expr $arg_index + 1]] 0] == "-" } {
+                            ### if the next item in the list starts with a -, that's another argument
+                            ### so this is an error
+                        set error_message "Argument $argument takes a value"
+                        MASCLR::log_message $error_message
+                        MASCLR::masclr_error $error_message
+                    } else {
+                            ### set the argument to the value
+                            ### if a format is provided, run the value through the format
+                        set arg_value [lindex $arg_list [expr $arg_index + 1]]
+                        MASCLR::log_message "arg value before formatting is $arg_value" 2
+                        if { [string trim [lindex $values $MASCLR::ARG_FORMAT_INDEX]] != "" } {
+                            set format_code "[lindex $values $MASCLR::ARG_FORMAT_INDEX]"
+                            MASCLR::log_message "arg_value is $arg_value.  format code is $format_code" 2
+                            if { [catch {set SCRIPT_ARGUMENTS([set normalized_argument]) [eval $format_code]} failure] } {
+                                ### have to error on failure
+                                set error_message "Could not format argument $arg_value with $format_code"
+                                MASCLR::log_message $error_message
+                                MASCLR::masclr_error $error_message
+                            }
+                        } else {
+                            set SCRIPT_ARGUMENTS([set normalized_argument]) $arg_value
+                        }
+                    }
+                    ### argument takes no value
+                } else {
+                        ### in the case of a single argument with no value
+                        ### that will be a flag turning the value on (1)
+                    set SCRIPT_ARGUMENTS([set normalized_argument]) 1
+                }
+                MASCLR::log_message "Setting argument $argument to $SCRIPT_ARGUMENTS([set normalized_argument])"
+                        ###
+            } else {    ;# if optional argument not found
+                        ###
+                    ### no error is thrown, but set to a default value if
+                    ### this was not supplied
+                if { [lindex $values $MASCLR::ARG_HAS_VAL_INDEX] == "ARG_HAS_VAL" } {
+                    set arg_value ""
+                    if { [string trim $MASCLR::ARG_DEFAULT_INDEX] != "" } {
+                            ### eval the code given for the default
+                        MASCLR::log_message "Evaluating [lindex $values $MASCLR::ARG_DEFAULT_INDEX]."
+                        set code_to_run "[lindex $values $MASCLR::ARG_DEFAULT_INDEX]"
+                        if { [catch {set arg_value [eval $code_to_run]} failure] } {
+                            set error_message "Could not eval [lindex $values $MASCLR::ARG_DEFAULT_INDEX].  Using empty string for default"
+                            MASCLR::log_message $error_message
+                        }
+
+                        if { [string trim [lindex $values $MASCLR::ARG_FORMAT_INDEX]] != "" } {
+                            set format_code "[lindex $values $MASCLR::ARG_FORMAT_INDEX]"
+                            if { [catch {set SCRIPT_ARGUMENTS([set normalized_argument]) [eval $format_code]} failure] } {
+                                ### have to error on failure
+                                set error_message "Could not format argument $arg_value with $format_code"
+                                MASCLR::log_message $error_message
+                                MASCLR::masclr_error $error_message
+                            }
+                        } else {
+                            set SCRIPT_ARGUMENTS([set normalized_argument]) $arg_value
+                        }
+                    } else {
+                            ### assign the default value of ""
+                        set SCRIPT_ARGUMENTS([set normalized_argument]) [lindex $values $MASCLR::ARG_DEFAULT_INDEX]
+                    }
+                    MASCLR::log_message "Setting argument $argument to default value of $SCRIPT_ARGUMENTS([set normalized_argument])"
+                    ###
+                    ### else if argument takes no value
+                } else {
+                        ### if an argument that does not take a value, set it to off status
+                    set SCRIPT_ARGUMENTS([set normalized_argument]) 0
+                    MASCLR::log_message "Turning off the $argument flag"
+                }
+                ###
+            }   ;# if $arg_index != -1
+                ###
+            ###
+        }   ;# foreach argument values  [array get OPTIONAL_ARGUMENTS]
+            ###
+
+            ### look for help flag
+        if { $SCRIPT_ARGUMENTS(HELP) == 1 } {
+            MASCLR::usage_statement
+            MASCLR::close_all_and_exit_with_code 0
+        }
+
+
+            ### loop through required arguments
+            ### for each required argument, search the passed in arg_list
+            ### for the normal or alt spelling
+            ### if a required argument is not found, error
+        foreach {argument values } [array get REQUIRED_ARGUMENTS] {
+            MASCLR::log_message "Looking for $argument $values" 1
+                ### find the index of the argument -- look for regular and alt spelling
+            set arg_name_index [lsearch -exact $arg_list $argument]
+            set arg_alt_index [lsearch -exact $arg_list [lindex $values $MASCLR::ARG_ALT_SPELL_INDEX]]
+
+                ### used to set the array subscript
+            set normalized_argument [string toupper [string trim $argument -]]
+
+            MASCLR::log_message "Found $argument at $arg_name_index" 1
+            MASCLR::log_message "Found [lindex $values $MASCLR::ARG_ALT_SPELL_INDEX] at $arg_alt_index" 1
+                ### set arg_index to whichever argument was given
+                ### note that this will find the full name first, so if both the --inst and -i
+                ### forms are given as parameters, --inst will be seen, but -i will not be seen
+            set arg_index [expr { $arg_name_index >= 0 ? $arg_name_index : \
+                [ expr { $arg_alt_index >= 0 ? $arg_alt_index : -1 } ] } ]
+
+                ### if not found, throw an error for required arguments
+            if { $arg_index != -1 } {
+                    ### check to see if this argument takes a value
+
+                MASCLR::log_message "Working with $argument $values" 2
+                if { [lindex $values $MASCLR::ARG_HAS_VAL_INDEX] == "ARG_HAS_VAL" } {
+                        ### if so, check to see if a value was supplied for the argument
+                        ### by looking at the element with the next index in the arg_list
+                    if { [string index [lindex $arg_list [expr $arg_index + 1]] 0] == "-" } {
+                            ### if the next item in the list starts with a -, that's another argument
+                            ### so this is an error
+                        set error_message "Argument $argument takes a value"
+                        MASCLR::log_message $error_message
+                        MASCLR::masclr_error $error_message
+                    } else {
+                            ### all is good, set the argument
+                            ### if a format is provided, run the value through the format
+                        set arg_value [lindex $arg_list [expr $arg_index + 1]]
+                        MASCLR::log_message "arg value before formatting is $arg_value" 2
+                        if { [string trim [lindex $values $MASCLR::ARG_FORMAT_INDEX]] != "" } {
+                            set format_code "[lindex $values $MASCLR::ARG_FORMAT_INDEX]"
+                            MASCLR::log_message "format_code is $format_code" 2
+                            if { [catch {set SCRIPT_ARGUMENTS([set normalized_argument]) [eval $format_code]} failure] } {
+                                ### have to error on failure
+                                set error_message "Could not format argument $arg_value with $format_code"
+                                MASCLR::log_message $error_message
+                                MASCLR::masclr_error $error_message
+                            }
+                        } else {
+                            set SCRIPT_ARGUMENTS([set normalized_argument]) $arg_value
+                        }
+                    }
+                } else {
+                        ### in the case of a single argument with no value
+                        ### that will be a flag turning the value on (1)
+                        ### this will be unusual for required arguments
+                    set SCRIPT_ARGUMENTS([set normalized_argument]) 1
+                }
+                MASCLR::log_message "Setting argument $argument to $SCRIPT_ARGUMENTS([set normalized_argument])"
+
+            } else {
+                    ### throw the error here if required argument not supplied
+                set error_message "required argument $argument was not supplied"
+                MASCLR::log_message $error_message
+                MASCLR::masclr_error $error_message
+                ###
+            }   ;# if $arg_index != -1
+                ###
+
+            ###
+        }   ;# foreach argument values  [array get REQUIRED_ARGUMENTS]
+            ###
+
+
+        ###
+    }   ;# parse_arguments
+        ###
+
+################################################################################
+# add_argument argument alt_spelling ?options?
+# add argument to the argument list
+# parameters:
+#   argument -- the argument indicator, such as "inst"
+#               -- this will be used from the command line as --inst
+#   alt_spelling -- optional alternate spelling, such as "i"
+#               -- this will be used from the command line as -i
+#   options -- a list of values that can include
+#       ARG_REQ, ARG_NOT_REQ, ARG_HAS_VAL, ARG_NO_VAL, ARG_DEFAULT, ARG_FORMAT
+#
+#   the ARG_DEFAULT and ARG_FORMAT options expect code blocks after them
+#
+#   arguments default to optional, no value
+#   if ARG_REQ is specified, argument becomes required
+#   if ARG_HAS_VAL is specified, argument expects a value
+#   if DEFAULT is specified, a default is set up if the argument is not given
+#       this should be a tcl code block
+#   if FORMAT is specified, the value given for the argument will be
+#       formatted to that specification
+#       this should be a tcl code block
+#
+# public use
+################################################################################
+    proc add_argument { argument alt_spelling {options ""} } {
+        variable REQUIRED_ARGUMENTS
+        variable OPTIONAL_ARGUMENTS
+
+        MASCLR::log_message "Received $argument $alt_spelling $options" 1
+            ### validate the values
+            ### remove any initial -'s from the argument and spelling -- we'll
+            ###      add those in ourselves
+        set alt_spelling [string trim [string trim $alt_spelling -] ]
+        set argument [string trim [string trim $argument -] ]
+        if { [string trim $argument] == "" } {
+            return
+        }
+        if { [string trim $alt_spelling] == "" } {
+            set alt_spelling $argument
+        }
+        set takes_value 0
+        set required 0
+        set default_value [list ""]
+        set arg_format [list ""]
+        foreach option $options {
+            MASCLR::log_message "\tlooking at option $option" 1
+            switch -exact $option {
+                ARG_REQ {
+                    set required ARG_REQ
+                    MASCLR::log_message "\t\tSetting required to ARG_REQ" 2
+
+                }
+                ARG_NOT_REQ {
+                    set required ARG_NOT_REQ
+                    MASCLR::log_message "\t\tSetting required to ARG_NOT_REQ" 2
+                }
+                ARG_HAS_VAL {
+                    set takes_value ARG_HAS_VAL
+                    MASCLR::log_message "\t\tSetting takes_value to ARG_HAS_VAL" 2
+                }
+                ARG_NO_VAL {
+                    set takes_value ARG_NO_VAL
+                    MASCLR::log_message "\t\tSetting takes_value to ARG_NO_VAL" 2
+                }
+                ARG_DEFAULT {
+                    catch {set default_value [lindex $options [expr [lsearch -exact $options ARG_DEFAULT]+ 1]] } failure
+                    MASCLR::log_message "\t\tSetting default_value to $default_value" 2
+                }
+                ARG_FORMAT {
+                    catch {set arg_format [lindex $options [expr [lsearch -exact $options ARG_FORMAT]+ 1]] } failure
+                    MASCLR::log_message "\t\tSetting arg_format to $arg_format" 2
+                }
+                default {}
+            }
+        }
+        set expanded_arg_name "--$argument"
+        set expanded_alt_spelling "-$alt_spelling"
+        if { $required == "ARG_REQ" } {
+            set REQUIRED_ARGUMENTS([set expanded_arg_name])  "$expanded_alt_spelling $takes_value $default_value $arg_format"
+            MASCLR::log_message "Adding required argument [array get REQUIRED_ARGUMENTS]" 1
+        } else {
+            set OPTIONAL_ARGUMENTS([set expanded_arg_name])  "$expanded_alt_spelling $takes_value $default_value $arg_format"
+            MASCLR::log_message "Adding optional argument [array get OPTIONAL_ARGUMENTS]" 1
+        }
+        ###
+    }   ;# add_argument
+        ###
+
+################################################################################
+# usage_statement ?extra_details ""?
+# display the usage statement
+# parameters:
+#   extra_details (optional) -- additional info to print after the argument list
+# public use
+################################################################################
+    proc usage_statement { {extra_details ""} } {
+        variable REQUIRED_ARGUMENTS
+        variable OPTIONAL_ARGUMENTS
+
+        if { [array size REQUIRED_ARGUMENTS] > 0 || [array size OPTIONAL_ARGUMENTS] > 0 } {
+            puts "Usage: [info script] arguments\n"
+            if { [array size REQUIRED_ARGUMENTS] > 0 } {
+                puts "Mandatory arguments."
+                foreach { argument values } [array get REQUIRED_ARGUMENTS] {
+                    puts -nonewline "[format "%+15s" $argument]"
+                    if { [string trim [lindex $values $MASCLR::ARG_ALT_SPELL_INDEX]] != "" } {
+                        puts -nonewline " [format "%-5s" [lindex $values $MASCLR::ARG_ALT_SPELL_INDEX]]"
+                    }
+                    if { [lindex $values $MASCLR::ARG_HAS_VAL_INDEX] == $MASCLR::ARG_HAS_VAL } {
+                        set arg_value "User-provided value"
+                        if { [string trim $MASCLR::ARG_DEFAULT_INDEX] != "" } {
+                                ### eval the code given
+                            set code_to_run "[lindex $values $MASCLR::ARG_DEFAULT_INDEX]"
+                            if { [catch {set arg_value [eval $code_to_run]} failure] } {
+                                set error_message "Could not eval [lindex $values $MASCLR::ARG_DEFAULT_INDEX].  Using empty string for default"
+                                MASCLR::log_message $error_message
+                            }
+                            if { [string trim [lindex $values $MASCLR::ARG_FORMAT_INDEX]] != "" } {
+                                set code_to_run "[lindex $values $MASCLR::ARG_FORMAT_INDEX]"
+                                if { [catch {set arg_value [eval $code_to_run]} failure] } {
+                                    set error_message "Could not eval [lindex $values $MASCLR::ARG_FORMAT_INDEX]."
+                                    MASCLR::log_message $error_message
+                                }
+                            }
+                        }
+                        puts -nonewline " Default: $arg_value"
+                    }
+                    puts ""
+                }
+            } else {
+                puts "No mandatory arguments."
+            }
+            puts ""
+            if { [array size OPTIONAL_ARGUMENTS] > 0 } {
+                puts "Optional arguments."
+                foreach { argument values } [array get OPTIONAL_ARGUMENTS] {
+                    puts -nonewline "[format "%+15s" $argument]"
+                    if { [string trim [lindex $values $MASCLR::ARG_ALT_SPELL_INDEX]] != "" } {
+                        puts -nonewline " [format "%-5s" [lindex $values $MASCLR::ARG_ALT_SPELL_INDEX]]"
+                    }
+                    if { [lindex $values $MASCLR::ARG_HAS_VAL_INDEX] == $MASCLR::ARG_HAS_VAL } {
+                        set arg_value "User-provided value"
+                        if { [string trim $MASCLR::ARG_DEFAULT_INDEX] != "" } {
+                                ### eval the code given
+                            set code_to_run "[lindex $values $MASCLR::ARG_DEFAULT_INDEX]"
+                            if { [catch {set arg_value [eval $code_to_run]} failure] } {
+                                set error_message "Could not eval [lindex $values $MASCLR::ARG_DEFAULT_INDEX].  Using empty string for default"
+                                MASCLR::log_message $error_message
+                            }
+                            if { [string trim [lindex $values $MASCLR::ARG_FORMAT_INDEX]] != "" } {
+                                set code_to_run "[lindex $values $MASCLR::ARG_FORMAT_INDEX]"
+                                if { [catch {set arg_value [eval $code_to_run]} failure] } {
+                                    set error_message "Could not eval [lindex $values $MASCLR::ARG_FORMAT_INDEX]."
+                                    MASCLR::log_message $error_message
+                                }
+                            }
+                        }
+                        puts -nonewline " Default: $arg_value"
+                    }
+                    puts ""
+                }
+            } else {
+                puts "No optional arguments"
+            }
+
+        } else {
+            puts "Usage: [info script]"
+        }
+        puts $extra_details
+        ###
+    }   ;# usage_statement
+        ###
+
+
+################################################################################
+# set_debug_level debug_value
+# parameters:
+#   debug_value -- whole number (normally 0, 1 or 2) designating the debug level
+#       for the script to run in
+# public use
+################################################################################
+    proc set_debug_level { debug_value } {
+        variable DEBUG_LEVEL
+        MASCLR::log_message "Setting debug level to $debug_value"
+        set MASCLR::DEBUG_LEVEL $debug_value
+    }
+
+
+
+
+################################################################################
+# send_alert_email ?subject ""? ?body ""?
+# send email with mailx -- quick and dirty with no attachments
+# parameters:
+#        subject -- email subject, defaults to empty string
+#        body -- email body, defaults to empty string
+#
+# The script email subject and body information set by setting the script
+# urgency level will be included with the subject and body information
+# passed in as parameters
+# on failure, logs a message, does not throw an error
+#
+# If the subject is empty, a default subject will be provided
+#
+# most alerts should be handled by the calling shell script, not by the tcl script
+# This shuld be used sparingly
+# tested in test_masclrlib_sendmail.test
+#
+# public use
+################################################################################
+    proc send_alert_email { {subject "" } {body ""} } {
+        global env
+        set calling_script [file tail [info script]]
+        set script_location [exec pwd]
+
+        if { [string trim $subject] == "" } {
+            set subject "$MASCLR::SCRIPT_EMAIL_SUBJECT reported an error with no specific subject line"
+        } else {
+            set subject "$MASCLR::SCRIPT_EMAIL_SUBJECT $subject"
+        }
+
+        set body "[set MASCLR::SCRIPT_EMAIL_BODY]\n[exec hostname] [set script_location]/[set calling_script]\n\n$body"
+
+        set mailto $env(MAIL_TO_FAILURE)
+
+        set command_to_run "echo \"$body\" | mailx -s \"$subject\" $mailto"
+        eval exec $command_to_run
+        ###
+    }   ;# send_alert_email
+        ###
+
+################################################################################
+# send_quick_info_email subject body
+# parameters:
+#   subject -- the subject line to send
+#   body -- the body of the email
+# This proc assumes MAIL_TO_NOTIFY as the sendto list
+# This constructs an email array and then calls send_info_email
+#
+# this can be used instead of send_info_email if no attachments are needed
+#
+# public use
+################################################################################
+    proc send_quick_info_email { subject body } {
+        global env
+        set mail_array(body) $body
+        set mail_array(subject) $subject
+        set mail_array(mailto) $env(MAIL_TO_NOTIFY)
+        MASCLR::send_info_email [array get mail_array]
+
+        ###
+    }   ;# send_quick_info_email
+        ###
+
+################################################################################
+# send_info_email ?email_info {}?
+# parameters:
+#   -- email_info -- passed in as a list, turned into an array called email
+#
+# send email with mutt, which sends attachments with MIME format
+# parameters sent as a list built from an array
+#        set email(file_list)
+#        set email(mailto)
+#        set email(subject)
+#        set email(body)
+# on failure, logs a message, does not throw an error
+# TODO throw an error on failure
+# use these procs to form the email info passed in to the proc
+# set_mail_subject
+# set_mail_file_list
+# set_mail_body
+# export set_mail_to
+#
+# public use
+################################################################################
+    proc send_info_email { {email_info {} } } {
+        global env
+        set script_location [exec pwd]
+        set calling_script [info script]
+
+        array set email $email_info
+        if { [info exists email(body)] == 0 } {
+            set email(body) ""
+        }
+
+        if { [info exists email(subject)] == 0 } {
+            set email(subject) "$env(SYS_BOX) [exec hostname] $script_location $calling_script sent an informational email with no specific subject line"
+        }
+
+        set attachment_string ""
+        if { [info exists email(file_list)] == 0 } {
+            set email(file_list) {}
+        }
+        if { [ llength $email(file_list) ] } {
+            foreach filename $email(file_list) {
+                if { [ file exists $filename ] } {
+                    append attachment_string "-a $filename "
+                }
+            }
+
+        }
+
+        if { [info exists email(mailto)] == 0 } {
+            set email(mailto) $env(MAIL_TO_NOTIFY)
+        }
+
+        set body_file ".[file tail [info script]]mail_body"
+        if { [file exists $body_file] } {
+            if { [catch {file delete $body_file} failure] } {
+                MASCLR::log_message "Could not remove existing email body temp file: $failure"
+            }
+        }
+        set command_to_run "echo \"$email(body)\" > $body_file"
+        if { [catch {eval exec $command_to_run} failure ] } {
+            MASCLR::log_message "Could not generate file for email body: $failure"
+        }
+
+        MASCLR::log_message "Calling mutt with mutt $attachment_string -s \"$email(subject)\" -- $email(mailto)"
+        set command_to_run "mutt $attachment_string -s \"$email(subject)\" -- $email(mailto) < $body_file"
+        if { [catch {eval exec $command_to_run} failure ] } {
+            MASCLR::log_message "Could not send information email through mutt: $failure"
+        }
+
+            # clean up the existing file
+        if { [file exists $body_file] } {
+            if { [catch {file delete $body_file} failure] } {
+                MASCLR::log_message "Could not remove existing email body temp file: $failure"
+            }
+        }
+
+        ###
+    }   ;# send_info_email
+        ###
+
+
+################################################################################
+# set_mail_subject in_mail_array mail_subject
+# parameters:
+#   in_mail_array -- predefined array
+#   mail_subject -- a string with the contents of the subject
+# public use
+################################################################################
+    proc set_mail_subject { in_mail_array mail_subject } {
+        upvar $in_mail_array mail_array
+        set mail_array(subject) $mail_subject
+        ###
+    }   ;# set_mail_subject
+        ###
+
+################################################################################
+# set_mail_file_list in_mail_array mail_file_list
+# parameters:
+#   in_mail_array -- predefined array
+#   mail_file_list -- a list/string with the file attachment(s) to send
+# public use
+################################################################################
+    proc set_mail_file_list { in_mail_array mail_file_list } {
+        upvar $in_mail_array mail_array
+        set mail_array(file_list) $mail_file_list
+        ###
+    }   ;# set_mail_file_list
+        ###
+
+################################################################################
+# set_mail_body in_mail_array mail_body
+# parameters:
+#   in_mail_array -- predefined array
+#   mail_body -- a string defining the email body
+# public use
+################################################################################
+    proc set_mail_body { in_mail_array mail_body } {
+        upvar $in_mail_array mail_array
+        set mail_array(body) $mail_body
+        ###
+    }   ;# set_mail_body
+        ###
+
+################################################################################
+# set_mail_to in_mail_array mail_to_list
+# parameters:
+#   in_mail_array -- predefined array
+#   mail_to_list -- a list/string with the email address(es) to include
+# public use
+################################################################################
+    proc set_mail_to { in_mail_array mail_to_list } {
+        upvar $in_mail_array mail_array
+        set mail_array(mailto) $mail_to_list
+        ###
+    }   ;# set_mail_to
+        ###
+
+################################################################################
+# set_command_string new_command_string
+# tested with setCommandString
+################################################################################
+    proc set_command_string { new_command_string } {
+        variable COMMAND_STRING
+        set COMMAND_STRING $new_command_string
+    }
+
+
+##################################################
+# get_command_string
+# tested with get_command_string-1.0
+##################################################
+    proc get_command_string {} {
+        variable COMMAND_STRING
+        if { [string trim $COMMAND_STRING] == "" } {
+            set_command_string [info script]
+        }
+        return $COMMAND_STRING
+        ###
+    }   ;# get_command_string
+        ###
+
+
+################################################################################
+# open_file file_name ?permissions "RDWR CREAT APPEND"? ?add_to_open_files_list 1?
+# parameters:
+#   file_name -- name of the file to open
+#   permissions -- permissions to open file with.  Defaults are safest
+#   add_to_open_files_list 1 makes sure the file is in the open list for
+#       closing when the script exits
+#
+# open a file (permissions passed in as optional argument)
+#
+# TODO test passing in custom permissions or something other than 1 last arg
+# public use
+################################################################################
+    proc open_file { file_name {permissions "RDWR CREAT APPEND"} {add_to_open_files_list 1} } {
+        variable DEBUG_LEVEL
+
+        if { [lsearch -exact [list stdin stdout stderr] [string trim [string tolower $file_name]]] > -1 && $add_to_open_files_list == 1} {
+            MASCLR::log_message "Adding [string tolower $file_name] to list of open files"
+            MASCLR::add_open_file stdout stdout
+            return
+        }
+
+        if { [info exists MASCLR::LOG_FILE_CHANNEL] != 1 } {
+            set MASCLR::LOG_FILE_CHANNEL stdout
+        }
+
+        # TODO change the file open flags if necessary
+        MASCLR::log_message "Opening file $file_name with permissions $permissions" 1
+
+        if {[catch {open $file_name $permissions} file_handle]} {
+            MASCLR::log_message "Cannot open file $file_name."
+            MASCLR::masclr_error "Cannot open file $file_name."
+        }
+
+        if { $add_to_open_files_list == 1 } {
+            MASCLR::add_open_file $file_name $file_handle
+        }
+
+
+        return $file_handle
+        ###
+    }   ;# open_file
+        ###
+
+################################################################################
+# add_open_file file_name file_handle
+# add the passed in file name and handle to OPEN_FILES
+# used internally by the library
+# tested with print_to_file-1.0
+# used internally
+################################################################################
+    proc add_open_file { file_name file_handle } {
+
+        variable DEBUG_LEVEL
+        set MASCLR::OPEN_FILES($file_name) $file_handle
+        MASCLR::log_message "Added $file_name to open files list" 1
+        ###
+    }   ;# add_open_file
+        ###
+
+################################################################################
+# close_file file_name
+# close a single file
+# if the file exists in the OPEN_FILES global array, remove it
+# tested with ????
+################################################################################
+    proc close_file { file_name } {
+        variable DEBUG_LEVEL
+        if { [lsearch -exact [list STDIN STDOUT STDERR stdin stdout stderr ] $file_name ] > -1 } {
+            MASCLR::log_message "Will not close file $file_name"
+            return
+        }
+        MASCLR::log_message "Closing file $file_name" 1
+
+        if {[catch {close $MASCLR::OPEN_FILES($file_name)} response]} {
+            MASCLR::log_message "Cannot close file $file_name.  Changes may not be saved."
+            MASCLR::masclr_error "Cannot close file $file_name.  Changes may not be saved."
+        }
+        MASCLR::remove_open_file $file_name
+        ###
+    }   ;# close_file
+        ###
+
+################################################################################
+# close_all_open_files
+# close all files in the OPEN_FILES array
+#
+# tested with close_all_and_exit_with_code-1.0
+# used internally by the library
+################################################################################
+    proc close_all_open_files {  } {
+
+        set flat_open_files [array get MASCLR::OPEN_FILES]
+        set results ""
+        foreach { file_name open_file_id } $flat_open_files {
+            if { [catch {close_file $file_name} failure] } {
+                append results "\n\tCould not close file $file_name $failure"
+            } else {
+                MASCLR::remove_open_file $file_name
+                append results "\n\tClosed file $file_name"
+            }
+
+        }
+        return $results
+        ###
+    }   ;# close_all_open_files
+        ###
+
+################################################################################
+# print_to_channel file_name text_to_print ?no_new_line 0?
+# parameters:
+#   file_name -- file to print to (file name, not the file handle)
+#   text_to_print -- string to print to the file
+#   no_new_line -- if set to 1, do not print a new line at end of the text
+#
+# print text_to_print to file_name
+#
+# file_name must be a previously opened file with MASCLR::open_file
+#
+# public use
+################################################################################
+    proc print_to_channel { file_handle text_to_print {no_new_line 0}} {
+        if { $no_new_line == 1 } {
+            if { [catch {puts -nonewline $file_handle $text_to_print} failure ] } {
+                if { $MASCLR::LOGGED_PRINT_ERROR == 0 } {
+                    MASCLR::log_message "Cannot print to file $file_handle: $failure"
+                    set MASCLR::LOGGED_PRINT_ERROR 1
+                }
+                puts -nonewline stdout $text_to_print
+            }
+
+        } else {
+            if { [catch {puts $file_handle $text_to_print} failure ] } {
+                if { $MASCLR::LOGGED_PRINT_ERROR == 0 } {
+                    MASCLR::log_message "Cannot print to file $file_handle: $failure"
+                    set MASCLR::LOGGED_PRINT_ERROR 1
+                }
+                puts stdout $text_to_print
+            }
+        }
+        ###
+    }   ;# print_to_channel
+        ###
+
+################################################################################
+# print_to_file_name file_name text_to_print ?no_new_line 0?
+# parameters:
+#   file_name -- file to print to (file name, not the file handle)
+#   text_to_print -- string to print to the file
+#   no_new_line -- if set to 1, do not print a new line at end of the text
+#
+# file_name must be a previously opened file with MASCLR::open_file
+#
+# tested with  print_to_file-1.0
+# public use
+################################################################################
+    proc print_to_file_name { file_name text_to_print {no_new_line 0}} {
+        print_to_channel $MASCLR::OPEN_FILES($file_name) $text_to_print $no_new_line
+        ###
+    }   ;# print_to_file_name
+        ###
+
+
+################################################################################
+# get_next_line file_handle delimiter
+# parameters:
+#   file_handle -- file handle to read from (already open)
+#   delimiter -- optional delimiter to split the line into.  defaults to \n
+#       so the entire string is captured into one list item
+# returns the full line or a list splitting the line on delimiter
+#
+# does not throw error -- calling function needs to catch in case the
+# file is not readable
+################################################################################
+    proc get_next_line { file_handle {delimiter "\n"} } {
+        #return [string trim [split [gets $file_handle] $delimiter ]]
+        return [string trim [gets $file_handle] ]
+        ###
+    }   ;# get_next_line
+        ###
+
+################################################################################
+# get_next_line_from_file_name file_name delimiter
+# parameters:
+#   file_name -- file name to read from (already open)
+#   delimiter -- optional delimiter to split the line into.  defaults to \n
+#       so the entire string is captured into one list item
+# returns the full line or a list splitting the line on delimiter
+#
+# wrapper for get_next_line converting file name to a file channel
+#
+# does not throw error -- calling function needs to catch in case the
+# file is not readable
+################################################################################
+    proc get_next_line_from_file_name { file_name {delimiter "\n"} } {
+        return [get_next_line $MASCLR::OPEN_FILES($file_name) $delimiter ]
+        ###
+    }   ;# get_next_line_from_file_name
+        ###
+
+
+
+################################################################################
+# remove_open_file file_name
+# tested with remove_open_file-1.0
+# used internally by the library
+################################################################################
+    proc remove_open_file { file_name } {
+        array_remove_subscript MASCLR::OPEN_FILES $file_name
+    }
+
+
+
+################################################################################
+# array_remove_subscript the_array key
+# rebuild an array but omit the given subscript
+# used internally by the library
+################################################################################
+    proc array_remove_subscript { the_array key } {
+        upvar $the_array _array
+
+        set flat_array [array get _array]
+        array unset _array *
+        #variable $the_array
+        #array set $the_array {}
+        foreach {flat_key value} $flat_array {
+            if {$flat_key == $key} continue
+            set _array($flat_key) $value
+        }
+        ###
+    }   ;# array_remove_subscript
+        ###
+
+
+################################################################################
+# close_all_and_exit_with_code  exit_code ?exit_message ""?
+# parameters:
+#    exit_code -- numeric code passed out of the program
+#    exit_message -- optional -- message logged with the exit
+#
+# exit_with_code
+# tries to gracefully close all db connections
+# tried to gracefully close all open files
+# tested with close_all_and_exit_with_code-1.0
+#
+# public use
+################################################################################
+    proc close_all_and_exit_with_code { exit_code {exit_message ""} } {
+        global env
+        set close_log_file 0
+        if { [info exists MASCLR::LOG_FILE_CHANNEL] == 1 } {
+            set close_log_file 1
+            set MASCLR::LOG_FILE_CHANNEL stdout
+        }
+        MASCLR::log_message "Cleaning up before exit"
+        MASCLR::log_message [MASCLR::close_db_connections]
+        MASCLR::log_message [MASCLR::close_all_open_files]
+        MASCLR::log_message "$exit_message"
+        MASCLR::log_message "============================================================"
+        MASCLR::log_message "Ending [MASCLR::get_command_string] with exit code $exit_code"
+        MASCLR::log_message "============================================================"
+
+        set MASCLR::LOG_FILE_CHANNEL stdout
+        if { $close_log_file == 1 } {
+            if {[catch {close $MASCLR::LOG_FILE_CHANNEL} response]} {
+                log_message "Cannot close file $MASCLR::LOG_FILE_NAME.  Changes may not be saved."
+            }
+        }
+        exit $exit_code
+
+        ###
+    }   ;# close_all_and_exit_with_code
+        ###
+
+
+################################################################################
+# set_out_sql_file_name new_name
+# parameters:
+#   new_name -- file name to open/create that will store sql code
+# can throw an open file error
+#
+# public use
+################################################################################
+    proc set_out_sql_file_name { new_name } {
+        variable OUT_SQL_FILE_NAME
+        variable DEBUG_LEVEL
+
+        MASCLR::log_message "Setting OUT_SQL_FILE_NAME to $new_name" 1
+        set OUT_SQL_FILE_NAME $new_name
+        MASCLR::log_message "Opening file handle for $new_name" 1
+        if { [catch {MASCLR::open_file $new_name} failure] } {
+            MASCLR::masclr_error "Could not open out SQL file: $failure " ""
+        }
+        ###
+    }   ;# set_out_sql_file_name
+        ###
+
+################################################################################
+# clear_database_logon_handles
+# used internally by the library
+################################################################################
+    proc clear_database_logon_handles {} {
+        variable DATABASE_LOGON_HANDLES
+        array unset DATABASE_LOGON_HANDLES
+        array set DATABASE_LOGON_HANDLES {}
+    }
+
+################################################################################
+# add_database_logon_handle
+# used internally by the library
+################################################################################
+    proc add_database_logon_handle { handle_name new_logon_handle } {
+        variable DATABASE_LOGON_HANDLES
+        set DATABASE_LOGON_HANDLES($handle_name) $new_logon_handle
+    }
+
+
+################################################################################
+# live_updates
+# set the LIVE_UPDATES flag to 1A
+# this means sql commands through the library
+#   will be run against the database
+################################################################################
+    proc live_updates { } {
+        variable LIVE_UPDATES
+        MASCLR::log_message "Setting LIVE_UPDATES to 1"
+        set LIVE_UPDATES 1
+    }
+
+################################################################################
+# save_updates_to_file
+# this will cause sql to output to a file instead of
+#   running live against the database
+################################################################################
+    proc save_updates_to_file { } {
+        variable LIVE_UPDATES
+        variable OUT_SQL_FILE_NAME
+
+        MASCLR::log_message "Setting LIVE_UPDATES to 0"
+        set LIVE_UPDATES 0
+        if { [string trim $OUT_SQL_FILE_NAME] == "" } {
+            MASCLR::set_out_sql_file_name  "[file tail [info script]]_out.sql"
+        }
+    }
+
+################################################################################
+# open_db_connection  handle_name login_data
+# parameters:
+#    handle_name -- friendly name for the handle
+#    login_data -- the user ID/password for the login
+#
+# open db connections -- this only opens the logon handle
+#
+# If login_data contains a database name, then that will be used
+# for the connection
+# otherwise the environment variable TWO_TASK will be used
+#
+# returns the new handle
+#
+# individual procs are responsible for their cursors
+# database logon handles are passed around in an array
+# the array subscripts refer to the logon handle "name".
+# dereference the array subscript to get the logon handle, like this:
+#
+#   set login_data "user/password"
+#   if { [catch { set test_handle [MASCLR::open_db_connection "TEST LOGIN" $login_data]} failure] } {
+#        MASCLR::log_message $failure
+#        exit 1
+#    }
+#
+# later open a cursor like this:
+#    some_proc $test_handle
+#    inside some_proc
+#    if { [catch {set select_cursor [MASCLR::open_cursor $database_handle]} failure] } {
+#         set message "Could not open cursor: $failure"
+#         error $message
+#    }
+#
+################################################################################
+    proc open_db_connection { handle_name login_data } {
+        global env
+
+        if {[catch {set new_logon_handle [oralogon $login_data]} result]} {
+            MASCLR::masclr_error "Could not open database connections.  Result: $result"
+        }
+        if { [catch {set connection \
+            [expr {[string trim [lindex [split $login_data @] 1]] == "" ? $env(TWO_TASK) : [lindex [split $login_data @] 1]}] \
+        } failure] } {
+            set connection "??? $failure"
+        }
+        MASCLR::log_message "Creating logon handle $handle_name for [lindex [split $login_data "/"] 0] at $connection" 1
+        MASCLR::add_database_logon_handle $handle_name $new_logon_handle
+        return $new_logon_handle
+        ###
+    }   ;# open_db_connection
+        ###
+
+
+################################################################################
+# start_fetch the_cursor the_sql
+# parameters:
+#   the_cursor -- previously opened cursor
+#   the_sql -- SQL statement to use for the query
+# throws an error with the oratcl message upon error
+# not tested yet
+# need to test with multiple cursors open.
+# need to test with a fetch from one cursor inside a fetch loop of another cursor
+# public use
+################################################################################
+    proc start_fetch { the_cursor the_sql } {
+        if { [ catch { orasql $the_cursor $the_sql } failure ] } {
+            MASCLR::masclr_error "Database error: $failure\nSQL: $the_sql"
+        }
+        MASCLR::log_message "Calling orasql on $the_sql" 1
+            ### upon success, set cursor status to HAS_MORE_RECORDS
+            ### reset the number of records fetched to 0
+        set MASCLR::CURSOR_INFO($the_cursor) {}
+        set MASCLR::CURSOR_INFO($the_cursor) [list $MASCLR::HAS_MORE_RECORDS 0]
+        MASCLR::log_message "[array get MASCLR::CURSOR_INFO($the_cursor)]" 2
+        ###
+    }   ;# start_fetch
+        ###
+
+################################################################################
+# start_fetch the_cursor the_sql
+# parameters:
+#   the_cursor -- previously opened cursor
+#   the_sql -- SQL statement to use for the query
+#   bind_vars -- list of bind variable/value pairs (such as :entity_id_var $ENTITY_ID :mid_var $MID)
+# same as start_fetch but uses bind variables and takes a list of bind variable/value pairs
+# throws an error with the oratcl message upon error
+# not tested yet
+# need to test with multiple cursors open.
+# need to test with a fetch from one cursor inside a fetch loop of another cursor
+# public use
+################################################################################
+    proc start_bind_fetch { the_cursor the_sql in_bind_vars } {
+        if { [ catch {
+            oraparse $the_cursor $the_sql
+            } failure ] } {
+            MASCLR::masclr_error "Error parsing sql: $failure\nSQL: $the_sql"
+        }
+        if { [ catch {
+            set script_to_eval "orabind $the_cursor $in_bind_vars"
+            MASCLR::log_message "ready to eval $script_to_eval" 2
+            eval $script_to_eval
+        } failure ] } {
+            MASCLR::masclr_error "Error binding variables: $failure\nSQL: $the_sql\n$in_bind_vars"
+        }
+        if { [ catch {
+            oraexec $the_cursor
+        } failure ] } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "[oramsg $the_cursor rc] [oramsg $the_cursor error]\nSQL: $the_sql\n\t\t$in_bind_vars"
+        }
+            ### upon success, set cursor status to HAS_MORE_RECORDS
+            ### reset the number of records fetched to 0
+        set MASCLR::CURSOR_INFO($the_cursor) {}
+        set MASCLR::CURSOR_INFO($the_cursor) [list $MASCLR::HAS_MORE_RECORDS 0]
+        MASCLR::log_message "[array get MASCLR::CURSOR_INFO($the_cursor)]" 2
+        ###
+    }   ;# start_bind_fetch
+        ###
+
+################################################################################
+# fetch_record the_cursor
+# parameters:
+#   the_cursor -- previously opened cursor
+# updates the cursor status and num rows fetched
+# gets an array indexed by column name from the fetch
+# returns the array flattened into a list
+# throws an error if orafetch returns something other than 0 or 1403
+# calling proc is responsible for closing the cursor
+# public use
+################################################################################
+    proc fetch_record { the_cursor } {
+        if { ![info exists MASCLR::CURSOR_INFO($the_cursor)] } {
+            set message "No cursor $the_cursor opened with MASCLR::open_cursor"
+            MASCLR::masclr_error $message
+        }
+        MASCLR::log_message "orafetch on $the_cursor" 2
+        if { [catch {orafetch $the_cursor -dataarray fetched_array -indexbyname} failure ] } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            set message "Database error: $failure\n"
+                ### this will get logged in the calling proc
+            MASCLR::masclr_error $message
+        }
+        set ora_return [oramsg $the_cursor rc]
+                ### update cursor status no matter what
+        MASCLR::set_cursor_status $the_cursor $ora_return
+
+        if { $ora_return == 1403 || $ora_return == 0 } {
+                ### clean fetch
+            if { $ora_return == 0 } {
+                    ### we got a new record, update rows fetched
+                    ### return the record
+                MASCLR::increment_rows_fetched $the_cursor
+                return [array get fetched_array]
+            } else {
+                ### no new record, leave rows fetched alone
+                ### return empty string
+                return ""
+            }
+        } else {
+            set message "Unexpected result from fetch: [oramsg $the_cursor rc] [oramsg $the_cursor error]"
+            MASCLR::masclr_error $message
+        }
+        ###
+    }   ;# fetch_record
+        ###
+
+################################################################################
+# fetch_record_as_list the_cursor
+# parameters:
+#   the_cursor -- previously opened cursor
+# updates the cursor status and num rows fetched
+# gets an array indexed by column name from the fetch
+# returns the array flatted into a list
+# throws an error if orafetch returns something other than 0 or 1403
+# calling proc is responsible for closing the cursor
+# public use
+################################################################################
+    proc fetch_record_as_list { the_cursor } {
+        if { ![info exists MASCLR::CURSOR_INFO($the_cursor)] } {
+            set message "No cursor $the_cursor opened with MASCLR::open_cursor"
+            MASCLR::masclr_error $message
+        }
+        MASCLR::log_message "orafetch on $the_cursor" 2
+        if { [catch {orafetch $the_cursor -datavariable fetched_list} failure ] } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            set message "Database error: $failure\n"
+                ### this will get logged in the calling proc
+            MASCLR::masclr_error $message
+        }
+        set ora_return [oramsg $the_cursor rc]
+                ### update cursor status no matter what
+        MASCLR::set_cursor_status $the_cursor $ora_return
+
+        if { $ora_return == 1403 || $ora_return == 0 } {
+                ### clean fetch
+            if { $ora_return == 0 } {
+                    ### we got a new record, update rows fetched
+                    ### return the record
+                MASCLR::increment_rows_fetched $the_cursor
+                return $fetched_list
+            } else {
+                ### no new record, leave rows fetched alone
+                ### return empty string
+                return ""
+            }
+        } else {
+            set message "Unexpected result from fetch: [oramsg $the_cursor rc] [oramsg $the_cursor error]"
+            MASCLR::masclr_error $message
+        }
+        ###
+    }   ;# fetch_record_as_list
+        ###
+
+
+
+
+################################################################################
+# set_cursor_status the_cursor status_code
+# parameters:
+#   the_cursor -- previously opened cursor
+#   status_code -- numeric code indicating the cursor's status
+# throws an error if the given cursor was not started with open_cursor
+# used internally by the library
+################################################################################
+    proc set_cursor_status { the_cursor status_code } {
+        if { ![info exists MASCLR::CURSOR_INFO($the_cursor)] } {
+            set message "No cursor $the_cursor opened with MASCLR::open_cursor"
+            MASCLR::masclr_error $message
+        }
+        MASCLR::log_message "Setting cursor status for $the_cursor to $status_code: Before update: $MASCLR::CURSOR_INFO($the_cursor)" 2
+        set MASCLR::CURSOR_INFO($the_cursor) [lreplace $MASCLR::CURSOR_INFO($the_cursor) $MASCLR::CURSOR_STATUS_INDEX $MASCLR::CURSOR_STATUS_INDEX $status_code]
+        MASCLR::log_message "After update: $MASCLR::CURSOR_INFO($the_cursor)" 2
+        ###
+    }   ;# set_cursor_status
+        ###
+
+################################################################################
+# increment_rows_fetched the_cursor
+# parameters:
+#   the_cursor -- previously opened cursor
+# throws an error if the given cursor was not started with open_cursor
+# used internally by the library
+################################################################################
+    proc increment_rows_fetched { the_cursor } {
+        if { ![info exists MASCLR::CURSOR_INFO($the_cursor)] } {
+            set message "No cursor $the_cursor opened with MASCLR::open_cursor"
+            MASCLR::masclr_error $message
+        }
+        set new_row_count [expr [MASCLR::get_rows_fetched $the_cursor] + 1]
+        MASCLR::log_message "Setting row count for $the_cursor to $new_row_count: Before update: $MASCLR::CURSOR_INFO($the_cursor)" 2
+        set MASCLR::CURSOR_INFO($the_cursor) [lreplace $MASCLR::CURSOR_INFO($the_cursor) $MASCLR::CURSOR_NUM_ROWS_INDEX $MASCLR::CURSOR_NUM_ROWS_INDEX $new_row_count]
+        MASCLR::log_message "After update: $MASCLR::CURSOR_INFO($the_cursor)" 2
+        ###
+    }   ;# increment_rows_fetched
+        ###
+
+################################################################################
+# set_affected_rows the_cursor rows
+# parameters:
+#   the_cursor -- previously opened cursor
+#   rows -- the number of rows
+# throws an error if the given cursor was not started with open_cursor
+# used internally by the library
+################################################################################
+    proc set_affected_rows { the_cursor rows } {
+        if { ![info exists MASCLR::CURSOR_INFO($the_cursor)] } {
+            set message "No cursor $the_cursor opened with MASCLR::open_cursor"
+            MASCLR::masclr_error $message
+        }
+
+        MASCLR::log_message "Setting affected rows for $the_cursor to [oramsg $the_cursor rows]: Before update: $MASCLR::CURSOR_INFO($the_cursor)" 2
+        set MASCLR::CURSOR_INFO($the_cursor) [lreplace $MASCLR::CURSOR_INFO($the_cursor) $MASCLR::CURSOR_AFFECTED_ROWS_INDEX $MASCLR::CURSOR_AFFECTED_ROWS_INDEX $rows]
+        MASCLR::log_message "After update: $MASCLR::CURSOR_INFO($the_cursor)" 2
+        ###
+    }   ;# set_affected_rows
+        ###
+
+################################################################################
+# get_cursor_status the_cursor
+# parameters:
+#   the_cursor -- previously opened cursor
+# returns status stored in the CURSOR_INFO array or throws an error
+# throws an error if the given cursor was not started with open_cursor
+# public use
+################################################################################
+    proc get_cursor_status { the_cursor } {
+        if { [info exists MASCLR::CURSOR_INFO($the_cursor)] } {
+            MASCLR::log_message "get_cursor_status returning [lindex $MASCLR::CURSOR_INFO($the_cursor) $MASCLR::CURSOR_STATUS_INDEX]" 2
+            return [lindex $MASCLR::CURSOR_INFO($the_cursor) $MASCLR::CURSOR_STATUS_INDEX]
+        } else {
+            set message "No cursor $the_cursor opened with MASCLR::open_cursor"
+            MASCLR::masclr_error $message
+        }
+        ###
+    }   ;# get_cursor_status
+        ###
+
+
+################################################################################
+# get_rows_fetched the_cursor
+# parameters:
+#   the_cursor -- previously opened cursor
+# returns the number of rows stored in the CURSOR_INFO array (the number of records
+#   retrieved by fetch up to this point for that particular sql statement)
+# or throws an error
+# public use
+################################################################################
+    proc get_rows_fetched { the_cursor } {
+        if { [info exists MASCLR::CURSOR_INFO($the_cursor)] } {
+            return [lindex $MASCLR::CURSOR_INFO($the_cursor) $MASCLR::CURSOR_NUM_ROWS_INDEX]
+        } else {
+            set message "No cursor $the_cursor opened with MASCLR::open_cursor"
+            MASCLR::masclr_error $message
+        }
+        ###
+    }   ;# get_rows_fetched
+        ###
+
+################################################################################
+# get_affected_rows the_cursor
+# parameters:
+#   the_cursor -- previously opened cursor
+# returns the number of rows stored in the CURSOR_INFO array (the number of records
+#   retrieved by fetch up to this point for that particular sql statement)
+# this is identical to get_rows_fetched (the location in the list is
+#   overloaded)
+# or throws an error
+# public use
+################################################################################
+    proc get_affected_rows { the_cursor } {
+        if { [info exists MASCLR::CURSOR_INFO($the_cursor)] } {
+            return [lindex $MASCLR::CURSOR_INFO($the_cursor) $MASCLR::CURSOR_AFFECTED_ROWS_INDEX]
+        } else {
+            set message "No cursor $the_cursor opened with MASCLR::open_cursor"
+            MASCLR::masclr_error $message
+        }
+        ###
+    }   ;# get_rows_fetched
+        ###
+
+
+################################################################################
+# open_cursor database_handle
+# parameters:
+#    handle -- previously opened db handle.
+# returns new cursor
+# sets the variable name $cursor_name to hold the cursor in the calling context
+# public use
+################################################################################
+    proc open_cursor { database_handle } {
+        if { [ catch {set new_cursor [oraopen $database_handle] } result ] } {
+            error "Could not open cursor for handle $database_handle.  Result: $result"
+        }
+        set MASCLR::CURSOR_INFO($new_cursor) {}
+        set MASCLR::CURSOR_INFO($new_cursor) [list $MASCLR::HAS_MORE_RECORDS 0]
+        return $new_cursor
+        ###
+    }   ;# open_cursor
+        ###
+
+################################################################################
+# close_cursor  the_cursor
+# parameters:
+#    the_cursor -- cursor to close
+# a specific remove from the open cursor array is not necessary and is not
+# done at this time
+# public use
+################################################################################
+    proc close_cursor { the_cursor  } {
+        if { [ catch {oraclose $the_cursor } result ] } {
+            MASCLR::masclr_error "Could not close cursor.  Result: $result"
+        }
+        unset MASCLR::CURSOR_INFO($the_cursor)
+        ###
+    }   ;# close_cursor
+        ###
+
+################################################################################
+# perform_commit  the_handle
+# parameters:
+#    the_handle -- database handle to commit
+# Upon error, attempt a rollback
+# Throws an error upon error
+# public use
+################################################################################
+    proc perform_commit { the_handle } {
+        MASCLR::log_message "Performing commit on handle $the_handle"
+        if { [ catch {oracommit $the_handle } result ] } {
+            set message "Could not commit changes.  Result: $result"
+            append message "\nPerforming automatic rollback"
+            if { [ catch {MASCLR::perform_rollback $the_handle } failure ] } {
+                append message $failure
+            }
+            MASCLR::masclr_error $message
+        }
+        MASCLR::log_message "Commit successful $the_handle"
+        ###
+    }   ;# perform_commit
+        ###
+
+################################################################################
+# perform_rollback  the_handle
+# parameters:
+#    the_handle -- database handle to roll back
+# public use
+################################################################################
+    proc perform_rollback { the_handle } {
+        MASCLR::log_message "Performing rollback on handle $the_handle"
+        if { [ catch {oraroll $the_handle } result ] } {
+            MASCLR::masclr_error "Could not roll back changes.  Result: $result"
+        }
+        MASCLR::log_message "Rollback successful $the_handle"
+        ###
+    }   ;# perform_rollback
+        ###
+
+################################################################################
+# close_db_connections
+# close db connections -- closes all logon handles in the array passed as the argument
+#    calling script should log the results.  Nothing breaks out of this proc so
+#           an attempt will be made to close every connection
+# parameters:
+# return :
+#     results - string with all results (both successful and caught errors)
+# public use
+################################################################################
+    proc close_db_connections { } {
+
+        set flat_logon_handles [array get MASCLR::DATABASE_LOGON_HANDLES]
+        set results ""
+        foreach {handle_name handle} $flat_logon_handles {
+            if { [catch {oralogoff $handle} result] } {
+                append results "\n\tCould not close handle $handle_name $result"
+            } else {
+                append results "\n\tClosing database connection $handle_name"
+            }
+
+        }
+        MASCLR::clear_database_logon_handles
+        return $results
+        ###
+    }   ;# close_db_connections
+        ###
+
+
+################################################################################
+# insert_record  the_cursor the_sql ?expected_rows -1?
+# runs the insert statement against an existing cursor
+# all error checking is done
+# parameters:
+#    the_cursor -- existing database cursor
+#    the_sql -- the sql code to run for the insert
+#    expected_rows -- optional number of expected rows to be affected
+#       -- the proc will rollback and throw an error if the number of
+#            affected rows is different than expected
+# throws an error if supplied an expected row count and the actual affected
+#   rows does not match the supplied count
+# The calling proc should roll back if an error is thrown
+# public use
+################################################################################
+    proc insert_record { the_cursor the_sql { expected_rows -1 } }  {
+        variable LIVE_UPDATES
+        MASCLR::set_affected_rows $the_cursor 0
+
+        MASCLR::log_message $the_sql 1
+        if { $LIVE_UPDATES == 0 } {
+            MASCLR::print_to_file_name $MASCLR::OUT_SQL_FILE_NAME "$the_sql;\n\n"
+            return
+        }
+
+        if {[catch {orasql $the_cursor $the_sql} result_code]} {
+            MASCLR::masclr_error "[oramsg $the_cursor rc] [oramsg $the_cursor error]"
+        }
+        set temp_rows [oramsg $the_cursor rows]
+        MASCLR::set_affected_rows $the_cursor $temp_rows
+        if { $expected_rows >= 0 && $temp_rows != $expected_rows } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "Expected to affect $expected_rows but affected $temp_rows instead. "
+        }
+        ###
+    }   ;# insert_record
+        ###
+
+################################################################################
+# insert_bind_record  the_cursor the_sql ?expected_rows -1?
+# runs the insert statement against an existing cursor
+# all error checking is done
+# parameters:
+#    the_cursor -- existing database cursor
+#    the_sql -- the sql code to run for the insert
+#   bind_vars -- list of bind variable/value pairs (such as :entity_id_var $ENTITY_ID :mid_var $MID)
+#    expected_rows -- optional number of expected rows to be affected
+#       -- the proc will rollback and throw an error if the number of
+#            affected rows is different than expected
+#
+# Same as insert_record but uses bind variables
+# throws an error if supplied an expected row count and the actual affected
+#   rows does not match the supplied count
+# The calling proc should roll back if an error is thrown
+# public use
+################################################################################
+    proc insert_bind_record { the_cursor the_sql in_bind_vars { expected_rows -1 } }  {
+        variable LIVE_UPDATES
+        MASCLR::set_affected_rows $the_cursor 0
+
+        MASCLR::log_message $the_sql 1
+        if { $LIVE_UPDATES == 0 } {
+            MASCLR::print_to_file_name $MASCLR::OUT_SQL_FILE_NAME "$the_sql;\n\n"
+            return
+        }
+        if { [ catch {
+            oraparse $the_cursor $the_sql
+            } failure ] } {
+            MASCLR::masclr_error "Error parsing sql: $failure\nSQL: $the_sql"
+        }
+        if { [ catch {
+            set script_to_eval "orabind $the_cursor $in_bind_vars"
+            MASCLR::log_message "ready to eval $script_to_eval" 2
+            eval $script_to_eval
+            } failure ] } {
+            MASCLR::masclr_error "Error binding variables: $failure\nSQL: $the_sql\n$in_bind_vars"
+        }
+        if { [ catch {
+            oraexec $the_cursor
+        } failure ] } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "[oramsg $the_cursor rc] [oramsg $the_cursor error]\nSQL: $the_sql\n\t\t$in_bind_vars"
+        }
+        set temp_rows [oramsg $the_cursor rows]
+        MASCLR::set_affected_rows $the_cursor $temp_rows
+        if { $expected_rows >= 0 && $temp_rows != $expected_rows } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "Expected to affect $expected_rows but affected $temp_rows instead. "
+        }
+        ###
+    }   ;# insert_bind_record
+        ###
+
+################################################################################
+# update_record the_cursor the_sql ?expected_rows -1?
+# runs an update statement against an existing cursor
+# all error checking is done in this proc
+# parameters:
+#    the_cursor -- existing database cursor
+#    the_sql -- the sql code to run for the update
+#    expected_rows -- optional number of expected rows to be affected
+#       -- the proc will rollback and throw an error if the number of
+#            affected rows is different than expected
+# throws an error if supplied an expected row count and the actual affected
+#   rows does not match the supplied count
+# The calling proc should roll back if an error is thrown
+# public use
+################################################################################
+
+    proc update_record { the_cursor the_sql { expected_rows -1 } }  {
+        variable LIVE_UPDATES
+        MASCLR::set_affected_rows $the_cursor 0
+        MASCLR::log_message $the_sql 1
+        if { $LIVE_UPDATES == 0 } {
+            MASCLR::print_to_file_name $MASCLR::OUT_SQL_FILE_NAME "$the_sql;\n\n"
+            return
+        }
+        if {[catch {orasql $the_cursor $the_sql} result_code]} {
+            MASCLR::masclr_error "[oramsg $the_cursor rc] [oramsg $the_cursor error]"
+        }
+        set temp_rows [oramsg $the_cursor rows]
+        MASCLR::set_affected_rows $the_cursor $temp_rows
+        if { $expected_rows >= 0 && $temp_rows != $expected_rows } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "Expected to affect $expected_rows but affected $temp_rows instead. "
+        }
+        ###
+    }   ;# update_record
+        ###
+
+################################################################################
+# update_bind_record the_cursor the_sql in_bind_vars ?expected_rows -1?
+# runs an update statement against an existing cursor
+# all error checking is done in this proc
+# parameters:
+#    the_cursor -- existing database cursor
+#    the_sql -- the sql code to run for the update
+#    in_bind_vars -- bind variable list passed in as a prepared list
+#    expected_rows -- optional number of expected rows to be affected
+#       -- the proc will rollback and throw an error if the number of
+#            affected rows is different than expected
+# throws an error if supplied an expected row count and the actual affected
+#   rows does not match the supplied count
+# The calling proc should roll back if an error is thrown
+# public use
+################################################################################
+
+    proc update_bind_record { the_cursor the_sql in_bind_vars { expected_rows -1 } }  {
+        variable LIVE_UPDATES
+        MASCLR::set_affected_rows $the_cursor 0
+        MASCLR::log_message $the_sql 1
+        if { $LIVE_UPDATES == 0 } {
+            MASCLR::print_to_file_name $MASCLR::OUT_SQL_FILE_NAME "$the_sql;\n\n"
+            return
+        }
+        if { [ catch {
+            oraparse $the_cursor $the_sql
+            } failure ] } {
+            MASCLR::masclr_error "Error parsing sql: $failure\nSQL: $the_sql"
+        }
+        if { [ catch {
+            set script_to_eval "orabind $the_cursor $in_bind_vars"
+            MASCLR::log_message "ready to eval $script_to_eval" 2
+            eval $script_to_eval
+            } failure ] } {
+            MASCLR::masclr_error "Error binding variables: $failure\nSQL: $the_sql\n$in_bind_vars"
+        }
+        if { [ catch {
+            oraexec $the_cursor
+        } failure ] } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "[oramsg $the_cursor rc] [oramsg $the_cursor error]\nSQL: $the_sql\n\t\t$in_bind_vars"
+        }
+        set temp_rows [oramsg $the_cursor rows]
+        MASCLR::set_affected_rows $the_cursor $temp_rows
+        if { $expected_rows >= 0 && $temp_rows != $expected_rows } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "Expected to affect $expected_rows but affected $temp_rows instead. "
+        }
+        ###
+    }   ;# update_bind_record
+        ###
+
+################################################################################
+# delete_record  the_cursor the_sql ?expected_rows -1?
+# runs a delete statement against an existing cursor
+# all error checking is done
+# parameters:
+#    the_cursor -- existing database cursor
+#    the_sql -- the sql code to run for the delete
+#    expected_rows -- optional number of expected rows to be affected
+#       -- the proc will rollback and throw an error if the number of
+#            affected rows is different than expected
+# tested by delete_record-1.0
+# throws an error if supplied an expected row count and the actual affected
+#   rows does not match the supplied count
+# The calling proc should roll back if an error is thrown
+# public use
+################################################################################
+
+    proc delete_record { the_cursor the_sql { expected_rows -1 } }  {
+        variable LIVE_UPDATES
+        MASCLR::set_affected_rows $the_cursor 0
+
+        MASCLR::log_message $the_sql 1
+        if { $LIVE_UPDATES == 0 } {
+            MASCLR::print_to_file_name $MASCLR::OUT_SQL_FILE_NAME "$the_sql;\n\n"
+            return
+        }
+
+        if {[catch {orasql $the_cursor $the_sql} result_code]} {
+            MASCLR::masclr_error "[oramsg $the_cursor rc] [oramsg $the_cursor error]"
+        }
+        set temp_rows [oramsg $the_cursor rows]
+        MASCLR::set_affected_rows $the_cursor $temp_rows
+        if { $expected_rows >= 0 && $temp_rows != $expected_rows } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "Expected to affect $expected_rows but affected $temp_rows instead. "
+        }
+        ###
+    }   ;# delete_record
+        ###
+
+################################################################################
+# delete_bind_record  the_cursor the_sql ?expected_rows -1?
+# runs a delete statement against an existing cursor
+# all error checking is done
+# parameters:
+#    the_cursor -- existing database cursor
+#    the_sql -- the sql code to run for the delete
+#    in_bind_vars -- bind variable list passed in as a prepared list
+#    expected_rows -- optional number of expected rows to be affected
+#       -- the proc will rollback and throw an error if the number of
+#            affected rows is different than expected
+# tested by delete_record-1.0
+# throws an error if supplied an expected row count and the actual affected
+#   rows does not match the supplied count
+# The calling proc should roll back if an error is thrown
+# public use
+################################################################################
+
+    proc delete_bind_record { the_cursor the_sql in_bind_vars { expected_rows -1 } }  {
+        variable LIVE_UPDATES
+        MASCLR::set_affected_rows $the_cursor 0
+
+        MASCLR::log_message $the_sql 1
+        if { $LIVE_UPDATES == 0 } {
+            MASCLR::print_to_file_name $MASCLR::OUT_SQL_FILE_NAME "$the_sql;\n\n"
+            return
+        }
+        if { [ catch {
+            oraparse $the_cursor $the_sql
+            } failure ] } {
+            MASCLR::masclr_error "Error parsing sql: $failure\nSQL: $the_sql"
+        }
+        if { [ catch {
+            set script_to_eval "orabind $the_cursor $in_bind_vars"
+            MASCLR::log_message "ready to eval $script_to_eval" 2
+            eval $script_to_eval
+            } failure ] } {
+            MASCLR::masclr_error "Error binding variables: $failure\nSQL: $the_sql\n$in_bind_vars"
+        }
+        if { [ catch {
+            oraexec $the_cursor
+        } failure ] } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "[oramsg $the_cursor rc] [oramsg $the_cursor error]\nSQL: $the_sql\n\t\t$in_bind_vars"
+        }
+        set temp_rows [oramsg $the_cursor rows]
+        MASCLR::set_affected_rows $the_cursor $temp_rows
+        if { $expected_rows >= 0 && $temp_rows != $expected_rows } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "Expected to affect $expected_rows but affected $temp_rows instead. "
+        }
+        ###
+    }   ;# delete_bind_record
+        ###
+
+################################################################################
+# fetch_single_record_as_array the_cursor the_sql
+# parameters:
+#    the_cursor -- existing database cursor
+#    the_sql -- the sql code to run for the select
+# return:
+#    result -- the single record found, returned with array get
+# runs a select statement against an existing cursor
+# all error checking is done
+# public use
+################################################################################
+
+    proc fetch_single_record_as_array { the_cursor the_sql }  {
+
+        MASCLR::log_message $the_sql 2
+        if {[catch {orasql $the_cursor $the_sql} result_code]} {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "[oramsg $the_cursor rc] [oramsg $the_cursor error]"
+        }
+        if { [catch {orafetch $the_cursor -dataarray result -indexbyname} failure] } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "[oramsg $the_cursor rc] [oramsg $the_cursor error]"
+        }
+        set temp_rows [oramsg $the_cursor rows]
+        MASCLR::set_affected_rows $the_cursor $temp_rows
+        if { [info exists result] } {
+            return [array get result]
+        } else {
+            return ""
+        }
+
+        ###
+    }   ;# fetch_single_record_as_array
+        ###
+
+################################################################################
+# fetch_single_bind_record_as_array the_cursor the_sql in_bind_vars
+# parameters:
+#    the_cursor -- existing database cursor
+#    the_sql -- the sql code to run for the select
+#    in_bind_vars -- bind variable list passed in as a prepared list
+# return:
+#    result -- the single record found, returned with array get
+# runs a select statement against an existing cursor
+# all error checking is done
+# public use
+################################################################################
+
+    proc fetch_single_bind_record_as_array { the_cursor the_sql in_bind_vars }  {
+
+        MASCLR::log_message $the_sql 2
+        if { [ catch {
+            oraparse $the_cursor $the_sql
+            } failure ] } {
+            MASCLR::masclr_error "Error parsing sql: $failure\nSQL: $the_sql"
+        }
+        if { [ catch {
+            set script_to_eval "orabind $the_cursor $in_bind_vars"
+            MASCLR::log_message "ready to eval $script_to_eval" 2
+            eval $script_to_eval
+        } failure ] } {
+            MASCLR::masclr_error "Error binding variables: $failure\nSQL: $the_sql\n$bind_vars"
+        }
+        if { [ catch {
+            oraexec $the_cursor
+        } failure ] } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "[oramsg $the_cursor rc] [oramsg $the_cursor error]\nSQL: $the_sql\n\t\t$bind_vars"
+        }
+        if { [catch {orafetch $the_cursor -dataarray result -indexbyname} failure] } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "[oramsg $the_cursor rc] [oramsg $the_cursor error]"
+        }
+        set temp_rows [oramsg $the_cursor rows]
+        MASCLR::set_affected_rows $the_cursor $temp_rows
+        if { [info exists result] } {
+            return [array get result]
+        } else {
+            return ""
+        }
+        ###
+    }   ;# fetch_single_record_as_array
+        ###
+
+################################################################################
+# fetch_single_value the_cursor the_sql
+# parameters:
+#    the_cursor -- existing database cursor
+#    the_sql -- the sql code to run for the select
+# return:
+#    result -- the single value returned from the query
+# runs a select statement against an existing cursor
+# all error checking is done
+# public use
+################################################################################
+
+    proc fetch_single_value { the_cursor the_sql }  {
+        set result ""
+        MASCLR::log_message $the_sql 1
+        if {[catch {orasql $the_cursor $the_sql} result_code]} {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "[oramsg $the_cursor rc] [oramsg $the_cursor error]"
+        }
+        if { [catch {orafetch $the_cursor -datavariable result} failure] } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "[oramsg $the_cursor rc] [oramsg $the_cursor error]"
+        }
+        set temp_rows [oramsg $the_cursor rows]
+        MASCLR::set_affected_rows $the_cursor $temp_rows
+
+        MASCLR::log_message "Got result $result" 1
+        return $result
+        ###
+    }   ;# fetch_single_value
+        ###
+
+################################################################################
+# fetch_single_bind_value the_cursor the_sql
+# parameters:
+#    the_cursor -- existing database cursor
+#    the_sql -- the sql code to run for the select
+#   bind_vars -- list of bind variable/value pairs (such as :entity_id_var $ENTITY_ID :mid_var $MID)
+#
+# same as fetch_single_value but with bind variables
+# return:
+#    result -- the single value returned from the query
+# runs a select statement against an existing cursor
+# all error checking is done
+# public use
+################################################################################
+
+    proc fetch_single_bind_value { the_cursor the_sql in_bind_vars }  {
+        set result ""
+        if { [ catch {
+            oraparse $the_cursor $the_sql
+            } failure ] } {
+            MASCLR::masclr_error "Error parsing sql: $failure\nSQL: $the_sql"
+        }
+        if { [ catch {
+            set script_to_eval "orabind $the_cursor $in_bind_vars"
+            MASCLR::log_message "ready to eval $script_to_eval" 2
+            eval $script_to_eval
+        } failure ] } {
+            MASCLR::masclr_error "Error binding variables: $failure\nSQL: $the_sql\n$bind_vars"
+        }
+        if { [ catch {
+            oraexec $the_cursor
+        } failure ] } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "[oramsg $the_cursor rc] [oramsg $the_cursor error]\nSQL: $the_sql\n\t\t$bind_vars"
+        }
+
+        if { [catch {orafetch $the_cursor -datavariable result} failure] } {
+            catch {MASCLR::set_cursor_status $the_cursor 13} failure
+            MASCLR::masclr_error "[oramsg $the_cursor rc] [oramsg $the_cursor error]"
+        }
+        set temp_rows [oramsg $the_cursor rows]
+        MASCLR::set_affected_rows $the_cursor $temp_rows
+
+        MASCLR::log_message "Got result $result" 1
+        return $result
+        ###
+    }   ;# fetch_single_value
+        ###
+
+################################################################################
+# clearing_amount decimal_amount
+# parameters:
+#    decimal_amount -- an amount (typically dollar amount) like 19.49
+#   that needs to be represented without a decimal and with exactly 2 digits
+#   representing the 2 decimal digits.
+#   19.49 = 1949
+#   19 = 1900
+#   100 = 10000
+#
+# public use
+################################################################################
+    proc clearing_amount { decimal_amount } {
+        return [expr wide(round($decimal_amount * 100))]
+    }
+
+
+################################################################################
+# get_date_with_format in_date out_format ?date_offset ""?
+# parameters:
+#       in_date -- date in any standard format
+#       out_format -- the format to return the date in
+#       date_offset -- a clock scan offset, such as "1 day" or "-3 day"
+# this library has predefined formats to choose from
+# or you can supply your own
+# returns in all caps
+# throws error if invalid date (if can't scan the in_date)
+# public use
+################################################################################
+    proc get_date_with_format { in_date out_format {date_offset ""} } {
+        set temp_date ""
+        if { [catch {set temp_date [clock format [clock scan "$in_date $date_offset"] -format $out_format]} failure ] } {
+            set message "Date/format error: $failure"
+            MASCLR::masclr_error $message
+        }
+        return [string toupper $temp_date]
+        ###
+    }   ;# get_date_with_format
+        ###
+
+
+################################################################################
+# get_julian_date ?date_offset ""?
+# parameters:
+#       in_date -- date in any standard format
+#       date_offset -- a clock scan offset, such as "1 day" or "-3 day"
+# throws error if invalid date (if can't scan the in_date)
+# public use
+################################################################################
+    proc get_julian_date { in_date {date_offset ""} } {
+        set temp_date ""
+        if { [catch {set temp_date [MASCLR::get_date_with_format $in_date $MASCLR::DT_JULIAN $date_offset] } failure ] } {
+            set message "Date/format error: $failure"
+            MASCLR::masclr_error $message
+        }
+        return [string trimleft $temp_date 0]
+        ###
+    }   ;# get_date_with_format
+        ###
+
+
+################################################################################
+# set_up_dates
+# sets up standard dates (current date, etc) for later use in the script
+# public use
+################################################################################
+    proc set_up_dates { } {
+        variable CURRENT_EF_DB_DATE
+        variable CURRENT_AUTH_DB_DATE
+        variable CURRENT_EF_FILE_DATE
+        variable CURRENT_JULIAN_DATE
+        variable CURRENT_EF_DB_SHORT_DATE
+        variable TODAY
+        variable TOMORROW
+        variable YESTERDAY
+
+        set CURRENT_EF_DB_DATE [MASCLR::get_date_with_format [clock format [clock seconds]] $MASCLR::DT_EF_DB_DATE_TRUNC]
+        set CURRENT_EF_DB_SHORT_DATE [MASCLR::get_date_with_format [clock format [clock seconds]] $MASCLR::DT_EF_DB_DATE_SHORT]
+        set CURRENT_EF_FILE_DATE [MASCLR::get_date_with_format [clock format [clock seconds]] $MASCLR::DT_EF_FILE_DATE_TRUNC]
+        set CURRENT_AUTH_DB_DATE [MASCLR::get_date_with_format [clock format [clock seconds]] $MASCLR::DT_AUTH_TRUNC]
+        set CURRENT_JULIAN_DATE [MASCLR::get_julian_date [clock format [clock seconds]] ]
+        set TODAY     [clock format [clock scan " 0 day" -base [clock seconds]] -format "%Y%m%d"]
+        set TOMORROW  [clock format [clock scan " 1 day" -base [clock seconds]] -format "%Y%m%d"]
+        set YESTERDAY [clock format [clock scan "-1 day" -base [clock seconds]] -format "%Y%m%d"]
+        ###
+    }   ;# set_up_dates
+        ###
+
+
+################################################################################
+# split_list_surround_quotes the_list
+# parameters:
+#   the_list -- the list to split out
+# takes a list like {101 105 107}
+# and returns it in the form '101','105','107'
+# public use
+################################################################################
+    proc split_list_surround_quotes { the_list } {
+        return "\'[join [split $the_list " "] "\',\'"]\'"
+    }
+
+################################################################################
+# masclr_error message
+# parameters:
+#   message -- the message to include in the error
+# show information about the call stack 2 levels up (to cover both the library
+# proc and the other proc calling it).
+# public use
+################################################################################
+    proc masclr_error { message } {
+        set call_level [info level]
+        set call_stack_info "\n$message"
+        for { set x [expr $call_level - 1] } { $x > 0 } { set x [expr $x - 1] } {
+            append call_stack_info "\n[string repeat = $x]>Called from level $x [info level $x]"
+        }
+        MASCLR::log_message "====================ERROR===================="
+        MASCLR::log_message "$message\n$call_stack_info"
+        error "$::errorInfo$call_stack_info"
+    }
+
+################################################################################
+# mutt_send_mail email_to_list email_subject  email_body email_file_attachments_list 
+# parameters:
+#   email_to_list -- list of email addresses to email to
+#	email_subject -- Subject Line of email
+#   email_body -- content or body of email
+#	email_file_attachments_list -- list of paths for attachments to add to email.
+# Sends email through mutt with error handling that properly addresses sendmail queue responses.
+# public use
+################################################################################
+	# email list is required, subject, body and attachmentlist can be blank as optional parameters. 
+	proc mutt_send_mail { email_to_list {email_subject ""} {email_body ""} {email_file_attachments_list ""} } {
+
+		global std_out_channel
+
+	#Checks for attachment list length. If not 0, then loop through list to concatinate them into attachment_string variable
+		set attachment_string ""
+		if { [ llength $email_file_attachments_list ] } {
+			foreach filename $email_file_attachments_list {
+				if { [ file exists $filename ] } {
+					append attachment_string "-a $filename "
+				}
+			}
+		}
+
+        set execcommand "echo \"$email_body\" \| mutt -s \"$email_subject\" $attachment_string -- \"$email_to_list\""
+        if { [catch { eval exec $execcommand } result] != 0 } {
+
+		   if { [string range $result 0 21] == "Waiting for fcntl lock" } {
+			  puts "Ignore mutt file control lock $result"
+		   } else {
+			  error "mutt error message: $result"
+		   }
+		}
+
+	}
+
+}
+
+set MASCLR_LIB_LOADED 1

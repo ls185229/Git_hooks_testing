@@ -1,0 +1,31 @@
+
+phy_format = elf
+
+classifier = elf_classifier
+MSG ach_elf
+{
+#field name                         field     offset len  type   des call_back
+ MAS_ACTIVITY_DATE                    19.17201.28057	0 -1 ocstring - - 
+ MAS_ACTIVITY_TIME                    19.17201.28058	0 -1 ocstring - - 
+ MAS_ENTITY_NAME                      19.17201.28059    0 -1 ocstring - - 
+ MAS_ENTITY_DBA_NAME                  19.17201.28117    0 -1 ocstring - -
+ MAS_ENTITY_ID                        19.17201.28009    0 -1 ocstring - - 
+ MAS_TAX_ID                        	  19.17201.28100    0 -1 ocstring - - 
+ MAS_PAY_CURR                         19.17201.28060    0 -1 ocstring - - 
+ MAS_SYS_DATE                         19.17201.28061	0 -1 ocstring - - 
+ MAS_PAY_EFFECT_DATE                  19.17201.28062	0 -1 ocstring - - 
+ MAS_JULIAN_SYS_DATE                  19.17201.28063	0 -1 ocstring - - 
+ MAS_PAYMENT_METHOD_CD                19.17201.28064    0 -1 ocstring - - 
+ MAS_CRED_DEB_IND                     19.17201.28065    0 -1 ocstring - - 
+ MAS_TRANS_ROUTING_NBR                19.17201.28041    0 -1 ocstring - - 
+ MAS_ACCT_NBR                         19.17201.28066    0 -1 ocstring - - 
+ MAS_PAY_AMT                          19.17201.28067	0 -1 ocstring - - 
+ MAS_PAY_PROC_DATE                    19.17201.28068	0 -1 ocstring - - 
+ MAS_PAYMENT_SEQ_NBR                  19.17201.28037	0 -1 ocstring - - 
+ MAS_SETTL_ROUTING_NBR                19.17201.28135	0 -1 ocstring - - 
+ MAS_SETTL_ACCT_NBR                   19.17201.28121	0 -1 ocstring - - 
+ MAS_SETTL_BANK_NAME                  19.17201.28136	0 -1 ocstring - - 
+ MAS_DEST_ROUTING_NBR                 19.17201.28138	0 -1 ocstring - - 
+ MAS_DEST_NAME                        19.17201.28139	0 -1 ocstring - - 
+ MAS_ENTITY_ACCT_DESC                 19.17201.28116    0 -1 ocstring - -
+}

@@ -1,0 +1,51 @@
+settl_plan_tid
+NAME      INSTITUTION_ID SETTL_PLAN_ID        CNT
+--------- -------------- ------------- ----------
+TRANSQA   107                        1        443
+TRANSQA   107                        2        443
+TRANSQA   107                        3        443
+TRANSQA   107                        4        443
+TRANSQA   107                        5        443
+TRANSQA   107                        6        460
+TRANSQA   107                        7        399
+TRANSQA   107                       11        399
+TRANSQA   107                       12        399
+TRANSQA   107                       13        399
+TRANSQA   107                       14        413
+TRANSQA   107                       15        399
+TRANSQA   107                       16        399
+TRANSQA   121                        1        443
+TRANSQA   121                        2        443
+TRANSQA   121                        3        443
+TRANSQA   121                        4        443
+TRANSQA   121                        5        464
+TRANSQA   121                        6        351
+
+ 23 rows selected
+
+acq_entity
+NAME      INSTITUTION_ID SETTL_PLAN_ID        CNT
+--------- -------------- ------------- ----------
+TRANSQA   107                        1        218
+TRANSQA   107                        3          8
+TRANSQA   107                        4         40
+TRANSQA   107                        5          4
+TRANSQA   107                       14         43
+TRANSQA   121                        1          4
+TRANSQA   121                        3          1
+TRANSQA   121                        5          1
+TRANSQA   121                        6          1
+
+ 9 rows selected
+
+NAME      INSTITUTION_ID SEQ_NAME      LAST_SEQ_NBR MAX_SEQ_NBR SEQ_BLOCK_SIZE
+--------- -------------- ------------- ------------ ----------- --------------
+TRANSQA   101            settl_plan_id         6284  2147483647           1000
+TRANSQA   105            settl_plan_id    106019787  2147483647             10
+TRANSQA   107            settl_plan_id        54817  2147483647           1000
+TRANSQA   121            settl_plan_id      1211463  2147483647           1000
+
+TRANSQA   107                      111        436
+TRANSQA   107                      112        436
+TRANSQA   107                      113        436
+TRANSQA   107                      114        436

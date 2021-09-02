@@ -1,0 +1,523 @@
+##################################################################################################################
+# $Id: turnOn_cron.txt 4918 2019-11-07 14:54:30Z bjones $
+##################################################################################################################
+#               #
+# MISCELLANEOUS #
+#               #
+
+01 06 * * * $HOME/GLOBAL_CHECKS/Group-Missing-Transaction-Check.sh >> $HOME/GLOBAL_CHECKS/Group-Missing-Transaction-Check.sh.log 2>&1
+01 06 * * * $HOME/GLOBAL_CHECKS/Individual-Missing-Transaction-Check.sh >> $HOME/GLOBAL_CHECKS/Individual-Missing-Transaction-Check.sh.log 2>&1
+#RB#00 09 * * * cd $HOME/GLOBAL_CHECKS/; daily_inst_check.sh >> $HOME/GLOBAL_CHECKS/LOG/daily_inst_check.log 2>&1
+30 17 * * * cd $HOME/; rm sent >> LOG/cronjob.log 2>&1
+
+# INST 121
+#00 01 * * * cd $HOME/GLOBAL_CHECKS/; mas_code_check.sh 121 >> $HOME/GLOBAL_CHECKS/LOG/mcd_chk.log 2>&1
+
+##################################################################################################################
+# # JOBS FOR 107 NEXTDAY107 & OK DMV (they do business Mon - Sat & report runs the next morning)
+##################################################################################################################
+#RUNDECK#00 06 * * * cd $HOME/JOURNALS/OK_DMV; okdmv_funding_report.sh >> LOG/okdmv_funding_report.log 2>&1
+#RUNDECK#00 06 * * * cd $HOME/JOURNALS/OK_DMV; okdmv_fee_report.sh     >> LOG/okdmv_fee_report.log 2>&1
+#RUNDECK#30 18 * * 1-6 cd $HOME/DEBIT/; pin_debit_load.sh                    >> LOG/pin_debit_load.log 2>&1
+#RUNDECK#45 18 * * 1-6 cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i107 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+#50 18 * * 1-6 cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i122 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+###47 18 * * * cd $HOME/GLOBAL_CHECKS; Cutoff-Batch-Check.sh 107 >> LOG/cutoff_batch_check_107.log 2>&1
+#RUNDECK#46 19 * * 1-6 cd $HOME/DEBIT/; mas_amex_settlement_file.sh >> LOG/amex_task.log 2>&1
+#RUNDECK#47 19 * * 1-6 cd $HOME/MAS/CONV_CHARGE/; mas_conv_charge_file.sh -i 107 -s OKDMV >> LOG/mas_conv_charge_file.log
+#RUNDECK#52 19 * * 1-6 cd $HOME/MAS/CONV_CHARGE/; mas_conv_charge_file.sh -i 107 -s CNVNEXT107 >> LOG/mas_conv_charge_file.log
+#RUNDECK#05,20,35 19 * * 1-6 cd $HOME/MAS/; get_clearing_mas_files.sh 107 >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#TEMP#07,27,48 19 * * 1-6 cd $HOME/MAS/; send_mas_files_to_mas.sh 107 NEXTDAY >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#TEMP#00,10 20 * * 1-6 cd $HOME/MAS/; send_mas_files_to_mas.sh 107 NEXTDAY >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#10 18 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 100 107 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#05,15,30,45 19 * * 1-6 cd $HOME/MAS; send_files.sh >> $HOME/MAS/LOG/send_files.log 2>&1
+#RUNDECK#00,10,20,55 20 * * 1-6 cd $HOME/MAS; send_files.sh >> $HOME/MAS/LOG/send_files.log 2>&1
+###10 19 * * 1-6 cd $HOME/GLOBAL_CHECKS/; check_visa_log_4_err_107.sh >> $HOME/GLOBAL_CHECKS/LOG/gbl_log_chk.log 2>&1
+###10 19 * * 1-6 cd $HOME/GLOBAL_CHECKS/; check_mfe_log_4_err.sh >> $HOME/GLOBAL_CHECKS/LOG/cj_mc_chk.log 2>&1
+#gens_error#05 20 * * 1-5 cd $HOME/MAS/; (mas_files_in.sh -i 107 -c OKDMV || echo "mas_file_in failed" >> $HOME/process.stop) >> LOG/mas_files_in.log 2>&1
+#RUNDECK#20 20 * * 1-6 cd $HOME/MAS/; check_mas_imports.sh -i 107 -g OKDMV >> $HOME/MAS/LOG/check_mas_imports.log 2>&1
+#RUNDECK#15 20 * * 1-5 cd $HOME/MAS/;          ($HOME/bankday.sh -i 107 && run_mas_cmd.sh 102 107 "5")  >> LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#25 20 * * 1-5 cd $HOME/ACH/INST_107/; ($HOME/bankday.sh -i 107 && get_ach_file.sh -i 107)      >> LOG/ach.log 2>&1
+#RUNDECK#30 20 * * 1-5 cd $HOME/ACH/INST_107/; ($HOME/bankday.sh -i 107 && ach_auto.sh -i 107 -c 52)            >> LOG/ach.log 2>&1
+#RUNDECK#35 20 * * 1-5 cd $HOME/MAS/; ($HOME/bankday.sh -i 107 && check_acct_accum_det.sh -i 107 -s OKDMV -c 5) >> $HOME/MAS/LOG/check_acct_accum_det.log 2>&1
+#RUNDECK#40 20 * * 1-5 cd $HOME/JOURNALS/DAILY; ($HOME/bankday.sh -i 107 && ach_report.sh -i 107 -c 5) >> LOG/ach_report.log 2>&1
+#RUNDECK#45 20 * * *   cd $HOME/JOURNALS/DAILY/; daily_detail_settled.sh -i 107 -c 5 >> LOG/daily_detail_settled.log 2>&1
+0,15,30,45 00-06 * * * cd $HOME/MAS; send_files.sh >> $HOME/MAS/LOG/send_files.log 2>&1
+
+##################################################################################################################
+# # JOBS FOR 122 NEXTDAY122 DAS
+##################################################################################################################
+#45 20 * * 1-5 cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i122 -v                          >> LOG/pin_debit.log  2>&1
+#TEMP#55 20 * * 1-5 cd $HOME/MAS/; send_mas_files_to_mas.sh 122 NEXTDAY                              >> LOG/MAS.MULTI.log 2>&1
+#15 21 * * 1-5 cd $HOME/MAS/;          ($HOME/bankday.sh -i 122 && run_mas_cmd.sh 102 122 "5")  >> LOG/MAS.MULTI.log 2>&1
+#45 21 * * 1-5 cd $HOME/ACH/INST_122/; ($HOME/bankday.sh -i 122 && get_ach_file.sh -i 122)      >> LOG/ach.log 2>&1
+#40 21 * * 1-5 cd $HOME/JOURNALS/DAILY; ($HOME/bankday.sh -i 122 && ach_report.sh -i 122 -c 5)  >> LOG/ach_report.log 2>&1
+#45 21 * * *   cd $HOME/JOURNALS/DAILY/; daily_detail_settled.sh -i 122 -c 5                    >> LOG/daily_det_stl.log 2>&1
+
+##################################################################################################################
+# # JOBS FOR 121 NEXTDAY121
+##################################################################################################################
+#30 20 * * 1-6 cd $HOME/DEBIT/; pin_debit_load.sh                    >> LOG/pin_debit_load.log 2>&1
+#45 20 * * 1-6 cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i121 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+#### 50 20 * * * cd $HOME/GLOBAL_CHECKS; Cutoff-Batch-Check.sh 121 >> $HOME/GLOBAL_CHECKS/Cutoff-Batch-Check.tcl.121.log 2>&1
+#55 20 * * * cd $HOME/MAS/; get_clearing_mas_files.sh 121 >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#57 20 * * * cd $HOME/MAS/; send_mas_files_to_mas.sh 121 >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#25 21 * * 1-5 cd $HOME/MAS/;          ($HOME/bankday.sh -i 121 && run_mas_cmd.sh 102 121 "5")  >> LOG/MAS.MULTI.CRON.log 2>&1
+#35 21 * * 1-5 cd $HOME/ACH/INST_121/; ($HOME/bankday.sh -i 121 && get_ach_file.sh)             >> LOG/ach.log 2>&1
+#45 21 * * 1-5 cd $HOME/MAS/; ($HOME/bankday.sh  -i 121 && check_acct_accum_det.sh -i 121 -s NEXTDAY121) >> $HOME/MAS/LOG/check_acct_accum_det.log 2>&1
+#40 21 * * 1-5 cd $HOME/ACH/INST_121/; ($HOME/bankday.sh  -i 121 && ach_auto.sh "52")            >> LOG/ach.log 2>&1
+#50 21 * * 1-5 cd $HOME/JOURNALS/DAILY; ($HOME/bankday.sh  -i 121 && ach_report.sh -i 121 -c 5) >> LOG/ach_report.log 2>&1
+#59 21 * * *   cd $HOME/JOURNALS/DAILY/; daily_detail_settled.sh -i 121 -c 5 >> LOG/daily_detail_settled.log 2>&1
+
+##################################################################################################################
+# # JOBS FOR EARLY 101 IMPORTS/EXPORTS
+##################################################################################################################
+#RUNDECK#45 23 * * * cd $HOME/MAS/; get_clearing_mas_files.sh 101 >>  $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#TEMP#50 23 * * * cd $HOME/MAS/; send_mas_files_to_mas.sh 101 >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+50 23 * * * cd $HOME/MAS; send_files.sh 101 >> $HOME/MAS/LOG/send_files.log 2>&1
+
+##################################################################################################################
+# # JOBS FOR EARLY 105 IMPORTS/EXPORTS
+##################################################################################################################
+#RUNDECK#25 22 * * * cd $HOME/MAS/; get_clearing_mas_files.sh 105 >>  $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#TEMP#27 22 * * * cd $HOME/MAS/; send_mas_files_to_mas.sh 105 >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+
+
+##################################################################################################################
+# # JOBS FOR EARLY 107 IMPORTS/EXPORTS
+##################################################################################################################
+#RUNDECK#45 21 * * 1-6 cd $HOME/MAS/; get_clearing_mas_files.sh 107 >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#TEMP#50 21 * * 1-6 cd $HOME/MAS/; send_mas_files_to_mas.sh 107 >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#50 21 * * * cd $HOME/MAS; send_files.sh 107 >> $HOME/MAS/LOG/send_files.log 2>&1
+#RUNDECK#16 23 * * * cd $HOME/MAS/; get_clearing_mas_files.sh 107 >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#TEMP#21 23 * * * cd $HOME/MAS/; send_mas_files_to_mas.sh 107 >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#21 23 * * * cd $HOME/MAS; send_files.sh 107 >> $HOME/MAS/LOG/send_files.log 2>&1
+
+#                     #
+# MAS FILE PROCESSING #
+#                     #
+# FILES FROM CLEARING
+#RUNDECK#20 01 * * * cd $HOME/MAS/; get_clearing_mas_files.sh 105 >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#TEMP#25 01 * * * cd $HOME/MAS/; send_mas_files_to_mas.sh 105 >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+15,45 21-23 * * * cd $HOME/MAS; send_files.sh >> $HOME/MAS/LOG/send_files.log 2>&1
+#RUNDECK#45 01 * * * cd $HOME/MAS/; get_clearing_mas_files.sh 101 >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#30 02 * * * cd $HOME/MAS/; get_clearing_mas_files.sh 107 >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#TEMP#02 03 * * * cd $HOME/MAS/; send_mas_files_to_mas.sh 101 >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#TEMP#00 04 * * * cd $HOME/MAS/; run_all_send_mas_files_to_mas.sh >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+
+#Below commented per NPP-4262
+#35 04 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 100 101 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#45 04 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 100 105 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#45 05 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 100 107 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#00 05 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 100 121 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#55 04 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 100 122 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#15 05 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 100 130 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#30 05 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 100 134 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#45 17 * * *   cd $HOME/MAS/; run_all_send_mas_files_to_mas.sh >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+
+35 21 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 100 101 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+45 21 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 100 105 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#55 21 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 100 121 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#00 18 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 100 122 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#15 22 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 100 130 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+30 22 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 100 134 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+45 17 * * *  cd $HOME/MAS; send_files.sh >> $HOME/MAS/LOG/send_files.log 2>&1
+
+# SPLIT FUNDING
+#00 03 * * 1-5 cd $HOME/MAS/SPLIT_FUNDS/; mas_split_fund_file.sh -i 101 -f 101MerchList.txt >> LOG/split_funding.log  2>&1
+#10 03 * * 1-5 cd $HOME/MAS/SPLIT_FUNDS/; mas_split_fund_file.sh -i 121 -f 121MerchList.txt >> LOG/split_funding.log  2>&1
+
+##################################################################################################################
+# DEBIT run at midnight
+##################################################################################################################
+#RUNDECK#31 00 * * * cd $HOME/DEBIT/; pin_debit_load.sh                      >> LOG/pin_debit_load.log 2>&1
+35 01 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i101 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+37 01 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i105 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+#RUNDECK#39 01 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i107 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+#RUNDECK#41 01 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i121 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+#42 01 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i122 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+# 43 01 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i129 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+#RUNDECK#45 01 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i130 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+47 01 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i134 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+# 49 01 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i132 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+# 51 01 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i133 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+
+##################################################################################################################
+# DEBIT
+##################################################################################################################
+# 01 04 * * * cd $HOME/DEBIT/; pin_debit_load.sh                      >> LOG/pin_debit_load.log 2>&1
+# 05 04 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i101 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+# 07 04 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i105 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+# 09 04 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i107 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+# 11 04 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i121 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+# 13 04 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i129 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+# 15 04 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i130 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+# 17 04 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i134 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+# 21 04 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i132 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+# 23 04 * * * cd $HOME/DEBIT/; pin_debit_create_mas_file.sh  -i133 -v >> LOG/pin_debit_create_mas_file.sh  2>&1
+
+# CONVENIENCE CHARGES
+#RUNDECK#08 23 * * * cd $HOME/MAS/CONV_CHARGE/; mas_conv_charge_file.sh -i 107 -s OKDMV      >> LOG/mas_conv_charge_file.log
+#RUNDECK#13 23 * * * cd $HOME/MAS/CONV_CHARGE/; mas_conv_charge_file.sh -i 107 -s CNVNEXT107 >> LOG/mas_conv_charge_file.log 2>&1
+#RUNDECK#18 23 * * * cd $HOME/MAS/CONV_CHARGE/; mas_conv_charge_file.sh -i 107 -s CNVNORM107 >> LOG/mas_conv_charge_file.log 2>&1
+#RUNDECK#23 23 * * * cd $HOME/MAS/CONV_CHARGE/; mas_conv_charge_file.sh -i 130 -s CNVNORM130 >> LOG/mas_conv_charge_file.log 2>&1
+#RUNDECK#28 23 * * * cd $HOME/MAS/CONV_CHARGE/; mas_conv_charge_file.sh -i 107 -s CNV1500107 >> LOG/mas_conv_charge_file.log 2>&1
+
+#RUNDECK#10 04 * * * cd $HOME/MAS/CONV_CHARGE/; mas_conv_charge_file.sh -i 107 -s CNVNORM107 >> LOG/mas_conv_charge_file.log 2>&1
+#RUNDECK#14 04 * * * cd $HOME/MAS/CONV_CHARGE/; mas_conv_charge_file.sh -i 130 -s CNVNORM130 >> LOG/mas_conv_charge_file.log 2>&1
+#RUNDECK#18 04 * * * cd $HOME/MAS/CONV_CHARGE/; mas_conv_charge_file.sh -i 107 -s CNV1500107 >> LOG/mas_conv_charge_file.log 2>&1
+
+# CHARGEBACKS
+28 03 * * * cd $HOME/MAS/; mas_chgbck_file.sh -i 101 >> $HOME/MAS/LOG/MAS.MULTI.cron.log 2>&1
+33 03 * * * cd $HOME/MAS/; mas_chgbck_file.sh -i 105 >> $HOME/MAS/LOG/MAS.MULTI.cron.log 2>&1
+#RUNDECK#38 03 * * * cd $HOME/MAS/; mas_chgbck_file.sh -i 107 >> $HOME/MAS/LOG/MAS.MULTI.cron.log 2>&1
+#RUNDECK#42 03 * * * cd $HOME/MAS/; mas_chgbck_file.sh -i 121 >> $HOME/MAS/LOG/MAS.MULTI.cron.log 2>&1
+#44 03 * * * cd $HOME/MAS/; mas_chgbck_file.sh -i 122 >> $HOME/MAS/LOG/MAS.MULTI.cron.log 2>&1
+# 46 03 * * * cd $HOME/MAS/; mas_chgbck_file.sh -i 129 >> $HOME/MAS/LOG/MAS.MULTI.cron.log 2>&1
+#RUNDECK#50 03 * * * cd $HOME/MAS/; mas_chgbck_file.sh -i 130 >> $HOME/MAS/LOG/MAS.MULTI.cron.log 2>&1
+54 03 * * * cd $HOME/MAS/; mas_chgbck_file.sh -i 134 >> $HOME/MAS/LOG/MAS.MULTI.cron.log 2>&1
+# 58 03 * * * cd $HOME/MAS/; mas_chgbck_file.sh -i 132 >> $HOME/MAS/LOG/MAS.MULTI.cron.log 2>&1
+# 06 06 * * * cd $HOME/MAS/; mas_chgbck_file.sh -i 133 >> $HOME/MAS/LOG/MAS.MULTI.cron.log 2>&1
+00 11 * * * cd $HOME/RETURN_FILES/MASTERCARD; mastercard_reclass_file.sh P >> $HOME/RETURN_FILES/MASTERCARD/LOG/mastercard_reclass_file.log 2>&1
+00 15 * * * cd $HOME/MAS/; run_all_arb_settlement.sh >> $HOME/MAS/MULTI/LOG/MAS.ARB_SETTLEMENT_RUN.log 2>&1
+
+
+# IMPORT PENDING FILES INTO MAS
+#RUNDECK#30 3-6 * * * cd $HOME/MAS/; get_clearing_mas_files.sh  >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+20 06 * * * cd $HOME/MAS/; run_all_send_mas_files_to_mas_eom.sh >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+30 07 * * * cd $HOME/MAS/; trans_sus_err_chk.sh >> $HOME/MAS/LOG/clr_sus_err_chk.log 2>&1
+15 07 * * * cd $HOME/MAS/; auth_count_summary.sh >> $HOME/MAS/LOG/MAS.auth_count.log 2>&1
+
+#                                   #
+# START OF MORNING MAS ACH COMMANDS #
+#                                   #
+00 07 * * * cd $HOME/GLOBAL_CHECKS/; check_for_extra_exported_files.sh >> $HOME/GLOBAL_CHECKS/LOG/exp_chk.log 2>&1
+15 07 * * *  cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd_138.sh >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+# INST 101
+35 07 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 107 101 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+40 07 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 110 101 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+45 07 * * * cd $HOME/MAS/; ($HOME/notlastday.sh && run_mas_cmd.sh 102 101 "1") >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+45 08 * * * cd $HOME/MAS/; ($HOME/notlastday.sh && run_mas_cmd.sh 102 101 "8") >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+# INST 105
+00 08 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 107 105 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+05 08 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 110 105 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+10 08 * * 1-5 cd $HOME/MAS/; ($HOME/notlastday.sh && $HOME/bankday.sh -i 105 && run_mas_cmd.sh 102 105 "1") >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+# INST 107
+#RUNDECK#15 08 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 107 107 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#20 08 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 110 107 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#25 08 * * 1-5 cd $HOME/MAS/; ($HOME/notlastday.sh && $HOME/bankday.sh -i 107 &&  run_mas_cmd.sh 102 107 "1") >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+# INST 121
+#RUNDECK#30 08 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 107 121 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#35 08 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 110 121 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#40 08 * * 1-5 cd $HOME/MAS/; ($HOME/notlastday.sh && $HOME/bankday.sh -i 121 &&  run_mas_cmd.sh 102 121 "1") >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+# INST 122
+#45 09 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 107 122 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#50 09 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 110 122 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#55 09 * * 1-5 cd $HOME/MAS/; ($HOME/notlastday.sh && $HOME/bankday.sh -i 122 &&  run_mas_cmd.sh 102 122 "1") >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+# INST 129
+# 45 08 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 107 129 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+# 50 08 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 110 129 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+# 55 08 * * 1-5 cd $HOME/MAS/; ($HOME/notlastday.sh && $HOME/bankday.sh -i 129 &&  run_mas_cmd.sh 102 129 "1") >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+# INST 130
+#RUNDECK#10 09 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 107 130 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#15 09 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 110 130 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#30 09 * * 1-5 cd $HOME/MAS/; ($HOME/notlastday.sh && $HOME/bankday.sh -i 130 &&  run_mas_cmd.sh 102 130 "1") >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+# INST 134
+18 09 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 107 134 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+24 09 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 110 134 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#TEMP#35 09 * * 1-5 cd $HOME/MAS/; ($HOME/notlastday.sh && $HOME/bankday.sh -i 134 &&  run_mas_cmd.sh 102 134 "1") >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+# INST 132
+# 45 09 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 107 132 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+# 50 09 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 110 132 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+# 55 09 * * 1-5 cd $HOME/MAS/; ($HOME/notlastday.sh && $HOME/bankday.sh -i 132 &&  run_mas_cmd.sh 102 132 "1") >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+# INST 133
+# 00 10 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 107 133 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+# 05 10 * * *   cd $HOME/MAS/; $HOME/notlastday.sh run_mas_cmd.sh 110 133 "all" >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+# 10 10 * * 1-5 cd $HOME/MAS/; ($HOME/notlastday.sh && $HOME/bankday.sh -i 133 &&  run_mas_cmd.sh 102 133 "1") >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+
+
+
+#                          #
+# CARD ASSOCIATION REPORTS #
+#                          #
+
+# AMEX
+30 08 * * *  $HOME/AMEX/get_amex_files.sh >> $HOME/AMEX/LOG/amex_dnload.log 2>&1
+#30 08 * * 0    $HOME/AMEX/get_amex_tilr.sh >> $HOME/AMEX/LOG/amex_dnload_tilr.log 2>&1
+
+# Visa
+#39 09 * * *   cd $HOME/BASE2/; multi_inst_base2_report.sh >> $HOME/BASE2/LOG/BASE2.MULTI.cron.log 2>&1
+#50 09 * * *   cd $HOME/BASE2/; multi_inst_base2_report-132.sh >> LOG/BASE2.MULTI.cron.log 2>&1
+39 09 * * *   cd $HOME/BASE2/; multi_visa_split.sh >> $HOME/BASE2/LOG/BASE2.MULTI.cron.log 2>&1
+#blank#05 11 * * *   cd $HOME/REJECTS/; visa_reject_reports.sh >> $HOME/REJECTS/LOG/CRON.rej.108.log 2>&1
+07 11 * * *   cd $HOME/REJECTS/; visa_EP240_reports.sh >> $HOME/REJECTS/LOG/CRON.240.108.log 2>&1
+11 11 * * *   cd $HOME/GLOBAL_CHECKS/; visa_dwngrd_chk.sh >> LOG/vsd_chk.log 2>&1
+
+# MasterCard
+# 45 09 * * 1-6 cd $HOME/IPM/; multi_inst_ipm_report.sh >> $HOME/IPM/LOG/IPM.MULTI.cron.log 2>&1
+# 45 09 * * 1-6 cd $HOME/IPM/; (recv_file_frm_mfe.exp & multi_ipm_split.py) >> LOG/IPM.MULTI.cron.log 2>&1
+45 09 * * 1-6 cd $HOME/IPM/; mc_reports.sh >> $HOME/IPM/LOG/IPM.MULTI.cron.log 2>&1
+09 11 * * 1-6 $HOME/REJECTS/chk_ipm_for_rejects.sh >> $HOME/REJECTS/LOG/rejchk.log 2>&1
+30 10 * * 0,2-6 cd $HOME/RETURN_FILES/MASTERCARD; run_t884.sh >> $HOME/RETURN_FILES/MASTERCARD/LOG/CLR.IMPORT.T884.log 2>&1
+
+00 12 * * *   $HOME/REJECTS/ep_reject_chk.sh >> $HOME/REJECTS/LOG/rejchk.log 2>&1
+#RB#30 13 * * *   $HOME/REJECTS/ep_reject_chk.sh >> $HOME/REJECTS/LOG/rejchk.log 2>&1
+
+#                                            #
+# DAILY JETPAY JOURNAL, ACH AND BALANCING REPORTS #
+#                                            #
+15 06 * * *   cd $HOME/JOURNALS/DAILY;  auth_balancing_report.sh -i 101 >> LOG/auth_balancing_report.log 2>&1
+18 06 * * *   cd $HOME/JOURNALS/DAILY;  auth_balancing_report.sh -i 105 >> LOG/auth_balancing_report.log 2>&1
+#RUNDECK#21 06 * * *   cd $HOME/JOURNALS/DAILY;  auth_balancing_report.sh -i 107 >> LOG/auth_balancing_report.log 2>&1
+#RUNDECK#24 06 * * *   cd $HOME/JOURNALS/DAILY;  auth_balancing_report.sh -i 121 >> LOG/auth_balancing_report.log 2>&1
+# 30 06 * * *   cd $HOME/JOURNALS/DAILY;  auth_balancing_report.sh -i 129 >> LOG/auth_balancing_report.log 2>&1
+#RUNDECK#33 06 * * *   cd $HOME/JOURNALS/DAILY;  auth_balancing_report.sh -i 130 >> LOG/auth_balancing_report.log 2>&1
+36 06 * * *   cd $HOME/JOURNALS/DAILY;  auth_balancing_report.sh -i 134 >> LOG/auth_balancing_report.log 2>&1
+39 06 * * *   cd $HOME/JOURNALS/DAILY;  auth_balancing_report.sh -i 122 >> LOG/auth_balancing_report.log 2>&1
+# 42 06 * * *   cd $HOME/JOURNALS/DAILY;  auth_balancing_report.sh -i 132 >> LOG/auth_balancing_report.log 2>&1
+# 45 06 * * *   cd $HOME/JOURNALS/DAILY;  auth_balancing_report.sh -i 133 >> LOG/auth_balancing_report.log 2>&1
+00 07 * * 1   cd $HOME/SOLUPAY; Intermex_pindebit_report.sh            >> LOG/Intermex_pindebit_report.log 2>&1
+00 09 * * *   cd $HOME/JOURNALS/AMEX_TILR; run_amex_tilr.sh >> LOG/amex_tilr.log 2>&1
+00 10 * * *   cd JOURNALS/AMEX_TILR; send_amex_tilr_to_sbc.sh >> LOG/send_amex_tilr.log 2>&1
+35 09 * * *   cd $HOME/JOURNALS/DISCOVER_ARI; run_discover_ari.sh >> LOG/reports.log 2>&1
+#RUNDECK#27 09 * * *   cd $HOME/JOURNALS/DAILY;  $HOME/notlastday.sh daily_detail_settled_v2.sh -i 107 >> LOG/daily_detail_settled_v2.log 2>&1
+30 09 * * *   cd $HOME/JOURNALS/DAILY;  $HOME/notlastday.sh daily_detail_settled.sh -i 101 >> LOG/daily_detail_settled.log 2>&1
+33 09 * * *   cd $HOME/JOURNALS/DAILY;  $HOME/notlastday.sh daily_detail_settled.sh -i 105 >> LOG/daily_detail_settled.log 2>&1
+#RUNDECK#45 09 * * *   cd $HOME/JOURNALS/DAILY;  $HOME/notlastday.sh daily_detail_settled_v2.sh -i 121 >> LOG/daily_detail_settled_v2.log 2>&1
+#15 10 * * *   cd $HOME/JOURNALS/DAILY;  $HOME/notlastday.sh daily_detail_settled.sh -i 122 >> LOG/daily_detail_settled.log 2>&1
+#25 10 * * *   cd $HOME/JOURNALS/DAILY;  $HOME/notlastday.sh daily_detail_settled_v2.sh -i 122 >> LOG/daily_detail_settled_v2.log 2>&1
+# 45 09 * * *   cd $HOME/JOURNALS/DAILY;  $HOME/notlastday.sh daily_detail_settled.sh -i 129 >> LOG/daily_detail_settled.log 2>&1
+#RUNDECK#50 09 * * *   cd $HOME/JOURNALS/DAILY;  $HOME/notlastday.sh daily_detail_settled_v2.sh -i 130 >> LOG/daily_detail_settled_v2.log 2>&1
+10 10 * * *   cd $HOME/JOURNALS/DAILY;  $HOME/notlastday.sh daily_detail_settled_v2.sh -i 134 >> LOG/daily_detail_settled_v2.log 2>&1
+# 52 09 * * *   cd $HOME/JOURNALS/DAILY;  $HOME/notlastday.sh daily_detail_settled.sh -i 132 >> LOG/daily_detail_settled.log 2>&1
+# 53 09 * * *   cd $HOME/JOURNALS/DAILY;  $HOME/notlastday.sh daily_detail_settled.sh -i 133 >> LOG/daily_detail_settled.log 2>&1
+15 10 * * *   cd $HOME/JOURNALS/DAILY;  $HOME/notlastday.sh daily_detail_settled_v2.sh -i 101 >> LOG/daily_detail_settled_v2.log 2>&1
+20 10 * * *   cd $HOME/JOURNALS/DAILY;  $HOME/notlastday.sh daily_detail_settled_v2.sh -i 105 >> LOG/daily_detail_settled_v2.log 2>&1
+55 09 * * *   cd $HOME/JOURNALS/DAILY;  daily_detail_not_settled.sh -i 117 >> LOG/daily_detail_not_settled.log 2>&1
+56 09 * * *   cd $HOME/JOURNALS/DAILY;  daily_detail_not_settled.sh -i 122 >> LOG/daily_detail_not_settled.log 2>&1
+57 09 * * *   cd $HOME/JOURNALS/DAILY;  daily_detail_not_settled.sh -i 127 >> LOG/daily_detail_not_settled.log 2>&1
+# 00 10 * * *   cd $HOME/JOURNALS/MONTHEND/; create_conv_residuals.sh  "D"   >> LOG/conv_residuals.log 2>&1
+51 09 * * *   cd $HOME/JOURNALS/DAILY;  amex_prefunding_report.sh   -i 101 >> LOG/amex_prefunding.log 2>&1
+56 09 * * *   cd $HOME/JOURNALS/DAILY;  amex_prefunding_report.sh   -i 105 >> LOG/amex_prefunding.log 2>&1
+#RUNDECK#52 09 * * *   cd $HOME/JOURNALS/DAILY;  amex_prefunding_report.sh   -i 107 >> LOG/amex_prefunding.log 2>&1
+53 09 * * *   cd $HOME/JOURNALS/DAILY;  amex_prefunding_report.sh   -i 117 >> LOG/amex_prefunding.log 2>&1
+#RUNDECK#56 09 * * *   cd $HOME/JOURNALS/DAILY;  amex_prefunding_report.sh   -i 121 >> LOG/amex_prefunding.log 2>&1
+54 09 * * *   cd $HOME/JOURNALS/DAILY;  amex_prefunding_report.sh   -i 127 >> LOG/amex_prefunding.log 2>&1
+57 09 * * *   cd $HOME/JOURNALS/DAILY;  amex_prefunding_report.sh   -i 122 >> LOG/amex_prefunding.log 2>&1
+#RUNDECK#55 09 * * *   cd $HOME/JOURNALS/DAILY;  debit_prefunding_report.sh  -i 107 >> LOG/debit_prefunding.log 2>&1
+#RUNDECK#05 10 * * *   cd $HOME/JOURNALS/DAILY;  debit_prefunding_report.sh  -i 121 >> LOG/debit_prefunding.log 2>&1
+07 10 * * *   cd $HOME/JOURNALS/DAILY;  debit_prefunding_report.sh  -i 122 >> LOG/debit_prefunding.log 2>&1
+00 10 * * * cd $HOME/JOURNALS/DAILY;  ($HOME/notlastday.sh && ach_report.sh -i 101) >> LOG/ach_report.log 2>&1
+03 10 * * * cd $HOME/JOURNALS/DAILY;  ($HOME/notlastday.sh && ach_report.sh -i 101 -c 8) >> LOG/ach_report.log 2>&1
+#RUNDECK#01 10 * * 1-5 cd $HOME/JOURNALS/DAILY;  ($HOME/notlastday.sh && $HOME/bankday.sh -i 107 && ach_report.sh -i 107) >> LOG/ach_report.log 2>&1
+02 10 * * 1-5 cd $HOME/JOURNALS/DAILY;  ($HOME/notlastday.sh && $HOME/bankday.sh -i 105 && ach_report.sh -i 105) >> LOG/ach_report.log 2>&1
+#RUNDECK#03 10 * * 1-5 cd $HOME/JOURNALS/DAILY;  ($HOME/notlastday.sh && $HOME/bankday.sh -i 121 && ach_report.sh -i 121) >> LOG/ach_report.log 2>&1
+#08 10 * * 1-5 cd $HOME/JOURNALS/DAILY;  ($HOME/notlastday.sh && $HOME/bankday.sh -i 122 && ach_report.sh -i 122) >> LOG/ach_report.log 2>&1
+# 04 10 * * 1-5 cd $HOME/JOURNALS/DAILY;  ($HOME/notlastday.sh && $HOME/bankday.sh -i 129 && ach_report.sh -i 129) >> LOG/ach_report.log 2>&1
+#RUNDECK#05 10 * * 1-5 cd $HOME/JOURNALS/DAILY;  ($HOME/notlastday.sh && $HOME/bankday.sh -i 130 && ach_report.sh -i 130) >> LOG/ach_report.log 2>&1
+06 10 * * 1-5 cd $HOME/JOURNALS/DAILY;  ($HOME/notlastday.sh && $HOME/bankday.sh -i 134 && ach_report.sh -i 134) >> LOG/ach_report.log 2>&1
+# 07 10 * * 1-5 cd $HOME/JOURNALS/DAILY;  ($HOME/notlastday.sh && $HOME/bankday.sh -i 132 && ach_report.sh -i 132) >> LOG/ach_report.log 2>&1
+# 08 10 * * 1-5 cd $HOME/JOURNALS/DAILY;  ($HOME/notlastday.sh && $HOME/bankday.sh -i 133 && ach_report.sh -i 133) >> LOG/ach_report.log 2>&1
+00 10 * * *   cd $HOME/JOURNALS/; daily_custom_report_run.sh >> LOG/daily_custom_report.log 2>&1
+05 10 * * *   cd $HOME/JOURNALS/DAILY;  reject_reprocess_report.sh >> LOG/reject_reprocess_report.log 2>&1
+#15 10 * * *   cd $HOME/JOURNALS/DAILY;  reserve_report.sh  >> LOG/reserve_report.log 2>&1
+45 10 * * *   cd $HOME/JOURNALS/INST_117/UPLOAD/; upload_117_disc_ari.sh >> LOG/upload.log 2>&1
+20 11 * * *   cd $HOME/REJECTS/;        gen_on_call_summary.sh >> LOG/gen_on_call_summary.log 2>&1
+40 11 * * *   cd $HOME/JOURNALS;        all-reject-return-117.tcl>> LOG/report.log 2>&1
+00 13 * * *   cd $HOME/JOURNALS;        direct_air_daily_report.tcl >> LOG/direct_air.log 2>&1
+
+#RUNDECK#00 14 * * *   cd $HOME/JOURNALS/DAILY; send_b2bca_auth_reports.sh         >> LOG/b2bca_auth_reports.log 2>&1
+#RUNDECK#02 14 * * *   cd $HOME/JOURNALS/DAILY; send_b2bca_daily_detail_reports.sh >> LOG/b2bca_daily_detail_reports.log 2>&1
+04 14 * * *   cd $HOME/JOURNALS/DAILY; send_ptcca_auth_reports.sh         >> LOG/ptcca_auth_reports.log 2>&1
+06 14 * * *   cd $HOME/JOURNALS/DAILY; send_ptcca_daily_detail_reports.sh >> LOG/ptcca_daily_detail_reports.log 2>&1
+08 14 * * *   cd $HOME/JOURNALS/DAILY; send_ptcus_auth_reports.sh         >> LOG/ptcus_auth_reports.log 2>&1
+10 14 * * *   cd $HOME/JOURNALS/DAILY; send_ptcus_daily_detail_reports.sh >> LOG/ptcus_daily_detail_reports.log 2>&1
+# 55 15 * * 1-5   cd $HOME/JOURNALS/DAILY; scp_all_conf_files.sh 129              >> LOG/scp_all_conf_files.log 2>&1
+#RUNDECK#00 16 * * 1-5   cd $HOME/JOURNALS/DAILY; scp_all_conf_files.sh 130              >> LOG/scp_all_conf_files.log 2>&1
+#05 16 * * 1-5   cd $HOME/JOURNALS/DAILY; scp_all_conf_files.sh 134              >> LOG/scp_all_conf_files.log 2>&1
+# 07 16 * * 1-5   cd $HOME/JOURNALS/DAILY; scp_all_conf_files.sh 132              >> LOG/scp_all_conf_files.log 2>&1
+# 09 16 * * 1-5   cd $HOME/JOURNALS/DAILY; scp_all_conf_files.sh 133              >> LOG/scp_all_conf_files.log 2>&1
+00 12 * * *   cd $HOME/JOURNALS/DAILY; upload_daily_reports.sh >> LOG/upload_daily_reports.log 2>&1
+#                                #
+# MONTHLY JETPAY JOURNAL REPORTS #
+#                                #
+#RUNDECK#30 07 01 * *    cd $HOME/JOURNALS/MONTHEND/ISO_BILLING/; iso_billing.sh -i 107 >> LOG/iso_billing.log 2>&1
+45 07 01 * *    cd $HOME/JOURNALS/MONTHEND/ISO_BILLING/; iso_billing.sh -i 101 >> LOG/iso_billing.log 2>&1
+55 07 01 * *    cd $HOME/JOURNALS/MONTHEND/ISO_BILLING/; iso_billing.sh -i 105 >> LOG/iso_billing.log 2>&1
+#RUNDECK#59 07 01 * *    cd $HOME/JOURNALS/MONTHEND/ISO_BILLING/; iso_billing.sh -i 121 >> LOG/iso_billing.log 2>&1
+#RUNDECK#05 08 01 * *    cd $HOME/JOURNALS/MONTHEND/ISO_BILLING/; iso_billing.sh -i 130 >> LOG/iso_billing.log 2>&1
+10 08 01 * *    cd $HOME/JOURNALS/MONTHEND/ISO_BILLING/; iso_billing.sh -i 134 >> LOG/iso_billing.log 2>&1
+#15 08 01 * *    cd $HOME/JOURNALS/MONTHEND/ISO_BILLING/; iso_billing.sh -i 122 >> LOG/iso_billing.log 2>&1
+30 07 02 * *    cd $HOME/JOURNALS/MONTHEND/ISO_BILLING/; compress_and_email_old_files.sh >> LOG/compress_and_email_old_files.log 2>&1
+# 20 08 01 * *    cd $HOME/JOURNALS/MONTHEND/ISO_BILLING/; iso_billing.sh -i 132 >> LOG/iso_billing.log 2>&1
+# 25 08 01 * *    cd $HOME/JOURNALS/MONTHEND/ISO_BILLING/; iso_billing.sh -i 133 >> LOG/iso_billing.log 2>&1
+30 11 01 * *    cd $HOME/AMEX/REPORTS/SALES_PERFORMANCE/; amex_sales_performance.sh >> LOG/amex_sales_performance.log 2>&1
+00 10 20 * *    cd $HOME/JOURNALS/MONTHEND/; PCINonComp.sh >> LOG/PCINonComp.log 2>&1
+00 08 28-31 * * cd $HOME/JOURNALS/MONTHEND/OKDMV; $HOME/lastday.sh okdmv_fee_report_monthend.sh >> LOG/okdmv_fee_report_monthend.log 2>&1
+00 22 28-31 * * cd $HOME/JOURNALS/RISK/INST_processing_volume/; run_inst_processing_vol.sh >> LOG/report.log 2>&1
+
+#                 #
+# ACH PROCESSSING #
+#                 #
+50 09 * * * cd $HOME/ACH/INST_101/; ($HOME/notlastday.sh  && get_ach_file.sh -i 101) >> LOG/ach.log 2>&1
+#RUNDECK#55 09 * * 1-5 cd $HOME/ACH/INST_107/; ($HOME/notlastday.sh && $HOME/bankday.sh -i 107 && get_ach_file.sh -i 107) >> LOG/ach.log 2>&1
+00 10 * * 1-5 cd $HOME/ACH/INST_105/; ($HOME/notlastday.sh && $HOME/bankday.sh -i 105 && get_ach_file.sh) >> LOG/ach.log 2>&1
+#RUNDECK#05 10 * * 1-5 cd $HOME/ACH/INST_121/; ($HOME/notlastday.sh && $HOME/bankday.sh -i 121 && get_ach_file.sh) >> LOG/ach.log 2>&1
+#06 10 * * 1-5 cd $HOME/ACH/INST_122/; ($HOME/notlastday.sh && $HOME/bankday.sh -i 122 && get_ach_file.sh) >> LOG/ach.log 2>&1
+# 06 10 * * 1-5 cd $HOME/ACH; ($HOME/notlastday.sh && $HOME/bankday.sh -i 129 && get_ach_file.sh -i 129) >> INST_129/LOG/ach.log 2>&1
+#RUNDECK#07 10 * * 1-5 cd $HOME/ACH; ($HOME/notlastday.sh && $HOME/bankday.sh -i 130 && get_ach_file.sh -i 130) >> INST_130/LOG/ach.log 2>&1
+#TEMP#08 10 * * 1-5 cd $HOME/ACH; ($HOME/notlastday.sh && $HOME/bankday.sh -i 134 && get_ach_file.sh -i 134) >> INST_134/LOG/ach.log 2>&1
+
+# 10 10 * * 1-5 cd $HOME/ACH; ($HOME/notlastday.sh && $HOME/bankday.sh -i 132 && get_ach_file.sh -i 132) >> INST_132/LOG/ach.log 2>&1
+# 11 10 * * 1-5 cd $HOME/ACH; ($HOME/notlastday.sh && $HOME/bankday.sh -i 133 && get_ach_file.sh -i 133) >> INST_133/LOG/ach.log 2>&1
+
+#00 11 * * 1-5 cd $HOME/ACH_RETURN; $HOME/notlastday.sh $HOME/bankday.sh get_ach_returns.sh >> $HOME/ACH_RETURN/LOG/ach_return_4_1pb.log 2>&1
+30 13 * * * cd $HOME/ACH/INST_101/; ($HOME/notlastday.sh && ach_auto.sh -i 101 -c 52) >> LOG/ach.log 2>&1
+00 10 * * * cd $HOME/ACH/INST_101/; ($HOME/notlastday.sh && ach_auto.sh -i 101 -c 92) >> LOG/ach.log 2>&1
+#RUNDECK#32 13 * * 1-5 cd $HOME/ACH/INST_107/; ($HOME/notlastday.sh && $HOME/bankday.sh -i 107 && ach_auto.sh -i 107 -c 52) >> LOG/ach.log 2>&1
+#RUNDECK#34 13 * * 1-5 cd $HOME/ACH/INST_121/; ($HOME/notlastday.sh && $HOME/bankday.sh -i 121 && ach_auto.sh "52") >> LOG/ach.log 2>&1
+# 36 13 * * 1-5 cd $HOME/ACH; ($HOME/notlastday.sh && $HOME/bankday.sh -i 129 && ach_auto.sh -i 129) >> INST_129/LOG/ach.log 2>&1
+#RUNDECK#38 13 * * 1-5 cd $HOME/ACH; ($HOME/notlastday.sh && $HOME/bankday.sh -i 130 && ach_auto.sh -i 130) >> INST_130/LOG/ach.log 2>&1
+#TEMP#40 13 * * 1-5 cd $HOME/ACH; ($HOME/notlastday.sh && $HOME/bankday.sh -i 134 && ach_auto.sh -i 134) >> INST_134/LOG/ach.log 2>&1
+
+# 38 13 * * 1-5 cd $HOME/ACH; ($HOME/notlastday.sh && $HOME/bankday.sh -i 132 && ach_auto.sh -i 132) >> INST_132/LOG/ach.log 2>&1
+# 40 13 * * 1-5 cd $HOME/ACH; ($HOME/notlastday.sh && $HOME/bankday.sh -i 133 && ach_auto.sh -i 133) >> INST_133/LOG/ach.log 2>&1
+#RUNDECK#35 13 * * * cd $HOME/JOURNALS/INST_121/UPLOAD/; $HOME/notlastday.sh upload_121.sh >> LOG/upload.log 2>&1
+# 45 13 * * * cd $HOME/JOURNALS/INST_122/UPLOAD/; $HOME/notlastday.sh upload_122.sh >> LOG/upload.log 2>&1
+
+15,45 04,06,14,22,23 * * * cd $HOME/ACH_RETURN; recv_ach_return.sh >> LOG/ach_return.log 2>&1
+
+#                                      #
+# MAS GL DATE ADVANCEMENT TO TOMORRROW #
+#                                      #
+10 14 * * * cd $HOME/MAS/; run_mas_cmd.sh 106 101 "all" >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+13 14 * * * cd $HOME/MAS/; run_mas_cmd.sh 106 105 "all" >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#16 14 * * * cd $HOME/MAS/; run_mas_cmd.sh 106 107 "all" >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#19 14 * * * cd $HOME/MAS/; run_mas_cmd.sh 106 121 "all" >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+21 14 * * * cd $HOME/MAS/; run_mas_cmd.sh 106 122 "all" >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+24 14 * * * cd $HOME/MAS/; run_mas_cmd.sh 106 129 "all" >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+#RUNDECK#27 14 * * * cd $HOME/MAS/; run_mas_cmd.sh 106 130 "all" >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+30 14 * * * cd $HOME/MAS/; run_mas_cmd.sh 106 131 "all" >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+33 14 * * * cd $HOME/MAS/; run_mas_cmd.sh 106 132 "all" >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+36 14 * * * cd $HOME/MAS/; run_mas_cmd.sh 106 133 "all" >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+39 14 * * * cd $HOME/MAS/; run_mas_cmd.sh 106 134 "all" >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+42 14 * * * cd $HOME/MAS/; run_mas_cmd.sh 106 811 "all" >> $HOME/MAS/MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+30 15 * * * cd $HOME/GLOBAL_CHECKS/; gl_date_check.sh >> $HOME/GLOBAL_CHECKS/LOG/MAS.CHECKS.CRON.log 2>&1
+
+##################################################################################################################
+# # END OF GL DATE ADVANCEMENT
+##################################################################################################################
+
+00 17 * * * cd $HOME/GLOBAL_CHECKS; check_for_extra_files.sh >> $HOME/GLOBAL_CHECKS/LOG/GLOBAL.cron.log 2>&1
+16 17 * * * $HOME/LOG_BACKUP/log_backup.sh >> $HOME/LOG_BACKUP/LOG/Backup.log 2>&1
+15 22 * * * $HOME/MAS/INST_101/remove_ps_stop.sh >> $HOME/MAS/INST_101/LOG/rmstop.log 2>&1
+#RUNDECK#15 22 * * * cd $HOME/MAS/INST_107/; remove_ps_stop.sh >> $HOME/MAS/INST_107/LOG/rmstop.log 2>&1
+#RUNDECK#15 22 * * * cd $HOME/MAS/INST_121/; remove_ps_stop.sh >> $HOME/MAS/INST_121/LOG/rmstop.log 2>&1
+#18 22 * * * cd $HOME/MAS/INST_122/; remove_ps_stop.sh >> $HOME/MAS/INST_122/LOG/rmstop.log 2>&1
+16 22 * * * $HOME/MAS/remove_ps_stop.sh >> $HOME/MAS/LOG/rmstop.log 2>&1
+30 23 * * * $HOME/reset_task.sh >> $HOME/LOG/resettask.log 2>&1
+
+#             #
+# BIN UPDATES #
+#             #
+###00 14 * * * $HOME/BINUPDATES/run_ipm_file_xfer_bin.sh >> $HOME/BINUPDATES/LOG/binxfer.log 2>&1
+###15 14 * * * $HOME/BINUPDATES/run_visa_file_xfer_bin.sh >> $HOME/BINUPDATES/LOG/binxfer.log 2>&1
+
+#          #
+# BOARDING #
+#          #
+#RB#00 09 * * 1 cd $HOME/BOARDING; merchants_boarded_last_7_days.sh >> $HOME/BOARDING/LOG/boarded_merchants.log 2>&1
+###32 10 * * * cd $HOME/DISCOVER/; discover_registration_dnload.sh >> $HOME/DISCOVER/LOG/regist.log 2>&1
+###34 10 * * * cd $HOME/REGISTRATION/DNLOAD/; disc_mreg_parser.sh >> $HOME/REGISTRATION/LOG/regist.log 2>&1
+
+#        #
+# MERLIN #
+#        #
+###30 09 * * 1-6 $HOME/MERLIN/UPLOAD/merlin_disc_disp_file.sh >> $HOME/MERLIN/LOG/merlin_disc_disp_file.log 2>&1
+###00 11 * * 1 cd $HOME/MERLIN; merlin_boarding_file.sh >> $HOME/MERLIN/LOG/GLOBAL.cron.log 2>&1
+###00 13 * * 1-5 cd $HOME/MERLIN; merchant_credits_for_merlin.sh >> $HOME/MERLIN/LOG/GLOBAL.cron.log 2>&1
+
+#                               #
+# WELLS FARGO FILES AND REPORTS #
+#                               #
+30 13 01 * * cd $HOME/WELLS; wells_fargo_thinfile.sh >> LOG/wells_fargo_thinfile.log 2>&1
+# 30 13 04 * * cd $HOME/WELLS; wells_fargo_send_thinfile.sh >> LOG/wells_fargo_thinfile.log 2>&1
+# 30 16 02 * * cd $HOME/WELLS; wells_liability_report.sh >> LOG/wells_liability_report.log 2>&1
+
+#                      #
+# MONTH END PROCESSING #
+#                      #
+05 00 28-31 * * cd $HOME/MAS; $HOME/lastday.sh mv EOM_HOLD/* MAS_FILES/ >> LOG/eom_file_move.log 2>&1
+#RUNDECK#07 00 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./extra_processing_fees.sh  >> ./LOG/extra_processing_fees.log 2>&1
+09 00 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./all_mas_count_sum_file_v13.sh -i 101 -e clearing@jetpay.com >> ./LOG/all_mas_count_101.log 2>&1
+#RUNDECK#11 00 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./all_mas_count_sum_file_v13.sh -i 107 -e clearing@jetpay.com >> ./LOG/all_mas_count_107.log 2>&1
+13 00 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./all_mas_count_sum_file_v13.sh -i 105 -e clearing@jetpay.com >> ./LOG/all_mas_count_105.log 2>&1
+#RUNDECK#15 00 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./all_mas_count_sum_file_v13.sh -i 121 -e clearing@jetpay.com >> ./LOG/all_mas_count_121.log 2>&1
+# 16 00 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./all_mas_count_sum_file_v13.sh -i 129 -e clearing@jetpay.com >> ./LOG/all_mas_count_130.log 2>&1
+# 17 00 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./all_mas_count_sum_file_v13.sh -i 130 -e clearing@jetpay.com >> ./LOG/all_mas_count_130.log 2>&1
+# 18 00 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./all_mas_count_sum_file_v13.sh -i 134 -e clearing@jetpay.com >> ./LOG/all_mas_count_130.log 2>&1
+# 21 00 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./all_mas_count_sum_file_v13.sh -i 132 -e clearing@jetpay.com >> ./LOG/all_mas_count_132.log 2>&1
+# 22 00 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./all_mas_count_sum_file_v13.sh -i 133 -e clearing@jetpay.com >> ./LOG/all_mas_count_133.log 2>&1
+#19 00 28-31 * * cd $HOME/MAS; $HOME/lastday.sh run_all_send_mas_files_to_mas_eom.sh >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+32 00 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./all_mas_count_sum_file_v13.sh -i 811 -e clearing@jetpay.com >> ./LOG/all_mas_count_811.log 2>&1
+35 00 28-31 * * cd $HOME/MAS; $HOME/lastday.sh prepare_downgrade_files.sh -i ALL >> LOG/downgrade.log 2>&1
+#RUNDECK#55 04 28-31 * * cd $HOME/MAS; ($HOME/lastday.sh && mas_files_in.sh -c FANF && fanf_staging.sh && fanf_processing.sh -i ALL -e clearing@jetpay.com) >> ./LOG/fanf.log 2>&1
+20 04 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./all_mas_count_sum_file_v13.sh -i US -f INTERVERI -e clearing@jetpay.com >> ./LOG/all_mas_count_INTERVERI.log 2>&1
+# 30 04 28-31 * * cd $HOME/MAS; ($HOME/lastday.sh && mas_files_in.sh -i 132 && extra_processing_fees.sh -i 132 -f CANADA_TAX ) >> ./LOG/all_mas_count_132.log 2>&1
+# 32 04 28-31 * * cd $HOME/MAS; ($HOME/lastday.sh && mas_files_in.sh -i 133 && extra_processing_fees.sh -i 133 -f CANADA_TAX ) >> ./LOG/all_mas_count_133.log 2>&1
+05 05 28-31 * * cd $HOME/MAS; ($HOME/lastday.sh && mas_files_in.sh -c FANF && extra_processing_fees.sh -i US -f MNTHLY_DISC ) >> ./LOG/extra_processing_fees.log 2>&1
+40 01 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./pass_through_fees.sh  -i 101 -c AUTH >> ./LOG/pass_through_fees.log 2>&1
+43 01 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./pass_through_fees.sh  -i 105 -c AUTH >> ./LOG/pass_through_fees.log 2>&1
+#RUNDECK#47 01 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./pass_through_fees.sh  -i 107 -c AUTH >> ./LOG/pass_through_fees.log 2>&1
+#RUNDECK#49 01 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./pass_through_fees.sh  -i 121 -c AUTH >> ./LOG/pass_through_fees.log 2>&1
+40 12 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./pass_through_fees.sh  -i 101 -c PORT >> ./LOG/pass_through_fees.log 2>&1
+43 12 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./pass_through_fees.sh  -i 105 -c PORT >> ./LOG/pass_through_fees.log 2>&1
+#RUNDECK#47 12 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./pass_through_fees.sh  -i 107 -c PORT >> ./LOG/pass_through_fees.log 2>&1
+#RUNDECK#49 12 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./pass_through_fees.sh  -i 121 -c PORT >> ./LOG/pass_through_fees.log 2>&1
+40 04 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./pass_through_fees.sh  -i 101 -c CLR >> ./LOG/pass_through_fees.log 2>&1
+43 04 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./pass_through_fees.sh  -i 105 -c CLR >> ./LOG/pass_through_fees.log 2>&1
+#RUNDECK#47 04 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./pass_through_fees.sh  -i 107 -c CLR >> ./LOG/pass_through_fees.log 2>&1
+#RUNDECK#49 04 28-31 * * cd $HOME/MAS; $HOME/lastday.sh ./pass_through_fees.sh  -i 121 -c CLR >> ./LOG/pass_through_fees.log 2>&1
+#45 04 28-31 * * cd $HOME/MAS; $HOME/lastday.sh run_all_send_mas_files_to_mas_eom.sh >> MULTI/LOG/MAS.MULTI.CRON.log 2>&1
+
+#                      #
+# MONTH END REPORTING  #
+#                      #
+# 40 10 01 * *    cd $HOME/JOURNALS/MONTHEND/; create_conv_residuals.sh  "M"      >> LOG/conv_residuals.log 2>&1
+# 00 11 01 * *    cd $HOME/JOURNALS/MONTHEND/; auth_settle_counts_monthend.sh INST_129 >> LOG/auth_settle_counts.log 2>&1
+#RUNDECK#20 11 01 * *    cd $HOME/JOURNALS/MONTHEND/; auth_settle_counts_monthend.sh INST_130 >> LOG/auth_settle_counts.log 2>&1
+40 11 01 * *    cd $HOME/JOURNALS/MONTHEND/; auth_settle_counts_monthend.sh INST_134 >> LOG/auth_settle_counts.log 2>&1
+42 11 01 * *    cd $HOME/JOURNALS/MONTHEND/; auth_settle_counts_monthend.sh INST_122 >> LOG/auth_settle_counts.log 2>&1
+# 44 11 01 * *    cd $HOME/JOURNALS/MONTHEND/; auth_settle_counts_monthend.sh INST_132 >> LOG/auth_settle_counts.log 2>&1
+# 46 11 01 * *    cd $HOME/JOURNALS/MONTHEND/; auth_settle_counts_monthend.sh INST_133 >> LOG/auth_settle_counts.log 2>&1
+00 12 01 * *    cd $HOME/JOURNALS/MONTHEND/; gen_fanf_monthly_report.sh     >> LOG/fanf_check.log 2>&1
+10 12 01 * *    cd $HOME/JOURNALS/MONTHEND/; fee_collected_monthend.sh 101  >> LOG/fees_collected.log 2>&1
+#RUNDECK#20 12 01 * *    cd $HOME/JOURNALS/MONTHEND/; fee_collected_monthend.sh 107  >> LOG/fees_collected.log 2>&1
+40 12 01 * *    cd $HOME/JOURNALS/MONTHEND/; chargeback_monthend.sh IDM 101 >> LOG/chargeback.log 2>&1
+#RUNDECK#00 13 01 * *    cd $HOME/JOURNALS/MONTHEND/; chargeback_monthend.sh IDM 107 >> LOG/chargeback.log 2>&1
+#RUNDECK#20 13 01 * *    cd $HOME/JOURNALS/MONTHEND/; chargeback_monthend.sh IDM 121 >> LOG/chargeback.log 2>&1
+# 22 13 01 * *    cd $HOME/JOURNALS/MONTHEND/; chargeback_monthend.sh IDM 129 >> LOG/chargeback.log 2>&1
+# 24 13 01 * *    cd $HOME/JOURNALS/MONTHEND/; chargeback_monthend.sh IDM 130 >> LOG/chargeback.log 2>&1
+# 26 13 01 * *    cd $HOME/JOURNALS/MONTHEND/; chargeback_monthend.sh IDM 134 >> LOG/chargeback.log 2>&1
+28 13 01 * *    cd $HOME/JOURNALS/MONTHEND/; chargeback_monthend.sh IDM 122 >> LOG/chargeback.log 2>&1
+# 30 13 01 * *    cd $HOME/JOURNALS/MONTHEND/; chargeback_monthend.sh IDM 132 >> LOG/chargeback.log 2>&1
+# 32 13 01 * *    cd $HOME/JOURNALS/MONTHEND/; chargeback_monthend.sh IDM 133 >> LOG/chargeback.log 2>&1
+# 40 13 01 * *    cd $HOME/JOURNALS/MONTHEND/; visa_fees_collect_monthend.sh 101 >> LOG/visa_fees_collected.log 2>&1
+# 00 14 01 * *    cd $HOME/JOURNALS/MONTHEND/; visa_fees_collect_monthend.sh 105 >> LOG/visa_fees_collected.log 2>&1
+# 20 14 01 * *    cd $HOME/JOURNALS/MONTHEND/; visa_fees_collect_monthend.sh 107 >> LOG/visa_fees_collected.log 2>&1
+# 40 14 01 * *    cd $HOME/JOURNALS/MONTHEND/; visa_fees_collect_monthend.sh 117 >> LOG/visa_fees_collected.log 2>&1
+# 00 15 01 * *    cd $HOME/JOURNALS/MONTHEND/; visa_fees_collect_monthend.sh 121 >> LOG/visa_fees_collected.log 2>&1
+# 05 15 01 * *    cd $HOME/JOURNALS/MONTHEND/; visa_fees_collect_monthend.sh 122 >> LOG/visa_fees_collected.log 2>&1
+# 10 15 01 * *    cd $HOME/JOURNALS/MONTHEND/; visa_fees_collect_monthend.sh 132 >> LOG/visa_fees_collected.log 2>&1
+# 15 15 01 * *    cd $HOME/JOURNALS/MONTHEND/; visa_fees_collect_monthend.sh 133 >> LOG/visa_fees_collected.log 2>&1
+20 15 01 * *    cd $HOME/JOURNALS/MONTHEND/; icare_monthend.sh              >> LOG/icare_monthend.log 2>&1
+40 15 01 * *    cd $HOME/JOURNALS/MONTHEND/; wepay_monthend.sh              >> LOG/wepay_monthend.log 2>&1
+# 00 16 01 * *    cd $HOME/JOURNALS/MONTHEND/; esquire_monthend.sh 121        >> LOG/esquire_monthend.log 2>&1
+20 16 01 * *    cd $HOME/JOURNALS/MONTHEND/; convchg_monthend.sh            >> LOG/convchg_monthend.log 2>&1
+00 12 03 * *    cd $HOME/JOURNALS/MONTHEND/; chargeback_monthend.sh MTL 101 >> LOG/chargeback.log 2>&1
+#RUNDECK#20 12 03 * *    cd $HOME/JOURNALS/MONTHEND/; chargeback_monthend.sh MTL 107 >> LOG/chargeback.log 2>&1
+#RUNDECK#40 12 03 * *    cd $HOME/JOURNALS/MONTHEND/; chargeback_monthend.sh MTL 121 >> LOG/chargeback.log 2>&1
+#50 12 03 * *    cd $HOME/JOURNALS/MONTHEND/; chargeback_monthend.sh MTL 122 >> LOG/chargeback.log 2>&1
+# 46 12 03 * *    cd $HOME/JOURNALS/MONTHEND/; chargeback_monthend.sh MTL 132 >> LOG/chargeback.log 2>&1
+# 49 12 03 * *    cd $HOME/JOURNALS/MONTHEND/; chargeback_monthend.sh MTL 133 >> LOG/chargeback.log 2>&1
+
+55 08 * * * cd $HOME/JOURNALS/DAILY/TEMP; daily_ichg_acct.sh >> LOG/daily_ichg_acct.log 2>&1

@@ -1,0 +1,38 @@
+
+phy_format = offset
+error_handler = mas_error_handler
+
+MSG detail
+{
+ trans_type                   0       0     2    alpha    -        - O -
+ institution_id               0       2     1    alpha    -        - O -
+ entity_id                    0       3    18    alpha    -        - O -
+ entity_level                 0      21     1    alpha    -        - O -
+ payment_effect_dt            0      22     8    date   YYYYMMDD   - O -
+ entity_acct_id               0      30    12    number   -        - O -
+ payment_method_cd            0      42     1    alpha    -        - O -
+ payment_seq_nbr              0      43    12    number   -        - O -
+ link_pay_seq_flag            0      55     1    alpha 	  -        - O -
+ payment_proc_dt              0      56    12    alpha    -        - O -
+ payment_amt                  0      68    19    number   7        - O -
+ payment_run                  0      87     3    number   -        - O -
+ trans_routing_nbr            0      90    12    alpha    -        - O -
+ acct_nbr                     0     102    25    alpha    -        - O -
+ dda_changed                  0     127     1    alpha    -        - O -
+ gl_date                      0     128     8    alpha    -        - O -
+ filler                       0     136    11    alpha    -        - O -
+}
+MSG FileHeader 
+{
+ trans_type                   0       0     2    alpha    -        - O -
+ file_type                    0       2     2    alpha    -        - O -
+ activity_date_time           0       4    16    alpha    -        - O -
+ activity_source              0      20    16    alpha    -        - O -
+ activity_job_name            0      36     8    alpha    -        - O -
+}
+MSG FileTrailer
+{
+ trans_type                   0       0     2    alpha    -        - O -
+ record_cnt                   0       2    10    number   -        - O -
+ file_total                   0      12    19    number   7        - O -
+}

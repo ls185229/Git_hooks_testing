@@ -1,32 +1,17 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+PROD
+QA
+__pycache__
+.vscode
+JETPY-5000-0001-AN12345-13288134924.zip
+JETPY-5000-0001-AN12345-13291094009.zip
+JETPY-5000-0003-AN12345-13296092612.zip
+JETPY-5000-0001-AN12345-13287122059.zip
+LOG
+/filemgr/linux/REPORTS/DAILY/Leonard
+filemgr/linux/.profile_filemgr_linux
+filemgr/linux/clearing-filemgr_profile
+*.pyc
+*.xls
+*.xlsx
+pylint*txt
+*.orig

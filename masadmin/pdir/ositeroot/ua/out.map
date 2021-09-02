@@ -1,0 +1,64 @@
+MAP file_header   : OASIS-OASIS-OutFH <> FileHeader 
+{
+ "FH"           					trans_type
+ "54"          						file_type
+ OutFH.activity_date_time    		activity_date_time
+ "MAS"               				activity_source					 
+ "OUTBOUND"            				activity_job_name
+ OutFH.payment_run     				payment_run
+}
+
+MAP detail: OASIS-OASIS-OutTxn <> detail 
+{
+ "01"           					trans_type
+ OutTxn.institution_id              institution_id
+ OutTxn.tid                         tid 
+ OutTxn.tid_settl_method			tid_settl_method
+ OutTxn.mas_code                    mas_code 
+ OutTxn.card_scheme                 card_scheme 
+ OutTxn.amt_original                amt_original 
+ OutTxn.curr_cd_original            curr_cd_original 
+ OutTxn.nbr_of_items                nbr_of_items 
+ OutTxn.entity_id                   entity_id 
+ OutTxn.add_amt1                    add_amt1 
+ OutTxn.add_cnt1                    add_cnt1 
+ OutTxn.add_amt2                    add_amt2 
+ OutTxn.add_cnt2                    add_cnt2 
+ OutTxn.activity_date_time          activity_date_time 
+ OutTxn.amt_billing                 amt_billing 
+ OutTxn.curr_billing               	curr_billing 
+ OutTxn.priced_date_time            priced_date_time
+ OutTxn.date_to_settle              date_to_settle 
+ OutTxn.curr_rate                   curr_rate
+ OutTxn.settl_flag                  settl_flag 
+ OutTxn.posting_entity_id           posting_entity_id 
+ OutTxn.percent_amt                 percent_amt
+ OutTxn.per_item_amt                per_item_amt
+ OutTxn.percent_rate                percent_rate
+ OutTxn.per_item_rate               per_item_rate 
+ OutTxn.fee_pkg_id                  fee_pkg_id
+ OutTxn.fee_grp_id                  fee_grp_id
+ OutTxn.external_trans_nbr          external_trans_nbr
+ OutTxn.invoice_nbr                 invoice_nbr 
+ OutTxn.payment_term                payment_term 
+ OutTxn.cheque_nbr                  cheque_nbr 
+ OutTxn.trans_routing_nbr           trans_routing_nbr 
+ OutTxn.mas_code_downgrade          mas_code_downgrade 
+ OutTxn.expected_mas_code           expected_mas_code 
+ OutTxn.trans_description           trans_description
+ OutTxn.reversal_ind                reversal_ind  
+ OutTxn.unapplied_cash				unapplied_cash
+ OutTxn.payment_seq_nbr             payment_seq_nbr 
+ OutTxn.payment_effect_date			payment_effect_date
+ OutTxn.gl_date						gl_date
+ OutTxn.entity_level				entity_level
+ OutTxn.settl_freq  				settl_freq  
+ " "        						unused
+}
+
+MAP file_trailer  : OASIS-OASIS-OutFT <> FileTrailer 
+{
+ "FT"          						trans_type
+ OutFT.record_cnt					record_cnt
+}
+

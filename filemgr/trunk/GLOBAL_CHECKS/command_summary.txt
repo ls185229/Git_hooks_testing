@@ -1,0 +1,16 @@
+# Merrick upload file check
+# We send files to Merrick bank each workday, and sometimes extra files make it into the upload folders (on purpose or by design).  
+# This quick script checks the contents of the upload folders before the upload time and then after the upload time to catch any 
+# files that may have unintentionally been left behind. 
+00 12 * * 1-5 cd /clearing/filemgr/GLOBAL_CHECKS; check_merrick_upload_files.sh >> LOG/MERRICK.FILEUPLOADCHECK.log
+
+# Check after uploads happen
+00 13 * * 1-5 cd /clearing/filemgr/GLOBAL_CHECKS; check_merrick_upload_files.sh >> LOG/MERRICK.FILEUPLOADCHECK.log
+
+
+00 12 * * 1-5 cd /clearing/filemgr/GLOBAL_CHECKS; check_susquehanna_upload_files.sh >> LOG/SUSQUEHANNA.FILEUPLOADCHECK.log
+
+# Check after uploads happen
+00 13 * * 1-5 cd /clearing/filemgr/GLOBAL_CHECKS; check_susquehanna_upload_files.sh >> LOG/SUSQUEHANNA.FILEUPLOADCHECK.log 
+
+

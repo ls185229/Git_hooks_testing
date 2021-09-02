@@ -1,0 +1,17 @@
+Usage: ./merrick_dda_report.tcl
+          --date_offset X                OPTIONAL.  Defaults to 0, which means current day.
+                                         Needs to be a whole number <= 0 specifying how many days ago to report on.
+          --debug [0|1]                  OPTIONAL.  Defaults to 0. 1 sets debug logging on.
+          --help                         OPTIONAL.  Prints this message and exits with an exit code of 0.
+
+
+REM to run from cron (runs for today):
+30 13 * * * cd /clearing/filemgr/JOURNALS/MERRICK; merrick_dda_report.sh >> /clearing/filemgr/JOURNALS/MERRICK/LOG/MERRICK.DDA.REPORT.RUN.log 2>&1
+
+REM to run manually for a different day:
+REM 1 day ago
+merrick_dda_report.sh -1 >> /clearing/filemgr/JOURNALS/MERRICK/LOG/MERRICK.DDA.REPORT.RUN.log 2>&1
+
+
+REM 2 days ago
+merrick_dda_report.sh -2 >> /clearing/filemgr/JOURNALS/MERRICK/LOG/MERRICK.DDA.REPORT.RUN.log 2>&1

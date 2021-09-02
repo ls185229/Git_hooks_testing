@@ -1,0 +1,18 @@
+#!/usr/bin/env python3
+
+# $Id: eom_ach 3234 2015-08-11 14:54:07Z bjones $
+
+( eom_ach
+  If bank_day and last_day
+    Return true
+  if not bank_day
+    Return false
+  If dayofmonth > 7
+    Return false
+  For day  = 1 to dayofmonth - 1
+    If bank_day( day )
+      Return false
+
+  Return true
+
+)

@@ -1,0 +1,46 @@
+INST       ENTITY_ID                             LVL ENTITY_DBA_NAME                                    SETTL_PLAN_ID
+---------- ------------------------------ ---------- -------------------------------------------------- -------------
+107        454045421660001                        70 JEFFERY BUSCH DDS INC                                      53628
+107        454045421660010                        70 DENTAL HEALTH CENTER                                       53646
+107        454045421660240                        70 STRAX REJUVENATION                                         53974
+107        454045421660620                        70 A BRITER SMILE DENTAL GROUP                                54645
+107        454045421660621                        70 A NEW SMILE DENTAL GROUP                                   54646
+107        454045421660622                        70 STRAX REJUVENATION II                                      54647
+107        454045421660623                        70 THREE RIVERS DENTAL                                        54692
+107        454045421660624                        70 QUALITY TRANSMISSIONS                                      54726
+107        454045421660625                        70 THE MACKIE CLINIC                                          54719
+107        454045421660626                        70 ORSATTI DENTAL GROUP                                       54723
+107        454045421660627                        70 COSMETIC  ADVANCED DENTISTRY                               54722
+107        454045421660628                        70 VIVA MD                                                    54745
+107        454045421660629                        70 AAMCO TRANSMISSION AND AUTO CARE- NEW BRUNSWICK            54751
+
+ 13 rows selected
+
+13 rows updated.
+INST       ENTITY_ID                             LVL ENTITY_DBA_NAME                                    SETTL_PLAN_ID
+---------- ------------------------------ ---------- -------------------------------------------------- -------------
+107        454045421660001                        70 JEFFERY BUSCH DDS INC                                         15
+107        454045421660010                        70 DENTAL HEALTH CENTER                                          15
+107        454045421660240                        70 STRAX REJUVENATION                                            15
+107        454045421660620                        70 A BRITER SMILE DENTAL GROUP                                   15
+107        454045421660621                        70 A NEW SMILE DENTAL GROUP                                      15
+107        454045421660622                        70 STRAX REJUVENATION II                                         15
+107        454045421660623                        70 THREE RIVERS DENTAL                                           15
+107        454045421660624                        70 QUALITY TRANSMISSIONS                                         15
+107        454045421660625                        70 THE MACKIE CLINIC                                             15
+107        454045421660626                        70 ORSATTI DENTAL GROUP                                          15
+107        454045421660627                        70 COSMETIC  ADVANCED DENTISTRY                                  15
+107        454045421660628                        70 VIVA MD                                                       15
+107        454045421660629                        70 AAMCO TRANSMISSION AND AUTO CARE- NEW BRUNSWICK               15
+
+ 13 rows selected
+
+
+    merch_list="454045421660001 454045421660010 454045421660240 454045421660620 454045421660621 \
+                454045421660622 454045421660623 454045421660624 454045421660625 454045421660626 \
+                454045421660627 454045421660628 454045421660629"
+
+    '454045421660001', '454045421660010', '454045421660240', '454045421660620',
+    '454045421660621', '454045421660622', '454045421660623', '454045421660624',
+    '454045421660625', '454045421660626', '454045421660627', '454045421660628',
+    '454045421660629'

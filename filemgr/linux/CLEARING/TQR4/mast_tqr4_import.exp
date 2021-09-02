@@ -1,0 +1,111 @@
+#!/bin/expect
+#/clearing/filemgr/.profile
+
+################################################################################
+# $Id: $
+# $Rev: $
+################################################################################
+#
+# File Name:  mast_tqr4_import.exp
+#
+# Description:  This script retrieves the MasterCard TQR4 files from the Windows
+#               edit workstation.
+#
+# Script Arguments:  None.
+#
+# Output:  None.
+#
+# Return:   0 = Success
+#          !0 = Exit with errors
+#
+# Notes:  None.
+#
+################################################################################
+
+#System variables
+#set box $env(SYS_BOX)
+#set sysinfo "System: $box\n Location: $env(PWD) \n\n"
+
+#Global variables
+global argv
+set curdate [clock seconds]
+set run_date [clock format $curdate -format "%Y%m%d"]
+set run_time [clock format $curdate -format "%H%M%S"]
+set IP_ADDR $env(MAST_EDIT_HOST)
+set USERNAME $env(MAST_EDIT_USERNAME)
+set PASSWORD $env(MAST_EDIT_PASSWORD)
+
+
+################################################################################
+#
+# Procedure Name:  bailout
+#
+# Description:     Exit the application due to error
+# Error Return:    1 [Script error]
+#
+################################################################################
+proc bailout {error_code} {
+
+    send "bye\r"
+    expect {
+        "221 Session terminated" {exec sleep 2; exit $error_code}
+        timeout                  {exit 99}
+    }
+    set return_code 0
+    exit $return_code
+
+};# end bailout
+
+##########
+## MAIN ##
+##########
+send_user "______________________________________________________________ \n"
+send_user "$run_date $run_time Beginning MasterCard TQR4 file download(s) \n"
+
+set timeout 300
+spawn ftp $IP_ADDR 8021
+set timeout 30
+set return_code 0
+
+#
+# Connect to the transfer box
+#
+while 1 { expect {
+    "Name*:"        {send "$USERNAME\r"}
+    "*rd:"          {send "$PASSWORD\r"}
+    "*ftp>"         {send_user "$run_date $run_time Logon to transfer box \n";sleep 2; break}
+    timeout         {send_user "$run_date $run_time Logon to transfer box timed out \n"; bailout 1}
+}}
+
+#
+# Download the BIN file
+#
+# C:\MCONLINE\MFE\DOWNLOAD
+send "cd /MCONLINE/MFE/DOWNLOAD \r"
+
+while 1 { expect {
+    "*ftp>"         {send_user "$run_date $run_time Directory changed to /MCONLINE/MFE/DOWNLOAD \n";sleep 2; break}
+    timeout         {send_user "$run_date $run_time Directory change to /MCONLINE/MFE/DOWNLOAD timed out \n"; bailout 2}
+}}
+
+send "binary \r"
+while 1 { expect {
+    "*ftp>"         {send_user "$run_date $run_time Change to binary mode \n";sleep 2; break}
+    timeout         {send_user "$run_date $run_time Change to binary mode timed out \n"; bailout 2}
+}}
+
+set timeout 30
+send "mget TTQR4T0.* \r"
+while 1 { expect {
+    "*ftp>"         {send_user "$run_date $run_time MasterCard TQR4 file(s) downloaded \n";sleep 2; break}
+    "mget*\?"       {send "y\r";sleep 2}
+    timeout         {send_user "$run_date $run_time MasterCard TQR4 file(s) download timed out \n"; bailout 2}
+}}
+
+send_user "$run_date $run_time Logoff from transfer box \n"
+send "quit\r"
+send_user "$run_date $run_time Ending MasterCard TQR4 file download \n"
+send_user "$run_date $run_time MasterCard TQR4 file retrieval process is complete \n"
+send_user "\n"
+
+exit $return_code

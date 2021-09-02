@@ -1,0 +1,50 @@
+
+phy_format = offset
+
+error_handler = mas_error_handler
+
+MSG detail
+{
+ bank_name		              0       0    30    alpha    -        - O -
+ city			              0      30    20    alpha    -        - O -
+ state			              0      50    20    alpha    -        - O -
+ trans_routing_nbr            0      70    20    alpha    -        - O -
+ dda			              0      90    19    alpha    -        - O -
+ next_line		              0     109     1    alpha    -        - O -
+ merchant_name                0     110    30    alpha    -        - O -
+ merchant_number              0     140    20    alpha    -        - O -
+ processing_date              0     160    20    alpha    -        - O -
+ deposit_amt                  0     180    20    alpha    -        - O -
+ payment_seq_nbr              0     200    20    alpha    -        - O -
+ divider_line                 0     220   110    alpha    -        - O -
+}
+MSG FileHeader
+{
+ header                       0       0    12    alpha    -        - O -
+ day_of_week                  0      12    11    alpha    -        - O -
+ sys_date                     0      23    18    alpha	  -        - O -
+ blank_line                   0      41     2    alpha    -        - O -
+ column1_1                    0      43    30    alpha    -        - O -
+ column1_2                    0      73    20    alpha    -        - O -
+ column1_3                    0      93    20    alpha    -        - O -
+ column1_4                    0     113    20    alpha    -        - O -
+ column1_5                    0     133    20    alpha    -        - O -
+ column2_1                    0     153    30    alpha    -        - O -
+ column2_2                    0     183    20    alpha    -        - O -
+ column2_3                    0     203    20    alpha    -        - O -
+ column2_4                    0     223    20    alpha    -        - O -
+ column2_5                    0     243    20    alpha    -        - O -
+}
+MSG FileTrailer
+{
+ spaces                       0       0    50    alpha    -        - O -
+ footer                       0      50    20    alpha    -        - O -
+ total_amt                    0      70    20    alpha    -        - O -
+}
+MSG BatchHeader
+{
+}
+MSG BatchTrailer
+{
+}
+

@@ -1,0 +1,37 @@
+
+# $Id: notes.txt 4719 2018-09-27 20:22:24Z bjones $
+
+1) After conversion to wells fargo, there is no credit/debit split up
+   so while converting to python  We can use the bmo code and enhance it
+   to support "FIRST PREMIER" ACH.
+
+2) Try to use map file in masadmin to have alll the configurations stuff.
+
+3) Combine the Canadian & US under one script. canadian ACH doesnt have clr_dump
+
+4) Modify fax form to have total along with credit & debit.
+
+5) If possible modify to look the count & amount similar BMO acknowledgment file.
+
+6) Python library for NACHA file specifications.
+
+Possible features for an ach / eft process:
+
+    split debit and credit lines into two files
+
+    generate an eft file from the ach file
+
+    block the ach file with lines of all 9s to a modulus of 10
+
+    balance the ach file (e.g., inst 121) with
+        one additional batch using our settlement account with
+            total debit for all credits and
+            total credit for all debits.
+
+    encrypt the resulting file(s)
+
+    upload has test location (use while tesing)
+
+    upload has no test location (use test stub routine while testing)
+
+    balancing credit or debit entry in last batch (1st Premier)

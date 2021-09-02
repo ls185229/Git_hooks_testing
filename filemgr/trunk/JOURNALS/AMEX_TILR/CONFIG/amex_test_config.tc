@@ -1,0 +1,13 @@
+#$Id: $
+###############################################################################################################################
+#Inst # Bins # UPLOAD_path # Archive_path # filename#
+###############################################################################################################################
+CLR_DB_LOGON,masclr/masclr
+101    ,2423794601              , /clearing/filemgr/JOURNALS/AMEX_TILR/,                              , 101.AMEX.TILR.REPORT.yyyymmdd.csv
+107    ,2423794213              , /clearing/filemgr/JOURNALS/AMEX_TILR/,                              , 107.AMEX.TILR.REPORT.yyyymmdd.csv
+105    ,2423794387              , /clearing/filemgr/JOURNALS/AMEX_TILR/,                              , 105.AMEX.TILR.REPORT.yyyymmdd.csv
+117    ,2423793603              , /clearing/filemgr/JOURNALS/AMEX_TILR/,                              , 117.AMEX.TILR.REPORT.yyyymmdd.csv
+121    ,2423792589              , /clearing/filemgr/JOURNALS/AMEX_TILR/,                              , 121.AMEX.TILR.REPORT.yyyymmdd.csv
+122    ,2423792258              , /clearing/filemgr/JOURNALS/AMEX_TILR/,                              , 122.AMEX.TILR.REPORT.yyyymmdd.csv
+000    ,0000000000              , /clearing/filemgr/JOURNALS/AMEX_TILR/,                              , 000.AMEX.TILR.REPORT.yyyymmdd.csv
+

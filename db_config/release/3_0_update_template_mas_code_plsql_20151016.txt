@@ -1,0 +1,70 @@
+anonymous block completed
+ 
+Database:AUTHQA at:2015-10-16 12:02:31
+Usage:CHECK_CARD_DISCOUNT rows to add: 30
+Usage:TFOCUSPAY_DISCOUNT rows to add: 30
+Usage:REVTRAK_DISCOUNT rows to add: 30
+Usage:DEFAULT_DISCOUNT rows to add: 0
+Usage:JP_MOBILE_DISCOUNT rows to add: 30
+Usage:NETSECURE_DISCOUNT rows to add: 30
+Usage:INTERCHANGE rows to add: 0
+Usage / Card rows:7 rows added:150
+Database:AUTHQA at:2015-10-16 12:02:31
+ 
+
+anonymous block completed
+ 
+Database:AUTHQA at:2015-10-16 12:02:34
+Usage:CHECK_CARD_DISCOUNT rows to add: 0
+Usage:TFOCUSPAY_DISCOUNT rows to add: 0
+Usage:REVTRAK_DISCOUNT rows to add: 0
+Usage:DEFAULT_DISCOUNT rows to add: 0
+Usage:JP_MOBILE_DISCOUNT rows to add: 0
+Usage:NETSECURE_DISCOUNT rows to add: 0
+Usage:INTERCHANGE rows to add: 0
+Usage / Card rows:7 rows added:0
+Database:AUTHQA at:2015-10-16 12:02:34
+ 
+
+anonymous block completed
+ 
+Database:CLEAR1 at:2015-10-16 12:02:45
+Usage:TFOCUSPAY_DISCOUNT rows to add: 37
+Usage:CHECK_CARD_DISCOUNT rows to add: 37
+Usage:REVTRAK_DISCOUNT rows to add: 37
+Usage:JP_MOBILE_DISCOUNT rows to add: 37
+Usage:DEFAULT_DISCOUNT rows to add: 0
+Usage:NETSECURE_DISCOUNT rows to add: 37
+Usage:INTERCHANGE rows to add: 0
+Usage / Card rows:7 rows added:185
+Database:CLEAR1 at:2015-10-16 12:02:45
+ 
+
+anonymous block completed
+ 
+Database:CLEAR1 at:2015-10-16 12:02:47
+Usage:TFOCUSPAY_DISCOUNT rows to add: 0
+Usage:CHECK_CARD_DISCOUNT rows to add: 0
+Usage:REVTRAK_DISCOUNT rows to add: 0
+Usage:JP_MOBILE_DISCOUNT rows to add: 0
+Usage:DEFAULT_DISCOUNT rows to add: 0
+Usage:NETSECURE_DISCOUNT rows to add: 0
+Usage:INTERCHANGE rows to add: 0
+Usage / Card rows:7 rows added:0
+Database:CLEAR1 at:2015-10-16 12:02:47
+ 
+
+anonymous block completed
+ 
+Database:AUTHQA at:2015-10-16 12:09:38
+Usage:CHECK_CARD_DISCOUNT rows to add: 0
+Usage:TFOCUSPAY_DISCOUNT rows to add: 0
+Usage:REVTRAK_DISCOUNT rows to add: 0
+Usage:DEFAULT_DISCOUNT rows to add: 0
+Usage:JP_MOBILE_DISCOUNT rows to add: 0
+Usage:NETSECURE_DISCOUNT rows to add: 0
+Usage:INTERCHANGE rows to add: 0
+Usage / Card rows:7 rows added:0
+Database:AUTHQA at:2015-10-16 12:09:38
+ 
+

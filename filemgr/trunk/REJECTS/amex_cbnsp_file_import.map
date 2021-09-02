@@ -1,0 +1,62 @@
+A01	The amount of the Authorization Approval was less than the amount of the Charge submitted.	CB1	010103015101	CR2	010103015201
+A02	The Charge submitted did not receive a valid Authorization Approval; it was declined or the Card was expired. or the Cardmember denies participation in Charge submitted and proof that the Cardmemeber participated in the Charge was not provided.	CB1	010103015101	CR2	010103015201
+A08	The Charge was submitted after the Authorization Approval expired.	CB1	010103015101	CR2	010103015201
+C02	AMEX has not received the Credit (or partial Credit) to apply to the Card.	CB1	010103015101	CR2	010103015201
+C04	The goods or services were returned or refused but the Cardmember did not receive Credit.	CB1	010103015101	CR2	010103015201
+C05	The Cardmember claims that the goods/services ordered were cancelled.	CB1	010103015101	CR2	010103015201
+C08	The Cardmember claims to have not received (or only partially received) the goods/services.	CB1	010103015101	CR2	010103015201
+C14	The Cardmember has provided AMEX with proof of payment by another method.	CB1	010103015101	CR2	010103015201
+C18	The Cardmember claims to have cancelled a lodging reservation or a Credit for a CARDeposit Charge was not received by the Cardmember.	CB1	010103015101	CR2	010103015201
+C28	Cardmember claims to have cancelled or attempted to cancel Recurring Billing Charges for goods or services. Please discontinue all future billing for this Recurring Billing Charge.	CB1	010103015101	CR2	010103015201
+C31	The Cardmember claims to have received goods/services that are different than the written description provided at the time of the Charge.	CB1	010103015101	CR2	010103015201
+C32	The Cardmember claims to have received damaged or defective goods/services.	CB1	010103015101	CR2	010103015201
+F10	The Cardmember claims they did not participate in this Charge that was not processed using Magnetic Stripe or Chip Card Data and a copy of an imprint of the Card has not been provided.	CB1	010103015101	CR2	010103015201
+F14	The Cardmember claims they did not participate in this Charge and a copy of the Cardmember''s signature to support the Charge has not been provided.	CB1	010103015101	CR2	010103015201
+F22	The Cardmember denies participation in the Charge submitted and the Card was expired or was not yet valid when the Charge was processed.	CB1	010103015101	CR2	010103015201
+F24	The Cardmember denies participation in the Charge submitted and the merchant has failed to provide proof that the Cardmember participated in the Charge.	CB1	010103015101	CR2	010103015201
+F29	The Cardmember denies participation in a mail order, telephone order, application-initiated or internet Charge.	CB1	010103015101	CR2	010103015201
+F30	Card Member denies participation in the Charge and a counterfeit ChipCard was used at a POSSystem where the Trans wasnt processed as a ChipCard Trans because either the POSSystem wasnt an Enabled Chip and PIN POSSystem or the trans was manually keyed.	CB1	010103015101	CR2	010103015201
+F31	Card Member denies participation in the Charge and ChipCard with PIN capabilities was lost/stolen/non-received and was used at a POSSystem where the Trans wasnt processed as a Chip Card Transaction with PIN validation.	CB1	010103015101	CR2	010103015201
+FR2	The Cardmember denies authorizing the Charge and the Establishment has been placed in the Fraud Full Recourse Program.	CB1	010103015101	CR2	010103015201
+FR4	The Cardmember has disputed the Charge and it has been placed in the Immediate Chargeback Program.	CB1	010103015101	CR2	010103015201
+FR5	The acnt is on the Immediate CB program. Under this, disputed chrgs are dbted from the acnt with no further recourse. These CBs cant be reversed unless a credit has been issued to the acnt, or the Cardholder advises the charge(s) are valid.	CB1	010103015101	CR2	010103015201
+FR6	The Cardmember has disputed the Charge and it has been placed in the Partial Immediate Chargeback Program.	CB1	010103015101	CR2	010103015201
+M01	AMEX has received the authorization to process Chargeback for the Charge.	CB1	010103015101	CR2	010103015201
+M04	AMEX previously received the authorization to debit the account. Please deal directly with the Cardholder for resolution on this matter.	FR	010103050101	FR	010103050101
+M10	The Cardmember claims to have been incorrectly billed for Capital Damages, theft, or loss of use.	CB1	010103015101	CR2	010103015201
+M11	AMEX recently debited the account for the adjustment amount indicated. AMEX has now received the credit for this charge and are reversing the debit and crediting the account.	CB1	010103015101	CR2	010103015201
+M19	According to AMEX records, the credit was inadvertently deducted from another merchant''s account. This has now been corrected, and a debit for this amount will be issued. AMEX apologizes for any inconvenience this may have caused.	MI1	010103010101	MI1	010103010102
+M21	AKEX records indicate that the charge or summary was inadvertently paid to another merchant. This has been corrected and a credit has been issued.	MI1	010103010102	MI1	010103010101
+M22	AMEX records indicate that the service establishment was inadvertently paid for a submission sent to AMEX by another service establishment. To correct this erroneous payment, an adjustment debiting the account has been processed.	MI1	010103010101	MI1	010103010102
+M23	AMEX records indicates that a service estblsmnt inadvertently cashed a check that belonged to another service estblsmnt. So, an adjustment debiting the acnt for the amt of this check has been processed.submit the chrgs or check to cover this amt asap.	MI1	010103010101	MI1	010103010102
+M24	AMEX has processed an adjustment transferring a debit balance from a previous account to the account listed. This balance owed AMEX was aging on an account that is no longer active.	MI1	010103010101	MI1	010103010102
+M25	AMEX records indicate that the affiliated acnt has an outstanding dbt balance. This dbt has not cleared because charges are no longer being submitted by this acnt. Consequently, AMEX has processed an adjustment to transfer this dbt to the acnt.	MI1	010103010101	MI1	010103010102
+M27	The cheque was returned to AMEX by the bank. Since the account was previously credited for this cheque, AMEX is debiting the account for the amount involved. Please send AMEX a replacement cheque immediately.	MI1	010103010101	MI1	010103010102
+M28	According to AMEX records, an incorrect discount rate was applied to the summaries. Since the rate should have been lower, credit has been issued.	MI1	010103010102	MI1	010103010101
+M29	The invoice and report provided includes details regarding discount fees for American Express charges processed for the month indicated. This invoice amount will be debited to the bank account.	MI1	010103010101	MI1	010103010102
+M32	AMEX has processed an adjustment to the account. This adjustment represents the share of the media costs incurred in participation in the cooperative advertisement program.	MI1	010103010101	MI1	010103010102
+M33	In accordance with the request, an adjustment to the account has been processed.	MI1	010103010101	MI1	010103010102
+M36	Please see the additional notes related to this dispute.	FR	010103050101	FR	010103050101
+M38	AMEX recently debited the account for the adjustment amount indicated. AMEX is now reversing the debit and crediting the account.	CB1	010103015101	CR2	010103015201
+M39	AMEX has issued an adjustment to the account to correct a transaction that was previously processed in error.	MI1	010103010101	MI1	010103010102
+M42	Due to the length of time between the chargeback to the account and receiving the dispute, AMEX is unable to review this for reversal.	FR	010103050101	FR	010103050101
+M43	AMEX has processed an adjustment to the acnt. This adjustment represents participation in AMEX Mktng Progs.AMEX rcrds show a recent change in pymt options for participation.So,future adjustments will be invoiced on a monthly frequency.	MI1	010103010101	MI1	010103010102
+M44	AMEX has processed an adjustment to the acnt. This represents participation in AMEX Mktng Progs. AMEX rcrds show a recent change in pymt options for participation. So,future adjustments'll be deducted every month from pymt for charges submitted.	MI1	010103010101	MI1	010103010102
+M45	A review of AMEX records indicates that a cheque was applied to the account in error. Therefore an adjustment has been processed to debit the account.	MI1	010103010101	MI1	010103010102
+M46	AMEX has determined that the establishment was inadvertently debited for item(s) which were submitted to AMEX by another establishment. So, an adjustment crediting the account has been processed, and will be included in a future statement.	MI1	010103010102	MI1	010103010101
+OP1	Dispute Adjustment – Details to follow under separate cover.	MI1	010103010101	MI1	010103010102
+P01	A Charge using an invalid or otherwise incorrect Card Number was submitted.	CB1	010103015101	CR2	010103015201
+P03	The Cardmember claims the Charge submitted should have been submitted as a Credit.	CB1	010103015101	CR2	010103015201
+P04	The Cardmember claims the Credit submitted should have been submitted as a Charge.	CB1	010103015101	CR2	010103015201
+P05	The Charge amount submitted differs from the amount the Cardmember agreed to pay.	CB1	010103015101	CR2	010103015201
+P07	The Charge was not submitted within the required timeframe.	CB1	010103015101	CR2	010103015201
+P08	The individual Charge was submitted more than once.	CB1	010103015101	CR2	010103015201
+P09	AMEX has processed duplicate payments to the account for the same transaction.	CB1	010103015101	CR2	010103015201
+P22	The Card Number in the Submission does not match the Card Number in the original Charge.	CB1	010103015101	CR2	010103015201
+P23	The Charge was incurred in an invalid currency.	CB1	010103015101	CR2	010103015201
+R03	Complete support and/or documentation were not provided as requested.	CB1	010103015101	CR2	010103015201
+R13	AMEX did not receive a response to the Inquiry within the specified timeframe.	CB1	010103015101	CR2	010103015201
+S01	The request for a chargeback reversal has been reviewed. The chargeback will remain, and the account will not be credited.	FR	010103050101	FR	010103050101
+S03	Support received.	FR	010103050101	FR	010103050101
+S04	AMEX has received the request for a chargeback reversal. Please allow 2 to 3 weeks for research.	FR	010103050101	FR	010103050101
+M02	The Cardmember no longer disputes the charge(s). Discontinue further investigation.	FR	010103050101	FR	010103050101

@@ -1,0 +1,814 @@
+#!/usr/local/bin/tclsh
+#/clearing/filemgr/.profile
+#
+#================================   ISO INFORMATION  ===========================
+# This script is to generate ISO commision monthly report automaticly for
+# previous month 
+# ISO numbers (as for Jan, 2008):      
+#              447474                JETPAY MERCHANT SERVICES LLC                       
+#              454045
+#                00....JETPAY MERCHANT SERVICES LLC
+#                11....JETPAY MERCHANT SERVICES LLC
+#                12....FIRST BUSINESS SOLUTIONS
+#                14....DAVANTE CORP
+#                15....GRANT ALDEN
+#                16....ATLANTIC PACIFIC PRO SYS
+#                18....FIRST NATIONAL BUS. SOLUTIONS
+#                19....CHARGE IT NOW
+#                20....WITHERBY
+#                23....AXENTIA BANKCARD SOLUTION
+#                24....RTL PAYMENT SYSTEMS
+#                26....CAMPGROUND AUTOMATION
+#                30....FLAT WORLD
+#                88....VYBRANZ LLC
+#                89....GUARDINO AND ASSOCIATES 
+##             
+#==============================   MODIFICATION HISTORY   =======================
+# Version 1.00 Sunny yang 03-30-2010
+#         clean up
+#
+# Version 0.04 Sunny Yang 08-27-2008
+#         Add Terminal Billing info
+#
+# Version 0.03 Sunny Yang 07-16-2008
+#         Add argument into this script to run on specified dates
+#
+# Version 0.02 Sunny Yang 06-24-2008
+#         Add Interchange, fee collection, Retrival count, Fraud History
+#         Goal: add in  ACH Return, CVV2, VBV
+#
+# Version 0.01 Sunny Yang 02-06-2008
+#         Add in factor there are settlement delay for some merchant, so date_to_settle
+#         needs to be in reporting date period.
+#         Took off 3 tables join. Use sub-query instead
+#         Plan type N or G
+#
+# Version 0.01 Sunny Yang 01-22-2008
+#         Changes made to sort out report by ISO numbers and subtotal under each ISO.
+#         Only count active terminals, active merchants
+#         Merchant needs to be boarded before the end of reporting period
+#         Add REtrieval count
+#         Add Chargeback column
+#         Take out Mastercard and Visa Fees, ACH returns, Fees per contract
+#         Add CVV2/CID, VBV, Fraud counts
+#
+#
+# Version 0.00 Sunny Yang 09-12-2007
+#
+#===============================================================================
+#===============================================================================
+
+#Environment veriables.......
+
+set box $env(SYS_BOX)
+set clrpath $env(CLR_OSITE_ROOT)
+set maspath $env(MAS_OSITE_ROOT)
+set mailtolist $env(MAIL_TO)
+set mailfromlist $env(MAIL_FROM)
+set clrdb $env(SEC_DB)
+set authdb $env(RPT_DB)
+
+#Email Subjects variables Priority wise
+
+set msubj_c "$box :: Priority : Critical - Clearing and Settlement"
+set msubj_u "$box :: Priority : Urgent - Clearing and Settlement"
+set msubj_h "$box :: Priority : High - Clearing and Settlement"
+set msubj_m "$box :: Priority : Medium - Clearing and Settlement"
+set msubj_l "$box :: Priority : Low - Clearing and Settlement"
+
+
+#Email Body Headers variables for assist
+
+set mbody_c "ASSIST :: \nContact On-Call Engr. \[15 minutes or Escalate\] - Open Ticket \n\n"
+set mbody_u "ASSIST :: \nContact On-Call Engr. \[60 minutes or Escalate\] - Open Ticket \n\n"
+set mbody_h "ASSIST :: \nInform On-Call/Available Engr. \[Day Time 7 days of the week\] - Open Ticket \n\n"
+set mbody_m "ASSIST :: \nInform Available Engr. \[Day Time 5 working days of week\] - Open Ticket \n\n"
+set mbody_l "ASSIST :: \nAssign Ticket to the appropriate Engr. \[24/7 - 365 days\] - Open Ticket \n\n"
+
+#System information variables....
+
+set sysinfo "System: $box\n Location: $env(PWD) \n\n"
+#===============================================================================
+
+package require Oratcl
+if {[catch {set handlerT [oralogon teihost/quikdraw@$authdb]} result]} {
+  exec echo "ISO Report failed to run on TEIHOST" | mailx -r $mailfromlist -s "ISO Commission Report" clearing-np@jetpay.com
+  exit
+}
+if {[catch {set handlerM [oralogon masclr/masclr@$clrdb]} result]} {
+  exec echo "ISO Report failed to run on MASCLR" | mailx -r $mailfromlist -s "ISO Commission Report" clearing-np@jetpay.com
+  exit
+}
+
+puts "$clrdb ... $authdb"
+
+set fetch_cursor    [oraopen $handlerT]
+set count_cursor1   [oraopen $handlerT]
+set count_cursor2   [oraopen $handlerT]
+set count_cursor3   [oraopen $handlerT]
+set count_cursor4   [oraopen $handlerT]
+set count_cursor5   [oraopen $handlerT]
+set count_cursor6   [oraopen $handlerT]
+set count_cursor7   [oraopen $handlerT]
+set count_cursor8   [oraopen $handlerT]
+set count_cursor9   [oraopen $handlerT]
+set fetch_cursorM1  [oraopen $handlerM]
+set fetch_cursorM2  [oraopen $handlerM]
+set fetch_cursorM3  [oraopen $handlerM]
+set fetch_cursorM4  [oraopen $handlerM]
+set fetch_cursorM5  [oraopen $handlerM]
+set fetch_cursorM6  [oraopen $handlerM]
+set fetch_cursorM7  [oraopen $handlerM]
+set fetch_cursorM8  [oraopen $handlerM]
+set fetch_cursorM9  [oraopen $handlerM]
+set fetch_cursorM10 [oraopen $handlerM]
+set cursorM1        [oraopen $handlerM]
+set cursorM2        [oraopen $handlerM]
+set cursorM3        [oraopen $handlerM]
+set cursorM4        [oraopen $handlerM]
+set cursorM5        [oraopen $handlerM]
+set cursorM6        [oraopen $handlerM]
+set cursorM7        [oraopen $handlerM]
+set cursorM8        [oraopen $handlerM]
+set cursorM9        [oraopen $handlerM]
+set cursorM10       [oraopen $handlerM]
+set test_cursor1    [oraopen $handlerM]
+set test_cursor2    [oraopen $handlerM]
+set test_cursor3    [oraopen $handlerM]
+set test_cursor4    [oraopen $handlerM]
+set test_cursor5    [oraopen $handlerM]
+
+set DIAL_MONTHLY_RATE                    0.645
+set AUTH_MONTHLY_RATE                    0.037
+set SETT_MONTHLY_RATE                    0.01
+set MERCHANT_STATEMENT_RATE              1.0
+set MERCHANT_PAGE_RATE                   0.25
+set NON_HIGH_RISK_CP_RATE                0.025
+set NON_HIGH_RISK_NCP_RATE               0.045
+set RISK_FREE_CP                         0.00003
+set RISH_FREE_CNP                        0.000125
+set DIALUP_MONTHLY_RATE_PER_MERCHANT     4.00
+set RETRIEVALS_RATE                      8.0
+
+set TERM_COUNT                0
+set DIAL_COUNT                0
+set MERCHANT_NUM              0
+set MERCHANT_NAME             0
+set AMOUNT                    0
+set TERMINAL_COUNT            0
+set NON_BANK_COUNT            0 
+set SETT_TRAN_COUNT           0
+set AUTH_TRAN_COUNT           0
+set COUNT                     0
+set PAGE_NUM                  0
+set DIAL_TR_COUNT             0
+set RETRIVAL_COUNT            0
+set DISCOUNT_CHARGE           0
+set PASSTHROUGH_AMOUNT        0
+set PASSTHROUGH_MS            0
+set PASSTHROUGH_VS            0
+set ACH_RETURN                0
+set AUTH_VOLUME               0
+set SETT_VOLUME               0
+set DIAL_MONTHLY              0
+set FEE_PER_CONTRACT          0
+set CHARGE_PER_PAGE           0
+set DIAL_MONTHLY_MERCHANT     0
+set CHARGEBACK_CNT            0  ;# added on 02-31
+set CHARGEBACK_AMT            0  ;# added on 02-31
+set FRAUD_COUNT               0
+set INTERCHANG_AMOUNT         0
+set NET_INCOME  0
+
+set TERM_COUNT         0
+set ALL_TERMINAL_COUNT 0
+set DT_COUNT           0
+set temp_vid           "SYANG"
+set TERMINAL_BILLING 0
+
+set MC_ASSESSMENT_AMT             0
+set VS_ASSESSMENT_AMT             0
+set SUB_MCASSESSMENT_AMT          0
+set SUB_VSASSESSMENT_AMT          0
+
+set SUB_AMOUNT                     0
+set SUB_CARD_PRESENT_AMOUNT        0 
+set SUB_CARD_NOT_PRESENT_AMOUNT    0
+set SUB_ALL_TERMINAL_COUNT         0
+set SUB_TERMINAL_COUNT             0
+set SUB_NON_BANK_COUNT             0
+set SUB_SETT_TRAN_COUNT            0
+set SUB_AUTH_TRAN_COUNT            0 
+set SUB_CP_TRAN_COUNT              0
+set SUB_NP_TRAN_COUNT              0
+set SUB_PAGE_NUM                   0
+set SUB_DIAL_TR_COUNT              0 
+set SUB_RETRIVAL_COUNT             0
+set SUB_DISCOUNT_CHARGE            0
+set SUB_PASSTHROUGH_AMOUNT         0  
+set SUB_PASSTHROUGH_MS             0
+set SUB_PASSTHROUGH_VS             0
+set SUB_ACH_RETURN                 0
+set SUB_AUTH_VOLUME                0
+set SUB_SETT_VOLUME                0
+set SUB_DIAL_MONTHLY               0 
+set SUB_FEE_PER_CONTRACT           0
+set SUB_CHARGE_PER_PAGE            0
+set SUB_DIAL_MONTHLY_MERCHANT      0
+set SUB_CHARGEBACK_CNT             0  ;# added on 02-31
+set SUB_CHARGEBACK_AMT             0  ;# added on 02-31
+set SUB_INTERCHANG_AMOUNT          0
+set SUB_TERMINAL_BILLING 0
+
+#===============================================================================
+
+  if {$argc == 1 } {
+        #puts "Input last day of the Month you want to report on:(format YYYYMMDD, like 20080630) "
+        set date [string trim [lindex $argv 0]]
+       puts $date 
+        set auth_end_day $date
+        set auth_begin_date [ string toupper [clock format [ clock scan " $date -1 month" ] -format %d-%b-%y ]]
+        set auth_begin [ string toupper [clock format [ clock scan " $date -1 month" ] -format %Y%m%d ]]
+        puts "auth_begin: $auth_begin"
+        set report_date  [ string toupper [clock format [ clock scan " $date -0 day " ] -format %d-%b-%y ]]   ;# 02-APR-08 as of 20080402
+        set current_year [string range  $report_date 7 8 ]
+        set short_month  [string range $report_date 3 5 ]
+        set name_date_year [string range $date 0 3 ]
+        set number_date_month  [string range $date 4 5 ]
+        set auth_time         "000000"
+        set first_day         "01"
+        set AUTH_BEGIN $auth_begin
+        set AUTH_BEGIN $AUTH_BEGIN$auth_time
+        set AUTH_END $date$auth_time
+        puts "AUTH_BEGIN is .....$AUTH_BEGIN....AUTH_END is .....  $AUTH_END"
+        set short_year       $current_year
+        set next_month        [string toupper [clock format [clock scan "$date +1 month"] -format %b]]
+                
+        puts "next month: $next_month "        
+  } else {        
+    set short_month       [string toupper [clock format [clock scan "-1 month"] -format %b]]      ;# DEC... as of 01/27/2008
+    set current_year        [clock format [clock scan "-0 month"] -format %y]                     ;# 08... as of 01/27/2008
+    set name_date_year      [clock format [clock scan "-1 month"] -format %Y]                      ;# 2008... as of 01/27/2008
+    set number_date_month   [clock format [clock scan "-1 month"] -format %m]                      ;# 12... as of 01/27/2008    
+    set auth_begin_day    "TO_CHAR(LAST_DAY(SYSDATE-(TO_CHAR(SYSDATE,'DD')+31)),'YYYYMMDD')"
+    set auth_begin        "$auth_begin_day"
+    set auth_end_day      "TO_CHAR(LAST_DAY(SYSDATE-(TO_CHAR(SYSDATE,'DD')+2)),'YYYYMMDD')"
+    set auth_end          "$auth_end_day"
+    set auth_time         "000000"
+    set first_day         "01"    
+    set query_str " select $auth_begin_day  as AUTH_BEGIN,
+                           $auth_end_day  as AUTH_END
+                    from dual"
+    orasql $count_cursor5 $query_str
+    puts $query_str
+    while {[orafetch $count_cursor5 -dataarray ad -indexbyname] == 0} { 
+    set AUTH_BEGIN $ad(AUTH_BEGIN)
+    set AUTH_END $ad(AUTH_END)      
+    }
+    set AUTH_BEGIN $AUTH_BEGIN$auth_time
+    set AUTH_END $AUTH_END$auth_time
+    puts "AUTH_BEGIN is .....$AUTH_BEGIN....AUTH_END is .....  $AUTH_END"
+
+    if { $short_month == "DEC" } {
+      set short_year        [clock format [clock scan "-1 year"] -format %y]                  ;# fall into previous year
+      set next_short_year   [clock format [clock scan "-0 year"] -format %y] 
+      set next_month        [string toupper [clock format [clock scan "-0 month"] -format %b]]
+    } else {
+      set short_year        [clock format [clock scan "-0 year"] -format %y]
+      set next_short_year   [clock format [clock scan "-0 year"] -format %y]
+      set next_month        [string toupper [clock format [clock scan "-0 month"] -format %b]]
+    }
+    
+  }
+      set ship_date           "$name_date_year$number_date_month"                                    ;# 200712
+      set name_date           "$short_month-$name_date_year"                                         ;# DEC-2007
+      
+puts " short_month:$short_month...next_month:$next_month...short_year: $short_year  "
+puts "01-$next_month-$current_year"
+
+######time setting#######
+
+# masclr--report starts at last day of month before previous month inclusively
+# masclr--report ends at last day of previous month inclusively
+  set begin_date        "01-$short_month-$short_year" 
+  set end_date          "substr((last_day(sysdate - (to_char(sysdate, 'DD')))), 1, 9)"
+  set clr_date          "$short_month-$short_year"
+  puts " clearing date is ....$clr_date "
+
+# teihost transaction--report starts at last day of month before previous month inclusively
+# teihost transaction--report ends at last day of month previous month exclusively  
+  set auth_time         "000000"
+  set first_day         "01"
+  
+  set MAS_END      "TO_CHAR(LAST_DAY(SYSDATE-(TO_CHAR(SYSDATE,'DD')+2)),'YYYYMMDD')"
+  set MAS_BEGIN      "$ship_date$first_day"
+  
+  set cur_file_name     "./LOG/105.RESIDUAL.REPORT.$name_date.gl001.csv"
+  set file_name         "105.RESIDUAL.REPORT.$name_date.gl001.csv"
+  set cur_file          [open "$cur_file_name" w]
+  
+  puts $cur_file "JETPAY ISO SERVICES, LLC"
+  puts $cur_file "ISO COMMISSION MONTHLY REPORT"
+  puts $cur_file "REPORTED MONTH:,$name_date"
+  
+  puts $cur_file " ,ISO ID, ISO NAME\r"
+
+  set query_string_isolist " select unique substr(ENTITY_ID, 1, 6) as INST, substr(ENTITY_ID, 8, 2) as ISO_NO, entity_name as NAME
+                             from acq_entity 
+                             where entity_level = '30' AND
+                                  entity_dba_name not like '%TEST%' AND
+                                  entity_status = 'A' and
+                                  substr(ENTITY_ID, 1, 6) in ('402529')
+                             order by substr(ENTITY_ID, 1, 6)"
+  orasql $fetch_cursorM4 $query_string_isolist
+  while {[orafetch $fetch_cursorM4 -dataarray isolist -indexbyname] != 1403} {
+           set ISO_NO $isolist(ISO_NO)
+           set ISO_NAME $isolist(NAME)
+
+           puts "  $ISO_NO....$ISO_NAME "
+           puts $cur_file " ,$ISO_NO, $ISO_NAME \r"
+  }
+       
+puts $cur_file "PER MERCHANT CALCULATIONS AND CHARGES:   "
+puts $cur_file "Merchant ID, Merchant Name,Total Sales Volume,Total Sales Count,Discount Charged, Interchange (Passthrough), MC Assessment, VS Assessment, Mastercard Fee Collection, \
+                Visa Fee Collection, Net Income \r\n"
+ 
+
+
+##========================================================================================================
+
+#***************************************************************************************************
+#**********************               >>>>>>   MAS 105  <<<<<<<<<         *************************
+#***************************************************************************************************
+                     
+set inst_105 "105"
+set total_mc_border 0
+set total_vs_isa    0
+set total_term_cost 0
+
+            set query_string_clr3 "select mtl.entity_id, sum(mtl.amt_original) as MC_BORDER_FEE
+                                        from mas_trans_log mtl 
+                                        where mtl.mas_code in ('MC_BORDER','MC_GLOBAL_ACQ') and
+                                              mtl.tid like '010004%' and
+                                              date_to_settle like '%-$short_month-$short_year%' and
+                                          mtl.institution_id = '105'
+                                        group by mtl.entity_id
+                                        order by mtl.entity_id "
+            
+            orasql $cursorM3 $query_string_clr3
+            while {[orafetch $cursorM3 -dataarray clr3 -indexbyname] != 1403} {
+                    set arrmcborfee($clr3(ENTITY_ID)) $clr3(MC_BORDER_FEE)
+                    puts " arrmcborfee.... $arrmcborfee($clr3(ENTITY_ID))"
+                    set total_mc_border [expr $total_mc_border + $arrmcborfee($clr3(ENTITY_ID))]
+            }
+            
+            set query_string_clr4 " select mtl.entity_id, sum(mtl.amt_original) as VS_ISA_FEE
+                                    from masclr.mas_trans_log mtl
+                                    where mtl.mas_code in ('VS_ISA_FEE','VS_ISA_HI_RISK_FEE') and
+                                          mtl.tid like '010004%' and
+                                          date_to_settle like '%-$short_month-$short_year%' and
+                                          mtl.institution_id = '105'
+                                    group by mtl.entity_id
+                                    order by mtl.entity_id "
+            
+            orasql $cursorM4 $query_string_clr4
+            while {[orafetch $cursorM4 -dataarray clr4 -indexbyname] != 1403} {
+                    set arrvsisafee($clr4(ENTITY_ID)) $clr4(VS_ISA_FEE)
+                    puts " arrvsisafee.... $arrvsisafee($clr4(ENTITY_ID))"
+                    set total_vs_isa [expr $total_vs_isa + $arrvsisafee($clr4(ENTITY_ID))]
+            }
+            
+         
+            set query_string_clr5 "select entity_id,
+                                          sum(ISO_EQ_COST) as ISO_EQ_COST,
+                                          sum(ISO_DNLD_COST) as ISO_DNLD_COST,
+                                          sum(ISO_REPAIR_COST) as ISO_REPAIR_COST,
+                                          sum(ISO_SHIPPING) as ISO_SHIPPING
+                                   from mas_terminal_log
+                                   where substr(BILLING_DT, 1,9) = last_day('01-$next_month-$short_year')
+                                   group by entity_id
+                                   order by entity_id"
+            orasql $cursorM7 $query_string_clr5
+puts "term bill: $query_string_clr5 "
+            while {[orafetch $cursorM7 -dataarray clr5 -indexbyname] != 1403} {
+               set isoeqp($clr5(ENTITY_ID))       $clr5(ISO_EQ_COST)
+               set isodnld($clr5(ENTITY_ID))      $clr5(ISO_DNLD_COST)
+               set isorepair($clr5(ENTITY_ID))    $clr5(ISO_REPAIR_COST)
+               set isoshipping($clr5(ENTITY_ID))  $clr5(ISO_SHIPPING)
+               set arrtermbilling($clr5(ENTITY_ID)) [expr $isoeqp($clr5(ENTITY_ID))  + $isodnld($clr5(ENTITY_ID)) + $isorepair($clr5(ENTITY_ID)) + $isoshipping($clr5(ENTITY_ID))]
+               set total_term_cost [expr $total_term_cost + $arrtermbilling($clr5(ENTITY_ID))]
+            }
+
+      set query_string_clr " SELECT unique m.entity_id as VISA_ID, (select entity_dba_name from acq_entity where entity_id = m.entity_id) as NAME,
+                      SUM(CASE WHEN (m.tid in ('010003005101' , '010123005102', '010003005102','010123005101') and m.tid_settl_method = 'C' and m.trans_sub_seq = '0') Then m.amt_original else 0 end ) AS S_AMOUNT,
+                      SUM(CASE WHEN (m.tid in ('010003005101' , '010123005102', '010003005102','010123005101') and m.tid_settl_method = 'D' and m.trans_sub_seq = '0') Then m.amt_original else 0 end) AS R_AMOUNT, 
+                      SUM(CASE WHEN (m.tid in ('010003005101' , '010123005102', '010003005102','010123005101') and m.trans_sub_seq = '0') Then 1 else 0 end ) AS S_COUNT,
+                      SUM(CASE WHEN ((m.tid in ('010003005101' , '010123005102', '010003005102' , '010123005101') and m.trans_sub_seq = '0') or (m.tid = '010003005301')) Then 1 else 0 end) AS TOTAL_COUNT,
+                      SUM(CASE WHEN (m.tid in ('010003005301', '010003005401', '010003010102','010003015201', '010003015102', '010003015101', '010003015210') and m.tid_settl_method = 'C' )Then m.amt_original else 0 end ) as CHARGEBACK_S_AMT,
+                      SUM(CASE WHEN (m.tid in ('010003005301', '010003005401', '010003010102','010003015201', '010003015102', '010003015101', '010003015210') and m.tid_settl_method = 'D' )Then m.amt_original else 0 end ) as CHARGEBACK_R_AMT,
+                      SUM(CASE WHEN m.tid in ('010003005301', '010003005401', '010003010102','010003015201', '010003015102', '010003015101', '010003015210') Then 1 else 0 end ) as CHARGEBACK_CNT            
+                FROM mas_trans_log m
+                WHERE  m.institution_id = '105'
+                      AND m.gl_date like '%-$short_month-$short_year%'
+                GROUP BY m.entity_id
+                ORDER BY substr(m.entity_id, 8,2), m.entity_id "
+                
+  puts " query_string_clr: $query_string_clr"
+  
+         orasql $cursorM6 $query_string_clr   
+         while {[orafetch $cursorM6 -dataarray clr -indexbyname] != 1403} {
+              set AMOUNT          [expr $clr(S_AMOUNT) - $clr(R_AMOUNT)]
+              set COUNT           $clr(S_COUNT)
+              set SETT_TRAN_COUNT         $clr(TOTAL_COUNT)
+              set SETT_VOLUME             [expr $SETT_TRAN_COUNT * $SETT_MONTHLY_RATE ]
+              set CHARGEBACK_AMT          [expr $clr(CHARGEBACK_S_AMT) - $clr(CHARGEBACK_R_AMT)]
+              set CHARGEBACK_CNT          $clr(CHARGEBACK_CNT)
+              
+              set arramt($clr(VISA_ID))     $AMOUNT
+              set arrcnt($clr(VISA_ID))     $COUNT
+              set arrsetcnt($clr(VISA_ID))  $SETT_TRAN_COUNT
+              set arrsetamt($clr(VISA_ID))  $SETT_VOLUME
+              set arrchgamt($clr(VISA_ID))  $CHARGEBACK_AMT
+              set arrchgcnt($clr(VISA_ID))  $CHARGEBACK_CNT
+     }               
+      
+    set query_string_clr2 " SELECT m.entity_id as VISA_ID,
+                SUM( CASE WHEN(((m.TID LIKE '010004%' and m.tid not like '01000428%') or m.tid like '01000507%' ) and m.settl_flag = 'Y' and m.tid_settl_method = 'C')
+                    then m.AMT_ORIGINAL end ) as CREDIT_AMOUNT,
+                SUM( CASE WHEN(((m.TID LIKE '010004%' and m.tid not like '01000428%') or m.tid like '01000507%' ) and m.settl_flag = 'Y' and m.tid_settl_method = 'D')
+                    then m.AMT_ORIGINAL end ) as DEBIT_AMOUNT,
+                SUM( CASE WHEN((m.TID LIKE '%4020000' or m.tid like '%4020005' ) and m.tid_settl_method = 'C')
+                    then m.AMT_ORIGINAL end ) as I_CREDIT_AMOUNT,
+                SUM( CASE WHEN((m.TID LIKE '%4020000' or m.tid like '%4020005' ) and m.tid_settl_method = 'D')
+                    then m.AMT_ORIGINAL end ) as I_DEBIT_AMOUNT,
+                SUM( CASE WHEN(m.tid_settl_method = 'C' and m.tid not in ('010004020000','010004020005') and (m.TID LIKE '010004%' and m.tid not like '01000428%') and m.card_scheme = '05' )
+                   then m.AMT_ORIGINAL end ) as MS_CREDIT_AMOUNT,
+                SUM( CASE WHEN(m.tid_settl_method = 'D' and m.tid not in ('010004020000','010004020005') and (m.TID LIKE '010004%' and m.tid not like '01000428%') and m.card_scheme = '05' )
+                   then m.AMT_ORIGINAL end ) as MS_DEBIT_AMOUNT,
+                SUM( CASE WHEN(m.tid_settl_method = 'C' and m.tid not in ('010004020000','010004020005') and (m.TID LIKE '010004%' and m.tid not like '01000428%') and m.card_scheme = '04' )
+                   then m.AMT_ORIGINAL end ) as VS_CREDIT_AMOUNT,
+                SUM( CASE WHEN(m.tid_settl_method = 'D' and m.tid not in ('010004020000','010004020005') and (m.TID LIKE '010004%' and m.tid not like '01000428%') and m.card_scheme = '04' )
+                   then m.AMT_ORIGINAL end ) as VS_DEBIT_AMOUNT,
+                (SUM(CASE WHEN( m.tid in ('010004030000') and m.tid_settl_method = 'D' and m.card_scheme = '05' ) then AMT_ORIGINAL else 0 end) - SUM(CASE WHEN( m.tid in ('010004030000') and m.tid_settl_method = 'C' and m.card_scheme = '05' ) then AMT_ORIGINAL else 0 end)) as MC_ASSESSMENT_AMT,
+                (SUM(CASE WHEN( m.tid in ('010004030000') and m.tid_settl_method = 'D' and m.card_scheme = '04') then AMT_ORIGINAL else 0 end) - SUM(CASE WHEN( m.tid in ('010004030000') and m.tid_settl_method = 'C' and m.card_scheme = '04' ) then AMT_ORIGINAL else 0 end)) as VS_ASSESSMENT_AMT,
+                (SUM(CASE WHEN( m.tid in ('010004020000', '010004020005') and m.tid_settl_method = 'D' ) then AMT_ORIGINAL else 0 end) - SUM(CASE WHEN( m.tid in ('010004020000', '010004020005') and m.tid_settl_method = 'C' ) then AMT_ORIGINAL else 0 end)) as INTERCHANGE_AMT,
+                SUM(CASE WHEN( m.tid in ('010004020000', '010004020005') ) then 1 else 0 end) as INTERCHANGE_CNT,
+                SUM(CASE WHEN( m.mas_code in ('0204RREQ', ' 0205RREQ')) then 1 else 0 end) as RETRIEVAL_CNT
+                                               FROM mas_trans_log m
+                                               WHERE m.institution_id = '105'
+                                                    AND m.date_to_settle like '%-$short_month-$short_year%'
+                                               GROUP BY m.entity_id
+                                               ORDER BY substr(m.entity_id, 8,2), m.entity_id "
+               orasql $cursorM5 $query_string_clr2  
+               while {[orafetch $cursorM5 -dataarray clr2 -indexbyname] != 1403} {
+                
+                      set DISCOUNT_CHARGE           [expr $clr2(DEBIT_AMOUNT) - $clr2(CREDIT_AMOUNT) ]
+                      set PASSTHROUGH_AMOUNT        [expr $clr2(I_DEBIT_AMOUNT) - $clr2(I_CREDIT_AMOUNT) ]
+                      set PASSTHROUGH_MS            [expr $clr2(MS_DEBIT_AMOUNT) - $clr2(MS_CREDIT_AMOUNT)]
+                      set PASSTHROUGH_VS            [expr $clr2(VS_DEBIT_AMOUNT) - $clr2(VS_CREDIT_AMOUNT)]
+                      set RETRIEVAL_CNT              $clr2(RETRIEVAL_CNT)
+                      set INTERCHANG_AMOUNT          $clr2(INTERCHANGE_AMT)
+                            set MC_ASSESSMENT_AMT              $clr2(MC_ASSESSMENT_AMT)
+                            set arrmcassess($clr2(VISA_ID))   $MC_ASSESSMENT_AMT
+                            set VS_ASSESSMENT_AMT              $clr2(VS_ASSESSMENT_AMT)
+                            set arrvsassess($clr2(VISA_ID))   $VS_ASSESSMENT_AMT
+                      set arrinchg($clr2(VISA_ID))   $INTERCHANG_AMOUNT                            
+                      set arrdischg($clr2(VISA_ID))  $DISCOUNT_CHARGE
+                      set arrpassamt($clr2(VISA_ID)) $PASSTHROUGH_AMOUNT
+                      set arrpassms($clr2(VISA_ID))  $PASSTHROUGH_MS
+                      set arrpassvs($clr2(VISA_ID))  $PASSTHROUGH_VS 
+                      set INTERCHANG_AMOUNT          $clr2(INTERCHANGE_AMT)
+                      set arrinchg($clr2(VISA_ID))   $INTERCHANG_AMOUNT                                                         
+                      set arrretrival($clr2(VISA_ID)) $RETRIEVAL_CNT
+               }
+
+                                       
+
+## ******************************************************************************************************               
+## ********************************************** MAIN 105 **********************************************
+##*******************************************************************************************************
+
+      set query_string_iso "   SELECT unique substr(entity_id, 8, 2) as ISO_ID
+                               FROM acq_entity
+                               WHERE entity_level = '70'
+                                     AND entity_status = 'A'
+                                     AND institution_id = '105'
+                                     AND entity_dba_name not like '%TEST%'
+                               ORDER BY substr(entity_id, 8, 2) "
+       orasql $fetch_cursorM3 $query_string_iso
+        puts "iso....$query_string_iso"
+       while {[orafetch $fetch_cursorM3 -dataarray iso -indexbyname] != 1403} {
+ 
+              set ISO_ID $iso(ISO_ID)      
+              puts " iso id is $ISO_ID"
+
+               set query_string_clr " SELECT unique a.entity_id as MERCHANT_ID,  a.entity_dba_name as MERCHANT_NAME, TERMINATION_DATE, CREATION_DATE 
+                                       FROM acq_entity a, mas_trans_log m     
+                                       WHERE a.entity_level = '70'        
+                                             and a.entity_id = m.entity_id 
+                                              AND a.institution_id = '105'
+                                             AND substr(a.entity_id, 8, 2) = '$ISO_ID'
+                                             AND a.entity_dba_name not like '%TEST%'  
+                                             AND (( a.exp_start_date  < '01-$next_month-$current_year' and a.entity_status = 'A') OR (a.TERMINATION_DATE > '01-$short_month-$short_year' and m.gl_date like '%$short_month-$short_year%'))        
+                                       ORDER BY substr(a.entity_id, 8, 2), a.entity_id "
+                                       
+                orasql $fetch_cursorM4 $query_string_clr
+                puts "merchants....$query_string_clr"
+                while {[orafetch $fetch_cursorM4 -dataarray mer -indexbyname] != 1403} {       
+                                    set MERCHANT_NUM $mer(MERCHANT_ID)
+                                    set MERCHANT_NAME $mer(MERCHANT_NAME)
+                # NON Bankcard Count:
+                        set NON_BANK_COUNT 0
+                        set DIAL_COUNT 0
+                        set c 0
+                        set IDcount 0
+                        set TERM_COUNT 0
+                        set DT_COUNT 0 
+
+                       
+
+                        catch {set syang107 $arramt($MERCHANT_NUM)}      result14
+                        catch {set syang107 $arrsetcnt($MERCHANT_NUM)}   result17
+                        catch {set syang107 $arrcnt($MERCHANT_NUM)}      result18
+                        catch {set syang107 $arrchgcnt($MERCHANT_NUM)}   result20
+                        catch {set syang107 $arrchgamt($MERCHANT_NUM)}   result21
+                        catch {set syang107 $arrdischg($MERCHANT_NUM)}   result22
+                        catch {set syang107 $arrfraud($MERCHANT_NUM)}    result54
+                        catch {set syang107 $arrinchg($MERCHANT_NUM)}    result57
+                        catch {set syang107 $arrretrival($MERCHANT_NUM)} result59
+                        catch {set syang107 $arrmcborfee($MERCHANT_NUM)} result62
+                        catch {set syang107 $arrvsisafee($MERCHANT_NUM)} result63
+                        catch {set syang107 $arrmcassess($MERCHANT_NUM)} result64
+                        catch {set syang107 $arrvsassess($MERCHANT_NUM)} result65
+                        catch {set syang107 $arrtermbilling($MERCHANT_NUM)}  resulttermbill
+         
+                      if {[string range $resulttermbill 0 9] == "can't read" } {
+                         set TERMINAL_BILLING 0 
+                      } else {
+                         set TERMINAL_BILLING $arrtermbilling($MERCHANT_NUM)
+                         set SUB_TERMINAL_BILLING [ expr $SUB_TERMINAL_BILLING + $TERMINAL_BILLING]
+                      }  
+                      
+                      if {[string range $result62 0 9] == "can't read" } {
+                         set MC_BORDER_FEE 0
+                        # puts " $MERCHANT_NUM $result62 "
+                      } else {
+                         set MC_BORDER_FEE $arrmcborfee($MERCHANT_NUM)
+                      }
+                      if {[string range $result63 0 9] == "can't read" } {
+                         set VS_ISA_FEE 0
+                        # puts " $MERCHANT_NUM $result63 "
+                      } else {
+                         set VS_ISA_FEE $arrvsisafee($MERCHANT_NUM)
+                      }  
+                      if {[string range $result64 0 9] == "can't read" } {
+                         set MC_ASSESSMENT_AMT 0
+                        # puts " $MERCHANT_NUM $result64 "
+                      } else {
+                         set MC_ASSESSMENT_AMT $arrmcassess($MERCHANT_NUM)
+                      }  
+                      if {[string range $result64 0 9] == "can't read" } {
+                         set VS_ASSESSMENT_AMT 0
+                        # puts " $MERCHANT_NUM $result65 "
+                      } else {
+                         set VS_ASSESSMENT_AMT $arrvsassess($MERCHANT_NUM)
+                      }  
+                      if {[string range $result59 0 9] == "can't read"} {
+                         set RETRIVAL_COUNT 0
+                         #puts " 107 $MERCHANT_NUM $result14 "
+                      } else {
+                         set RETRIVAL_COUNT $arrretrival($MERCHANT_NUM)
+                      }                      
+                      if {[string range $result14 0 9] == "can't read"} {
+                         set AMOUNT 0
+                         #puts " 107 $MERCHANT_NUM $result14 "
+                      } else {
+                         set AMOUNT $arramt($MERCHANT_NUM)
+                      }
+                      if { [string range $result17 0 9] == "can't read" } {
+                          set SETT_TRAN_COUNT 0
+                         #puts " 107 $MERCHANT_NUM $result17 "
+                      }  else {
+                        set SETT_TRAN_COUNT  $arrsetcnt($MERCHANT_NUM)
+                      }
+                      if { [string range $result18 0 9] == "can't read" } {
+                          set COUNT 0
+                         #puts " 107 $MERCHANT_NUM $result18 "
+                      } else {
+                        set COUNT $arrcnt($MERCHANT_NUM)
+                      }
+                      if { [string range $result20 0 9] == "can't read" } {
+                          set CHARGEBACK_CNT 0
+                         #puts " 107 $MERCHANT_NUM $result20"
+                      }  else {
+                       set  CHARGEBACK_CNT $arrchgcnt($MERCHANT_NUM)
+                      }
+                      if { [string range $result21 0 9] == "can't read" } {
+                          set CHARGEBACK_AMT 0
+                         #puts " 107 $MERCHANT_NUM $result21 "
+                      }  else {
+                        set CHARGEBACK_AMT $arrchgamt($MERCHANT_NUM)
+                      }
+                      if {[string range $result22 0 9] == "can't read" } {
+                          set DISCOUNT_CHARGE 0
+                         #puts " 107 $MERCHANT_NUM $result22"
+                      }  else {
+                       set DISCOUNT_CHARGE $arrdischg($MERCHANT_NUM)
+                      }
+                    if {[string range $result54 0 9] == "can't read"} {
+                       set FRAUD_COUNT 0
+                       #puts " $MERCHANT_NUM $result54 "
+                    } else {
+                       set FRAUD_COUNT $arrfraud($MERCHANT_NUM)
+                    }          
+                    if {[string range $result57 0 9] == "can't read"} {
+                       set INTERCHANG_AMOUNT 0
+                       #puts " $MERCHANT_NUM $result57 "
+                    } else {
+                       set INTERCHANG_AMOUNT $arrinchg($MERCHANT_NUM)
+                    }
+                    set NET_INCOME [expr $DISCOUNT_CHARGE - $INTERCHANG_AMOUNT - $MC_ASSESSMENT_AMT - $VS_ASSESSMENT_AMT - $MC_BORDER_FEE - $VS_ISA_FEE]
+                   
+                    
+                 if {$AMOUNT != "0" || $ALL_TERMINAL_COUNT != "0" || $PAGE_NUM != "0" || $CHARGEBACK_CNT != "0" || $RETRIVAL_COUNT != "0" || $DISCOUNT_CHARGE != "0" || $MC_ASSESSMENT_AMT != "0" || $VS_ASSESSMENT_AMT != "0" || $MC_BORDER_FEE != "0" || $VS_ISA_FEE != "0" || $FRAUD_COUNT != "0"} {   
+                     puts $cur_file " $MERCHANT_NUM, $MERCHANT_NAME, $AMOUNT,$COUNT, $DISCOUNT_CHARGE,$INTERCHANG_AMOUNT,$MC_ASSESSMENT_AMT, $VS_ASSESSMENT_AMT, $MC_BORDER_FEE, $VS_ISA_FEE,$NET_INCOME\r"
+                 }
+                    set MERCHANT_NUM              0
+                    set MERCHANT_NAME             0
+                    set AMOUNT                    0
+                    set CARD_PRESENT_AMOUNT       0
+                    set CARD_NOT_PRESENT_AMOUNT   0
+                    set TERMINAL_COUNT            0
+                    set NON_BANK_COUNT            0 
+                    set SETT_TRAN_COUNT           0
+                    set AUTH_TRAN_COUNT           0
+                    set CP_TRAN_COUNT             0
+                    set NP_TRAN_COUNT             0
+                    set PAGE_NUM                  0
+                    set DIAL_TR_COUNT             0
+                    set RETRIVAL_COUNT            0
+                    set DISCOUNT_CHARGE           0
+                    set PASSTHROUGH_AMOUNT        0
+                    set PASSTHROUGH_MS            0
+                    set PASSTHROUGH_VS            0
+                    set ACH_RETURN                0
+                    set AUTH_VOLUM                0
+                    set SETT_VOLUME               0
+                    set DIAL_MONTHLY              0
+                    set FEE_PER_CONTRACT          0
+                    set CHARGE_PER_PAGE           0
+                    set DIAL_MONTHLY_MERCHANT     0
+                    set NET_INCOME 0
+                }
+      
+                set SUB_AMOUNT                     0
+                set SUB_CARD_PRESENT_AMOUNT        0 
+                set SUB_CARD_NOT_PRESENT_AMOUNT    0  
+                set SUB_ALL_TERMINAL_COUNT         0
+                set SUB_TERMINAL_COUNT             0
+                set SUB_NON_BANK_COUNT             0
+                set SUB_SETT_TRAN_COUNT            0
+                set SUB_AUTH_TRAN_COUNT            0 
+                set SUB_CP_TRAN_COUNT              0
+                set SUB_NP_TRAN_COUNT              0
+                set SUB_PAGE_NUM                   0
+                set SUB_DIAL_TR_COUNT              0 
+                set SUB_RETRIVAL_COUNT             0
+                set SUB_DISCOUNT_CHARGE            0
+                set SUB_PASSTHROUGH_AMOUNT         0  
+                set SUB_PASSTHROUGH_MS             0
+                set SUB_PASSTHROUGH_VS             0
+                set SUB_ACH_RETURN                 0
+                set SUB_AUTH_VOLUME                0
+                set SUB_SETT_VOLUME                0
+                set SUB_DIAL_MONTHLY               0 
+                set SUB_CHARGE_PER_PAGE            0
+                set SUB_DIAL_MONTHLY_MERCHANT      0
+                set SUB_CHARGEBACK_CNT             0
+                set SUB_CHARGEBACK_AMT             0
+                set SUB_TERMINAL_BILLING           0
+                
+puts " $ISO_ID:   $SUB_DISCOUNT_CHARGE "
+
+                set query_string_sub1 " SELECT  SUM(CASE WHEN (m.tid in ('010003005101' , '010123005102', '010003005102','010123005101') and m.tid_settl_method = 'C' and m.trans_sub_seq = '0') Then m.amt_original else 0 end ) AS S_AMOUNT,
+                      SUM(CASE WHEN (m.tid in ('010003005101' , '010123005102', '010003005102','010123005101') and m.tid_settl_method = 'D' and m.trans_sub_seq = '0') Then m.amt_original else 0 end) AS R_AMOUNT, 
+                      SUM(CASE WHEN (m.tid in ('010003005101' , '010123005102', '010003005102','010123005101') and m.trans_sub_seq = '0') Then 1 else 0 end ) AS S_COUNT,
+                      SUM(CASE WHEN ((m.tid in ('010003005101' , '010123005102', '010003005102' , '010123005101') and m.trans_sub_seq = '0') or (m.tid = '010003005301')) Then 1 else 0 end) AS TOTAL_COUNT,
+                      SUM(CASE WHEN (m.tid in ('010003005301', '010003005401', '010003010102','010003015201', '010003015102', '010003015101', '010003015210') and m.tid_settl_method = 'C' )Then m.amt_original else 0 end ) as CHARGEBACK_S_AMT,
+                      SUM(CASE WHEN (m.tid in ('010003005301', '010003005401', '010003010102','010003015201', '010003015102', '010003015101', '010003015210') and m.tid_settl_method = 'D' )Then m.amt_original else 0 end ) as CHARGEBACK_R_AMT,
+                      SUM(CASE WHEN m.tid in ('010003005301', '010003005401', '010003010102','010003015201', '010003015102', '010003015101', '010003015210') Then 1 else 0 end ) as CHARGEBACK_CNT            
+                FROM mas_trans_log m
+                WHERE  m.institution_id = '105'
+                  AND m.gl_date like '%-$short_month-$short_year%'
+            GROUP BY substr(m.entity_id, 8, 2)
+            ORDER BY substr(m.entity_id, 8,2) "
+                         
+                  puts "  query_string_sub1: $query_string_sub1"                
+                  orasql $cursorM8 $query_string_sub1  
+                  while {[orafetch $cursorM8 -dataarray clrsub1 -indexbyname] != 1403}  {
+          
+                                 set SUB_AMOUNT  [expr $clrsub1(S_AMOUNT) - $clrsub1(R_AMOUNT)]
+                                 set SUB_COUNT   $clrsub1(S_COUNT)
+                                 set SUB_SETT_TRAN_COUNT         $clrsub1(TOTAL_COUNT)
+                                 set SUB_SETT_VOLUME             [expr $SETT_TRAN_COUNT * $SETT_MONTHLY_RATE ]
+                                 set SUB_CHARGEBACK_AMT          [expr $clrsub1(CHARGEBACK_S_AMT) - $clrsub1(CHARGEBACK_R_AMT)]
+                                 set SUB_CHARGEBACK_CNT          $clrsub1(CHARGEBACK_CNT)                
+                  }
+
+                  set SUB_DISCOUNT_CHARGE    0
+                  set SUB_PASSTHROUGH_AMOUNT 0
+                  set SUB_PASSTHROUGH_MS     0
+                  set SUB_PASSTHROUGH_VS     0
+               
+                set query_string_sub2 " SELECT SUM( CASE WHEN(((m.TID LIKE '010004%' and m.tid not like '01000428%') or m.tid like '01000507%' ) and m.settl_flag = 'Y' and m.tid_settl_method = 'C')
+                                                   then m.AMT_ORIGINAL end ) as CREDIT_AMOUNT,
+                                               SUM( CASE WHEN(((m.TID LIKE '010004%' and m.tid not like '01000428%') or m.tid like '01000507%' ) and m.settl_flag = 'Y' and m.tid_settl_method = 'D')
+                                                   then m.AMT_ORIGINAL end ) as DEBIT_AMOUNT,
+                                               SUM( CASE WHEN((m.TID LIKE '%4020000' or m.tid like '%4020005' ) and m.tid_settl_method = 'C')
+                                                   then m.AMT_ORIGINAL end ) as I_CREDIT_AMOUNT,
+                                               SUM( CASE WHEN((m.TID LIKE '%4020000' or m.tid like '%4020005' ) and m.tid_settl_method = 'D')
+                                                   then m.AMT_ORIGINAL end ) as I_DEBIT_AMOUNT,
+                                               SUM( CASE WHEN(m.tid_settl_method = 'C' and m.tid <> '010004020000' and m.tid <> '010004020005' and (m.TID LIKE '010004%' and m.tid not like '01000428%') and m.card_scheme = '05' )
+                                                  then m.AMT_ORIGINAL end ) as MS_CREDIT_AMOUNT,
+                                               SUM( CASE WHEN(m.tid_settl_method = 'D' and m.tid <> '010004020000' and m.tid <> '010004020005' and (m.TID LIKE '010004%' and m.tid not like '01000428%') and m.card_scheme = '05' )
+                                                  then m.AMT_ORIGINAL end ) as MS_DEBIT_AMOUNT,
+                                               SUM( CASE WHEN(m.tid_settl_method = 'C' and m.tid <> '010004020000' and m.tid <> '010004020005' and (m.TID LIKE '010004%' and m.tid not like '01000428%') and m.card_scheme = '04' )
+                                                  then m.AMT_ORIGINAL end ) as VS_CREDIT_AMOUNT,
+                                               SUM( CASE WHEN(m.tid_settl_method = 'D' and m.tid <> '010004020000' and m.tid <> '010004020005' and (m.TID LIKE '010004%' and m.tid not like '01000428%') and m.card_scheme = '04' )
+                                                  then m.AMT_ORIGINAL end ) as VS_DEBIT_AMOUNT
+                                               FROM mas_trans_log m
+                                               WHERE m.institution_id = '105'
+                                                    AND substr(m.entity_id, 8, 2) = '$ISO_ID'
+                                                    AND m.date_to_settle like '%-$short_month-$short_year%'
+                                               GROUP BY substr(m.entity_id, 8, 2)
+                                               ORDER BY substr(m.entity_id, 8,2) "
+               orasql $cursorM9 $query_string_sub2
+               puts "query_string_sub2: $query_string_sub2"
+               while {[orafetch $cursorM9 -dataarray clrsub2 -indexbyname] != 1403}  {
+                
+                      set SUB_DISCOUNT_CHARGE    [expr $clrsub2(DEBIT_AMOUNT) - $clrsub2(CREDIT_AMOUNT) ]
+                      puts "SUB_DISCOUNT_CHARGE: $SUB_DISCOUNT_CHARGE"
+                      set SUB_PASSTHROUGH_AMOUNT [expr $clrsub2(I_DEBIT_AMOUNT) - $clrsub2(I_CREDIT_AMOUNT) ]
+                      set SUB_PASSTHROUGH_MS     [expr $clrsub2(MS_DEBIT_AMOUNT) - $clrsub2(MS_CREDIT_AMOUNT)]
+                      set SUB_PASSTHROUGH_VS     [expr $clrsub2(VS_DEBIT_AMOUNT) - $clrsub2(VS_CREDIT_AMOUNT)]
+               }
+               
+puts " $ISO_ID:   $SUB_DISCOUNT_CHARGE "
+              if {$SUB_AMOUNT != "0" || $SUB_ALL_TERMINAL_COUNT != "0" || $SUB_TERMINAL_BILLING  != "0" || $SUB_PAGE_NUM != "0" ||  $SUB_CHARGEBACK_CNT != "0" || $SUB_RETRIVAL_COUNT  != "0" || $SUB_DISCOUNT_CHARGE  != "0"} { 
+              puts $cur_file "                 "
+              puts $cur_file " **SUBTOTAL**:, , $SUB_AMOUNT,$SUB_COUNT, $SUB_DISCOUNT_CHARGE, , , , ,\r"
+              puts $cur_file "                 "
+              }
+              
+              set SUB_AMOUNT                     0
+              set SUB_ALL_TERMINAL_COUNT         0
+              set SUB_TERMINAL_COUNT             0
+              set SUB_NON_BANK_COUNT             0
+              set SUB_SETT_TRAN_COUNT            0
+              set SUB_AUTH_TRAN_COUNT            0 
+              set SUB_PAGE_NUM                   0
+              set SUB_DIAL_TR_COUNT              0 
+              set SUB_RETRIVAL_COUNT             0
+              set SUB_DISCOUNT_CHARGE            0
+              set SUB_PASSTHROUGH_AMOUNT         0  
+              set SUB_PASSTHROUGH_MS             0
+              set SUB_PASSTHROUGH_VS             0
+              set SUB_ACH_RETURN                 0
+              set SUB_AUTH_VOLUME                0
+              set SUB_SETT_VOLUME                0
+              set SUB_DIAL_MONTHLY               0 
+              #set SUB_FEE_PER_CONTRACT           0
+              set SUB_CHARGE_PER_PAGE            0
+              set SUB_DIAL_MONTHLY_MERCHANT      0
+              set SUB_CHARGEBACK_CNT             0
+              set SUB_CHARGEBACK_AMT             0
+              set SUB_TERMINAL_BILLING          0
+       }
+       
+close $cur_file
+
+exec uuencode $cur_file_name $file_name | mailx -r clearing@jetpay.com -s $file_name clearing-np@jetpay.com
+
+oraclose $count_cursor1
+oraclose $count_cursor2
+oraclose $count_cursor3
+oraclose $count_cursor4
+oraclose $count_cursor5
+oraclose $count_cursor6
+oraclose $count_cursor7
+oraclose $count_cursor8
+oraclose $count_cursor9
+oraclose $fetch_cursorM1
+oraclose $fetch_cursorM2
+oraclose $fetch_cursorM3
+oraclose $cursorM1
+oraclose $cursorM2
+oraclose $cursorM3
+oraclose $cursorM4
+oraclose $cursorM5
+oraclose $cursorM6
+oraclose $cursorM7
+oraclose $cursorM8
+oraclose $cursorM9
+oralogoff $handlerT
+oralogoff $handlerM

@@ -1,0 +1,69 @@
+#!/usr/bin/env expect
+
+# $Id: upload_1pb.exp 4884 2019-09-09 15:08:34Z tyork $
+
+# Setup initial variable
+# Set username, password and destination
+set DESTINATION_MACHINE "www.fpbvpn.net"
+set USERNAME "ncr"
+set PASSWORD "4fIYkFKl3k7nSMT"
+
+#set DESTINATION_MACHINE "172.17.0.57"
+#set USERNAME "jetpay"
+#set PASSWORD "04jetpay09jet" 
+
+log_file ftp.log
+set curdate [clock format [clock seconds] -format {%Y-%m-%d %H:%M:%S}]
+send_log  "\nToday is: $curdate\n"
+
+# Procedure to try to make sure the link is terminated cleanly so the
+# ISDN line will drop quickly
+proc bailout {error_code} {
+        send "bye\r"
+        expect {
+                "221 Session terminated" {exec sleep 2; exit $error_code}
+                timeout                  {exit 99}
+        "*ftp>"          {exit 1}
+        }
+        exit 99
+};# end bailout
+
+#**** Main Code Module ****
+
+#exit 0
+
+set customer_directory nextgate
+set file_2_transfer [lindex $argv 0]
+
+
+set timeout 30
+#spawn sftp $USERNAME@$DESTINATION_MACHINE
+spawn sftp -o "IdentityFile=/clearing/filemgr/.ssh/first_premier_rsa" -o "ProxyCommand=ssh filemgr@sftp.jetpay.com nc www.fpbvpn.net 22" $USERNAME@$DESTINATION_MACHINE
+
+
+while 1 { expect {
+    "*Name*"     {send "$USERNAME\r"}
+    "*assword:"  {send "$PASSWORD\r"}
+    "\n530*"           {send_user "failed login\n"; bailout 1}
+    "*ftp>"       {send_user "successful login\n";break}
+    timeout            {send_user "Timeout problem\n"; bailout 2}
+}}
+
+send "cd FromJetPay\r"
+
+while 1 { expect {
+    "*ftp>"                  {send_user "changed BINARY\n"; break}
+        timeout              {send_user "Problem setting to binary"; bailout 3}
+}
+}
+
+
+send "put $file_2_transfer\r"
+
+while 1 { expect {
+        "*ftp>" {send_user "FILE TRANSFERED\n\n"; break}
+        timeout              {send_user "Problem transferring file\n"; bailout 4}
+}
+}
+
+send "bye\r"

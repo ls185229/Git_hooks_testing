@@ -1,0 +1,69 @@
+#!/usr/bin/env expect
+
+# Setup initial variable
+set DESTINATION_MACHINE eft.merrickbank.com
+
+exit 0
+
+# These allow testing of this script
+set USERNAME "jetpay"
+set PASSWORD "Merrick123"
+
+
+log_file ftp.log
+
+# Procedure to try to make sure the link is terminated cleanly so the
+# ISDN line will drop quickly
+proc bailout {error_code} {
+        send "bye\r"
+        expect {
+                "221 Session terminated" {exec sleep 2; exit $error_code}
+                timeout                  {exit 99}
+        "*ftp>"          {exit 1}
+        }
+        exit 99
+};# end bailout
+
+
+#**** Main Code Module ****
+
+set customer_directory nextgate
+set file_2_transfer [lindex $argv 0]
+set fdir "R"
+
+switch $fdir {
+    "R" {set drop_dir "Reports"}
+    "A" {set drop_dir "ACH"}
+     default {exit 1}
+}
+set timeout 30
+spawn sftp $USERNAME@$DESTINATION_MACHINE
+
+while 1 { expect {
+    "*assword:"  {send "$PASSWORD\r"}
+    "\n530*"           {send_user "failed login\n"; bailout 1}
+    "*ftp>"       {send_user "successful login\n";break}
+    timeout            {send_user "Timeout problem\n"; bailout 2}
+}}
+
+send "cd ToMerrick/$drop_dir\r"
+
+while 1 { expect {
+    "*ftp>"                  {send_user "chnaged to binary"; break}
+        timeout              {send_user "Problem setting to binary"; bailout 3}
+}
+}
+
+set timeout 1200
+
+send "put $file_2_transfer\r"
+
+while 1 { expect {
+        "*ftp>" {send_user "FILE TRANSFERED"; break}
+        timeout              {send_user "Problem transferring file\n"; bailout 4}
+}
+}
+
+send "bye\r"
+
+exit 0

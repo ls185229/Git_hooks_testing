@@ -1,0 +1,87 @@
+
+phy_format = elf
+
+classifier = elf_classifier
+
+phy_record_checker = enrich_MasElf
+
+MSG mas_elf
+{
+#field name                         field     offset len  type   des call_back
+ MAS_INSTITUTION_ID   				  19.17201.28000    0 -1 ocstring - -
+ MAS_TRANS_SEQ_NBR                    19.17201.28001	0 -1 ocstring - - 
+ MAS_TRANS_SUB_SEQ                    19.17201.28002	0 -1 ocstring - - 
+ MAS_TID                              19.17201.28003 	0 -1 ocstring - -
+ MAS_MAS_CODE                         19.17201.28004    0 -1 ocstring - - 
+ MAS_CARD_SCHEME                      19.17201.28005	0 -1 ocstring - - 
+ MAS_AMT_ORIGINAL                     19.17201.28006	0 -1 ocstring - - 
+ MAS_CURR_CD_ORIGINAL                 19.17201.28007    0 -1 ocstring - - 
+ MAS_NBR_OF_ITEMS                     19.17201.28008	0 -1 ocstring - - 
+ MAS_ENTITY_ID                        19.17201.28009    0 -1 ocstring - - 
+ MAS_EXTERNAL_ENTITY_ID               19.17201.28010    0 -1 ocstring - - 
+ MAS_ADD_AMT1                         19.17201.28011	0 -1 ocstring - - 
+ MAS_ADD_CNT1                         19.17201.28012	0 -1 ocstring - - 
+ MAS_ADD_AMT2                         19.17201.28013	0 -1 ocstring - - 
+ MAS_ADD_CNT2                         19.17201.28014	0 -1 ocstring - - 
+ MAS_FILE_ID                          19.17201.28015    0 -1 ocstring - - 
+ MAS_BATCH_ID                         19.17201.28016    0 -1 ocstring - - 
+ MAS_ACTIVITY_DATE_TIME               19.17201.28017	0 -1 ocstring - 
+ MAS_ENTITY_ACCT_ID                   19.17201.28018    0 -1 ocstring - - 
+ MAS_AMT_BILLING                      19.17201.28019	0 -1 ocstring - - 
+ MAS_CURR_BILLING                     19.17201.28020    0 -1 ocstring - - 
+ MAS_PRICED_DATE_TIME                 19.17201.28021	0 -1 ocstring - - 
+ MAS_DATE_TO_SETTLE                   19.17201.28022	0 -1 ocstring - - 
+ MAS_CURR_RATE                        19.17201.28023	0 -1 ocstring - - 
+ MAS_SETTL_FLAG                       19.17201.28024    0 -1 ocstring - - 
+ MAS_POSTING_ENTITY_ID                19.17201.28025    0 -1 ocstring - - 
+ MAS_GL_ACCT_FROM                     19.17201.28026    0 -1 ocstring - - 
+ MAS_GL_ACCT_TO                       19.17201.28027    0 -1 ocstring - - 
+ MAS_GL_DATE                          19.17201.28028    0 -1 ocstring - - 
+ MAS_PERCENT_AMT                      19.17201.28029	0 -1 ocstring - - 
+ MAS_PER_ITEM_AMT                     19.17201.28030	0 -1 ocstring - - 
+ MAS_PERCENT_RATE                     19.17201.28031	0 -1 ocstring - - 
+ MAS_PER_ITEM_RATE                    19.17201.28032	0 -1 ocstring - - 
+ MAS_CALENDAR_ID                      19.17201.28033    0 -1 ocstring - - 
+ MAS_SETTL_PLAN_ID                    19.17201.28034    0 -1 ocstring - - 
+ MAS_FEE_PKG_ID                       19.17201.28035    0 -1 ocstring - - 
+ MAS_EXTERNAL_TRANS_NBR               19.17201.28036    0 -1 ocstring - - 
+ MAS_PAYMENT_SEQ_NBR                  19.17201.28037	0 -1 ocstring - - 
+ MAS_INVOICE_NBR                      19.17201.28038	0 -1 ocstring - - 
+ MAS_PAYMENT_TERM                     19.17201.28039    0 -1 ocstring - - 
+ MAS_CHEQUE_NBR                       19.17201.28040    0 -1 ocstring - - 
+ MAS_TRANS_ROUTING_NBR                19.17201.28041    0 -1 ocstring - - 
+ MAS_MAS_CODE_DOWNGRADE               19.17201.28042    0 -1 ocstring - - 
+ MAS_EXPECTED_MAS_CODE                19.17201.28043    0 -1 ocstring - - 
+ MAS_TRANS_DESCRIPTION                19.17201.28044    0 -1 ocstring - - 
+ MAS_SUSPEND_REASON                   19.17201.28045    0 -1 ocstring - - 
+ MAS_REVERSAL_IND					  19.17201.28046    0 -1 ocstring - -
+ MAS_CUT_OFF_FLAG                     19.17201.28047	0 -1 ocstring - -
+ MAS_UNAPPLIED_CASH                   19.17201.28048	0 -1 ocstring - -
+ MAS_TID_SETTL_METHOD				  19.17201.28049    0 -1 ocstring - -
+ MAS_FEE_GRP_ID    					  19.17201.28050    0 -1 ocstring - -
+ MAS_TRANS_TYPE						  19.17201.28051    0 -1 ocstring - -
+ MAS_FILE_TYPE						  19.17201.28052    0 -1 ocstring - -
+ MAS_ACTIVITY_SOURCE				  19.17201.28053    0 -1 ocstring - -
+ MAS_ACTIVITY_JOB_NAME				  19.17201.28054    0 -1 ocstring - -
+ MAS_SUSPEND_LEVEL    				  19.17201.28092    0 -1 ocstring - -
+ MAS_FILE_NAME         		 		  19.17201.28055    0 -1 ocstring - -
+ MAS_ACTIVITY_DATE				  	  19.17201.28057    0 -1 ocstring - -
+ MAS_ACTIVITY_TIME					  19.17201.28058    0 -1 ocstring - -
+ MAS_PAY_EFFECT_DATE                  19.17201.28062	0 -1 ocstring - -
+ MAS_RECORD_CNT  					  19.17201.28073    0 -1 ocstring - -
+ MAS_ENTITY_TYPE       		 		  19.17201.28094    0 -1 ocstring - -
+ MAS_BILL_IND          		 		  19.17201.28115    0 -1 ocstring - -
+ MAS_TRANS_REF_DATA                   19.17201.28122    0 -1 ocstring - -
+ MAS_SENDER_ID                        19.17201.28123    0 -1 ocstring - -
+ MAS_ORIG_FILE_ID                     19.17201.28124    0 -1 ocstring - -
+ MAS_ORIG_BATCH_ID                    19.17201.28125    0 -1 ocstring - -
+ MAS_EXT_FILE_ID                      19.17201.28126    0 -1 ocstring - -
+ MAS_EXT_BATCH_ID                     19.17201.28127    0 -1 ocstring - -
+ MAS_MICROFILM_NBR                    19.17201.28128    0 -1 ocstring - -
+ MAS_PAY_CYCLE                        19.17201.28129    0 -1 ocstring - -
+ MAS_PAY_MTHD                         19.17201.28119    0 -1 ocstring - -
+ MAS_PAYER_NAME                       19.17201.28131    0 -1 ocstring - -
+ MAS_BATCH_CAPTURE_DT                 19.17201.28132    0 -1 ocstring - -
+ MAS_TRANS_DESCRIPTION                19.17201.28044    0 -1 ocstring - -
+ MAS_PAYMENT_REF_NBR                  19.17201.28137    0 -1 ocstring - -
+}

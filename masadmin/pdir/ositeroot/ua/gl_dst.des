@@ -1,0 +1,21 @@
+phy_format = offset
+MSG detail
+{
+ gl_acct_id                   0       0    20    alpha    -        - O -
+ amt_credit                   0      28    12    number   2        - O -
+ amt_debit                    0      40    12    number   2        - O -
+}
+MSG FileHeader 
+{
+ file_id                      0       0    12    alpha    -        - O -
+ gl_date                      0      12     8    date     YYYYMMDD - O -
+ export_date                  0      20     8    date     YYYYMMDD - O -
+ export_time                  0      28     8    number   -        - O -
+}
+MSG FileTrailer
+{
+ file_id                      0       0    12    alpha    -        - O -
+ credit_amt                   0      12    12    number   2        - O - 
+ debit_amt                    0      24    12    number   2        - O - 
+ record_cnt                   0      36    12    number   -        - O - 
+}

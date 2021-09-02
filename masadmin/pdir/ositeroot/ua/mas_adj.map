@@ -1,0 +1,59 @@
+MAP batch_header  : BatchHeader <> mas_elf
+{
+ trans_type							 MAS_TRANS_TYPE
+ activity_date_time				  	 MAS_ACTIVITY_DATE_TIME
+ batch_curr							 MAS_CURR_CD_ORIGINAL		field_trim
+}
+
+MAP batch_trailer : BatchTrailer <> mas_elf
+{
+ trans_type							 MAS_TRANS_TYPE
+ batch_amt							 MAS_AMT_ORIGINAL
+ batch_cnt							 MAS_NBR_OF_ITEMS
+ batch_add_amt1						 MAS_ADD_AMT1
+ batch_add_cnt1						 MAS_ADD_CNT1
+ batch_add_amt2						 MAS_ADD_AMT2
+ batch_add_cnt2						 MAS_ADD_CNT2
+}
+
+MAP file_header   : FileHeader <> mas_elf
+{
+ trans_type							 MAS_TRANS_TYPE
+ file_type							 MAS_FILE_TYPE
+ file_date_time    					 MAS_ACTIVITY_DATE_TIME
+ activity_source					 MAS_ACTIVITY_SOURCE
+ activity_job_name					 MAS_ACTIVITY_JOB_NAME
+ suspend_level						 MAS_SUSPEND_LEVEL
+}
+
+MAP file_trailer  : FileTrailer <> mas_elf
+{
+ trans_type							 MAS_TRANS_TYPE
+ file_amt							 MAS_AMT_ORIGINAL
+ file_cnt							 MAS_NBR_OF_ITEMS
+ file_add_amt1						 MAS_ADD_AMT1
+ file_add_cnt1						 MAS_ADD_CNT1
+ file_add_amt2						 MAS_ADD_AMT2
+ file_add_cnt2						 MAS_ADD_CNT2
+}
+
+MAP detail: detail <> mas_elf
+{
+ trans_type							 MAS_TRANS_TYPE
+ %file_type							 MAS_FILE_TYPE
+ trans_id							 MAS_TID					field_trim
+ entity_id                  	 	 MAS_ENTITY_ID				field_trim
+ %activity_date_time                 MAS_ACTIVITY_DATE_TIME
+ %batch_curr                         MAS_CURR_CD_ORIGINAL		field_trim
+ card_scheme                         MAS_CARD_SCHEME			field_trim
+ mas_code                            MAS_MAS_CODE				field_trim
+ mas_code_downgrade                  MAS_MAS_CODE_DOWNGRADE     field_trim
+ nbr_of_items                        MAS_NBR_OF_ITEMS
+ amt_original                        MAS_AMT_ORIGINAL
+ add_cnt1                            MAS_ADD_CNT1
+ add_amt1                            MAS_ADD_AMT1
+ add_cnt2                            MAS_ADD_CNT2
+ add_amt2                            MAS_ADD_AMT2
+ external_trans_id                   MAS_EXTERNAL_TRANS_NBR		field_trim
+ free_text_description               MAS_TRANS_DESCRIPTION 		field_trim
+}

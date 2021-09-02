@@ -1,0 +1,119 @@
+#!/usr/bin/env expect
+
+# $Id: upload_SBC.exp 2446 2013-10-07 19:20:30Z mitra $
+
+#===============================================================================
+
+#Environment veriables.......
+
+set box $env(SYS_BOX)
+set clrpath $env(CLR_OSITE_ROOT)
+set maspath $env(MAS_OSITE_ROOT)
+set mailtolist $env(MAIL_TO)
+set mailfromlist $env(MAIL_FROM)
+set clrdb $env(IST_DB)
+set authdb $env(ATH_DB)
+
+#Email Subjects variables Priority wise
+
+set msubj_c "$box :: Priority : Critical - Clearing and Settlement"
+set msubj_u "$box :: Priority : Urgent - Clearing and Settlement"
+set msubj_h "$box :: Priority : High - Clearing and Settlement"
+set msubj_m "$box :: Priority : Medium - Clearing and Settlement"
+set msubj_l "$box :: Priority : Low - Clearing and Settlement"
+
+#Email Body Headers variables for assist
+
+set mbody_c "ASSIST :: \nContact On-Call Engr. \[15 minutes or Escalate\] - Open Ticket \n\n"
+set mbody_u "ASSIST :: \nContact On-Call Engr. \[60 minutes or Escalate\] - Open Ticket \n\n"
+set mbody_h "ASSIST :: \nInform On-Call/Available Engr. \[Day Time 7 days of the week\] - Open Ticket \n\n"
+set mbody_m "ASSIST :: \nInform Available Engr. \[Day Time 5 working days of week\] - Open Ticket \n\n"
+set mbody_l "ASSIST :: \nAssign Ticket to the appropriate Engr. \[24/7 - 365 days\] - Open Ticket \n\n"
+
+#System information variables....
+
+set sysinfo "System: $box\n Location: $env(PWD) \n\n"
+#===============================================================================
+
+#Checking if a process stop file exist. If process stop file exists stoping process
+#and notifying process issue exists. If the the stop file do not exist
+#create the stop file while running this script, so that other process do not start
+#if this scripts completes successfully and removes the stop file at
+#the end of the scripts.
+
+if {[file exists /clearing/filemgr/process.stop]} {
+set mbody "PREVIOUS PROCESS NOT COMPLETED ALL OTHER PROCESSES STOPED: Msg sent from JOURNALS/INST_117/UPLOAD/upload_SBC.exp\n"
+exec echo "$mbody_c $sysinfo $mbody" | mutt -s "$msubj_c" $mailtolist
+exit 1
+}
+
+# Setup initial variable
+set DESTINATION_MACHINE sftp.jetpay.com
+set USERNAME "filemgr"
+set PASSWORD ""
+
+log_file ftp.log
+set curdate [clock format [clock seconds] -format {%Y-%m-%d %H:%M:%S}]
+send_log  "\nToday is: $curdate\n"
+
+# Procedure to try to make sure the link is terminated cleanly so the
+# ISDN line will drop quickly
+proc bailout {error_code} {
+        send "bye\r"
+        expect {
+                "221 Session terminated" {exec sleep 2; exit $error_code}
+                timeout                  {exit 99}
+        "*ftp>"          {exit 1}
+        }
+        exit 99
+};# end bailout
+
+set customer_directory nextgate
+set file_2_transfer [lindex $argv 0]
+set drop_dir "/secure/sbancard/reports"
+
+catch {set x [exec find . -name *$file_2_transfer\*]} result
+puts $result
+if {$x == ""} {
+    puts "NO FILE FOUND"
+    exit 1
+}
+
+#**** Main Code Module ****
+
+set timeout 30
+spawn sftp $USERNAME@$DESTINATION_MACHINE
+
+while 1 { expect {
+    "*assword:"  {send "$PASSWORD\r"}
+    "\n530*"     {send_user "failed login\n"; bailout 1}
+    "*ftp>"      {send_user "successful login\n";break}
+    timeout      {send_user "Timeout problem\n"; bailout 2}
+}}
+
+send "cd $drop_dir\r"
+
+while 1 { expect {
+    "*ftp>"          {send_user "changed to binary\n"; break}
+        timeout      {send_user "Problem setting to binary"; bailout 3}
+}
+}
+
+set timeout 1200
+
+foreach file_2_transfer $x {
+set file_2_transfer [string range $file_2_transfer 2 end]
+puts $file_2_transfer
+
+send "put $file_2_transfer\r"
+
+while 1 { expect {
+        "*ftp>"  {send_user "FILE TRANSFERED\n\n"; exec mv $file_2_transfer ../ARCHIVE ; break}
+        timeout  {send_user "Problem transferring file\n"; bailout 4}
+}
+}
+}
+
+send "bye\r"
+
+exit 0

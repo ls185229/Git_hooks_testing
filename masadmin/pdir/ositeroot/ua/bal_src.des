@@ -1,0 +1,9 @@
+classifier = bal_classifier
+
+error_handler = mas_error_handler
+
+phy_format = tvs
+tvs_layout = mastvs
+tvs_lookup_tag = lookup_tag
+tvs_lookup_type = lookup_type
+tvs_create = create_message_bal

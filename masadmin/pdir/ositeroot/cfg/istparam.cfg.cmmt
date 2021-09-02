@@ -1,0 +1,57 @@
+#
+# Copyright (C) 2004 eFunds Corporation ("eFunds").  All Rights Reserved.  
+# eFunds Canada Corporation is an authorized user. 
+# 
+# IST is a registered trademark of eFunds Corporation.  Other brand or
+# product names are trademarks or registered trademarks of their respective
+# holders. 
+# 
+# The information contained herein is the unpublished proprietary property
+# of eFunds.  Except as specifically authorized in writing by eFunds, the
+# holder of this document shall: i) keep all information contained herein
+# confidential, and ii) protect the information, in whole or in part, from
+# disclosure and dissemination to all third parties. 
+# 
+# This document and the software described in it are furnished under license
+# and may be used or copied only in accordance with the terms of such license.
+# This document is supplied for information purposes only, is subject to
+# change without notice, and should not be construed as a commitment by
+# either eFunds Corporation or eFunds Canada Corporation. 
+#
+
+#
+#	CMMT Driver: sample configuration (1 running instance)
+#
+
+GROUP PORT
+
+# Starting from mbport version 0.1.1 it is not necessary to specify 'null'
+# port.server entry and use it for all port.name entries except first. This version
+# takes care about running instances of driver.
+
+port.server cmmt		cmmt
+
+# the driver's instance name is CMMT
+# Note: TCP/IP port #9777 has been used only as a sample!!!
+#	Please change it in according to local specifics. 
+
+port.name Listener CurrentNode Server external accept-call <cmmt:CMMT.localhost.9777:cmmt_listener>
+
+# the following ports are statically defined "passive" listener ports
+# (if parameter cmmt.enable_port_create is Yes or 1 the driver will create it
+# automatically)
+
+#port.name Port1 CurrentNode Server external listen <cmmt:CMMT:cmmt_pos>
+#port.name Port2 CurrentNode Server external listen <cmmt:CMMT:cmmt_pos>
+#port.name Port3 CurrentNode Server external listen <cmmt:CMMT:cmmt_pos>
+#port.name Port4 CurrentNode Server external listen <cmmt:CMMT:cmmt_pos>
+#port.name Port5 CurrentNode Server external listen <cmmt:CMMT:cmmt_pos>
+
+#port.name Port11 CurrentNode Server2 external make-call <cmmt:CMMT.localhost.9777:cmmt_pos>
+#port.name Port22 CurrentNode Server2 external make-call <cmmt:CMMT.localhost.9777:cmmt_pos>
+#port.name Port33 CurrentNode Server2 external make-call <cmmt:CMMT.localhost.9777:cmmt_pos>
+#port.name Port44 CurrentNode Server2 external make-call <cmmt:CMMT.localhost.9777:cmmt_pos>
+#port.name Port55 CurrentNode Server2 external make-call <cmmt:CMMT.localhost.9777:cmmt_pos>
+
+END_GROUP
+

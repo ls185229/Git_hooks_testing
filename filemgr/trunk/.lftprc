@@ -1,0 +1,12 @@
+set ftps:initial-prot ""
+set ftp:use-feat false
+set ftp:ssl-force true
+set ftp:ssl-protect-data true
+set ftp:ssl-auth TLS
+set ftp:auto-passive-mode on
+set ftp:passive-mode on
+set ssl:cert-file /clearing/filemgr/.certdata/mas_cert.pem
+set ssl:key-file  /clearing/filemgr/.certdata/mas_privkey.pem
+set ssl:ca-file   /clearing/filemgr/.certdata/mas_trust.pem
+set ssl:check-hostname no
+set ssl:verify-certificate false

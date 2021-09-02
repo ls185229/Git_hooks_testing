@@ -1,0 +1,56 @@
+MAP file_header   : wire_elf <> FileHeader
+{
+ "RID="									_rec_type
+ "00"                                 	rec_type    
+ "\n TID="								_trans_id
+ MAS_TRANS_ID							trans_id
+ "\n VDT="								_value_date
+ MAS_PAY_EFFECT_DATE                 	value_date 
+ "\n RCT="								_rec_total
+ " "									rec_total
+ "\n AMT="								_dollar_total
+ " "									dollar_total
+ "\n UID="								_user_id
+ MAS_USER_ID  							user_id
+ "\n AUT="								_auth_code
+ " "                                    auth_code
+}
+MAP batch_header  : wire_elf <> BatchHeader
+{
+ "RID="                                 _rec_type
+ "01"									rec_type
+ "\n TID="								_trans_id
+ MAS_TRANS_ID							trans_id
+ MAS_BATCH_SEQ							batch_seq
+ "\n VDT="								_value_date
+ MAS_PAY_EFFECT_DATE                 	value_date 
+ "\n RCT="								_rec_total
+ " "									rec_total
+ "\n AMT="								_dollar_total
+ " "									dollar_total
+ "\n AUT="								_auth_code
+ " "                                    auth_code
+}
+MAP detail : wire_elf <> detail
+{
+ "RID="   								_rec_type
+ "10"                                   rec_type   
+ "\n TID=R"								_item_ref
+ MAS_ITEM_REF                        	item_ref
+ "\n VDT="								_value_date
+ MAS_PAY_EFFECT_DATE                 	value_date 
+ "\n AMT="								_amount
+ MAS_PAY_AMT                         	amount               
+ "\n RPT="								_repeat_code
+ MAS_REPEAT_CODE                     	repeat_code
+ "\n SID="								_source_id
+ MAS_SOURCE_ID                       	source_id
+ "\n AUT="								_auth_code
+ MAS_AUTH_CODE                          auth_code
+}
+MAP batch_trailer  : wire_elf <> BatchTrailer
+{
+}
+MAP file_trailer  : wire_elf <> FileTrailer
+{
+}

@@ -1,0 +1,86 @@
+R01:Insufficient Funds
+R02:Account Closed
+R03:No Account/Unable to locate Account
+R04:Invalid Account Number
+R05:Unauthorized Debit To Consumer Acc Using Corp SEC code
+R06:Returned Per ODFI's Request
+R07:Authorization Revoked By Customer
+R08:Payment Stopped
+R09:Uncollected Funds
+R10:Customer Advises Not Authorized
+R11:Check Truncation Entry Return
+R12:Account Sold To Another DFI
+R13:Invalid ACH Routing Number
+R14:Representative Payee Deceased Or Unable To Continue In That Capacity
+R15:Beneficiay Or Account Holder Deceased
+R16:Account Frozen
+R17:File Record Edit Criteria
+R18:Improper Effective Entry Date
+R19:Amount Field Error
+R20:Non-Transaction Account
+R21:Invalid Company Identification
+R22:Invalid Individual ID Number
+R23:Credit Entry Refused By Receiver
+R24:Duplicate Entry
+R25:Addenda Error
+R26:Mandatory Field Error
+R27:Trace Number Error
+R28:Routing Number Check Digit Error
+R29:Corporate Customer Advises Not Authorized
+R30:RDFI Not Participant in Check Truncation Program
+R31:Permissible Return Entry (CCD & CTX only)
+R32:RDFI Not-Settlement
+R33:Return Of XCK Entry
+R34:Limited Participation DFI
+R35:Return Of Improper Debit Entry
+R36:Return Of Improper Credit Entry
+R37:Source Document Presented For Payment
+R38:Stop Payment On Source Document
+R39:Improper Source Document
+R40:Return Of ENR Entry By Federal Government
+R41:Invalid Transaction Code 
+R42:Routing Number/Check Digit Error
+R43:Invalid DFI Account Number
+R44:Invalid Individual ID Number
+R45:Invalid Individual Name/Company Name
+R46:Invalid Representative Payee Indicator
+R47:Duplicate Enrollment
+R50:State Law Affecting RCK Acceptance
+R51:Item Is Ineligible
+R52:Stop Payment on Item
+R53:Item and ACH Entry Presented for Payment
+R80:IAT Entry Coding Error
+R81:Non-Participant in IAT program
+R82:Invalid Foreign Receiving DFI Identification
+R83:Foreign Receiving DFI Unable to Settle
+R84:Entry Not Processed by Gateway Operator
+R61:Misrouted Return
+R67:Duplicate Return
+R68:Untimely Return
+R69:Field Error
+R70:Permissible Return Entry Not Accepted/Return Not Requested by ODFI
+R71:Misrouted Dishonored Return
+R72:Untimely Dishonored Return
+R73:Timely Original Return
+R74:Corrected Return
+R75:Original Return Not A Duplicate
+R76:No Errors Found
+C01:Incorrect DFI Account Number
+C02:Incorrect Routing Number
+C03:Incorrect Routing Number And Incorrect DFI Account Number
+C04:Incorrect Individual Name/Receiving Company Name
+C05:Incorrect Transaction Code
+C06:Incorrect DFI Acc Number And Incorrect Transaction Code
+C07:Incorrect Routing number, DFI Account And Transaction Code 
+C08:Incorrect Receiving DFI Identification
+C09:Incorrect Individual Identification Number
+C13:Addenda Format Error
+C61:Misrouted Notification Of Change
+C62:Incorrect Trace Number
+C63:Incorrect Company Identification Number
+C64:Incorrect Individual ID number
+C65:Incorrectly Formatted Corrected Data
+C66:Incorrect Discretionary Data
+C67:Routing Number Not From Original Entry Detail Record
+C68:DFI Account Number Not From Original Entry Detail Record
+C69:Incorrect Transaction Code

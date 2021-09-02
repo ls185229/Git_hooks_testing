@@ -1,0 +1,307 @@
+#!/usr/bin/env expect
+#/clearing/filemgr/.profile
+
+# $Id: upload.exp 3196 2015-07-17 19:29:37Z bjones $
+
+################################################################################
+#
+#    File Name - upload.exp
+#
+#    Description - uploads a file or files to a sftp destination
+#
+#    Arguments - $1 = filename
+#                $2 = directory
+#
+#    Return - 0 = Success
+#             1 = Fail
+#
+#    Usage:   $programName \[ options \] <arg1> <arg2>
+#         where <arg1> - a filename
+#         options: -d date (date must me YYYYMMDD)
+#                  -m (turns on TEST mode)
+#                  -f filename (filename is the cofig file to use)
+#                     (the default config file is upload.cfg)
+#                  -h (this list)
+#
+#    Exit - 1 -
+#           2 -
+#           3 - DB Error
+#
+#    Note - requires GetOpts package from tclGetOpts1.1 to be in ~/MASCLRLIB
+#
+################################################################################
+
+lappend auto_path /clearing/filemgr/MASCLRLIB
+package require GetOpts 1.1
+
+source $env(MASCLR_LIB)/masclr_tcl_lib
+
+##package require Oratcl
+
+## Enviornment Variable ##
+##set box $env(SYS_BOX)
+##set prod_db $env(IST_DB)
+##set prod_auth_db $env(ATH_DB)
+##set sysinfo "System: $box \nLocation: $env(PWD) \n\n"
+
+## Global Variable ##
+global programName
+
+global ARCHIVE_DIR DESTINATION FTP_CMD FTP_OPTION LOG_FILE MODE PASSWORD
+global REMOTE_DIR USERNAME debug_level
+
+set programName [file tail $argv0]
+set cfg_file "upload.cfg"
+
+set ARCHIVE_DIR ""
+set DESTINATION ""
+set FTP_CMD     "sftp"
+set FTP_OPTION  ""
+set LOG_FILE    "ftp.log"
+set MODE        "PROD"
+set PASSWORD    ""
+set REMOTE_DIR  ""
+set USERNAME    ""
+set MASCLR::DEBUG_LEVEL 0
+
+###############################################################################
+#
+#    Procedure Name - usage
+#
+#    Description - Print the script usage
+#
+###############################################################################
+
+proc usage {} {
+    global programName
+
+    puts "Usage:   $programName \[ options \] <arg1> <arg2>"
+    puts "     where <arg1> - a filename "
+    puts "     options: -d date (date must be YYYYMMDD) "
+    puts "              -f configfile (configfile is the config file to use) "
+    puts "                 (the default config file is upload.cfg)"
+    puts "              -l logfile (file destination for script text output) "
+    puts "              -m (set the mode, e.g., DEV, TEST, QA or PROD)"
+    puts "              -v (verbosity, i.e., raises the debug level)"
+    puts "              -h (help. displays this list)"
+}
+
+
+################################################################################
+#
+#    Procedure Name - initDB
+#
+#    Description - Setup the DB, tables and handles
+#
+#    Return - exit 3 if any error
+#
+###############################################################################
+proc initDB {} {
+    return 0
+}
+
+###############################################################################
+#
+#    Procedure Name - init
+#
+#    Description - Initialize program arguments
+#
+###############################################################################
+
+proc init {} {
+    global argv
+    global programName
+    global runDate
+    global mode
+    global cfg_file
+    global optind
+    global debug_level
+
+    set runDate [clock format [clock second] -format "%Y%m%d"]
+    set mode "PROD"
+    set debug_level 0
+
+    while { [ set err [ getopt $argv "d:f:hl:mv" opt optarg ]] } {
+        if { $err < 0 } then {
+            puts "error: $argv0: $opt "
+            usage
+        } else {
+            switch -exact $opt {
+                d {set runDate  $optarg}
+                f {set cfg_file $optarg}
+                l {set log_file $optarg}
+                m {set mode     $optarg}
+                v {incr debug_level
+                   incr MASCLR::DEBUG_LEVEL}
+                h { usage }
+            }
+        }
+    }
+
+    set argv [ lrange $argv $optind end ]
+
+    ### Read the config file to get DB params
+    readCfgFile $cfg_file
+
+    ### Intitalize database variables
+    initDB
+}
+
+###############################################################################
+#
+#    Procedure Name - readCfgFile
+#
+#    Description -
+#
+#    Return -
+#
+###############################################################################
+
+proc readCfgFile {cfg_file_name} {
+    global programName
+
+    global ARCHIVE_DIR DESTINATION FTP_CMD FTP_OPTION LOG_FILE MODE PASSWORD
+    global REMOTE_DIR USERNAME debug_level
+
+    set clr_db_logon ""
+
+    if {[catch {open $cfg_file_name r} file_ptr]} {
+        puts "File Open Err:Cannot open config file $cfg_file_name"
+        exit 1
+    }
+
+    MASCLR::log_message "readCfgFile {$cfg_file_name}" 4
+
+    while { [set line [gets $file_ptr]] != {}} {
+        set line_parms [split $line ,]
+        MASCLR::log_message "readCfgFile with line: $line" 4
+        switch -exact -- [lindex  $line_parms 0] {
+            "ARCHIVE_DIR"   { set ARCHIVE_DIR [lindex $line_parms 1] }
+            "DESTINATION"   { set DESTINATION [lindex $line_parms 1] }
+            "FTP_CMD"       { set FTP_CMD     [lindex $line_parms 1] }
+            "FTP_OPTION"    { set FTP_OPTION  [lrange $line_parms 1 [llength $line_parms]] }
+            "LOG_FILE"      {
+                            set LOG_FILE    [lindex $line_parms 1]
+                            MASCLR::set_log_file_name $LOG_FILE
+                            log_file $LOG_FILE
+                }
+            "MODE"          { set MODE        [lindex $line_parms 1] }
+            "PASSWORD"      { set PASSWORD    [lindex $line_parms 1] }
+            "REMOTE_DIR"    { set REMOTE_DIR  [lindex $line_parms 1] }
+            "USERNAME"      { set USERNAME    [lindex $line_parms 1] }
+
+            default {
+                puts "Unknown config parameter [lindex $line_parms 0]"
+            }
+        }
+    }
+
+    close $file_ptr
+    MASCLR::log_message "ARCHIVE_DIR: $ARCHIVE_DIR " 4
+    MASCLR::log_message "DESTINATION: $DESTINATION " 4
+    MASCLR::log_message "FTP_CMD    : $FTP_CMD     " 4
+    MASCLR::log_message "FTP_OPTION : $FTP_OPTION  " 4
+    MASCLR::log_message "LOG_FILE   : $LOG_FILE    " 4
+    MASCLR::log_message "MODE       : $MODE        " 4
+    MASCLR::log_message "PASSWORD   : $PASSWORD    " 4
+    MASCLR::log_message "REMOTE_DIR : $REMOTE_DIR  " 4
+    MASCLR::log_message "USERNAME   : $USERNAME    " 4
+}
+
+###############################################################################
+#
+#    Procedure Name - bailout
+#
+#    Description - Used to exit out from the sftp child process
+#
+#    Return - None
+#
+###############################################################################
+
+proc bailout {error_code} {
+    global loc_path
+
+    send "bye\r"
+    exit $error_code
+};# end bailout
+
+###############################################################################
+#
+#    Procedure Name -
+#
+#    Description -
+#
+#    Return -
+#
+###############################################################################
+
+proc send_files {file_list} {
+    global ARCHIVE_DIR DESTINATION FTP_CMD FTP_OPTION LOG_FILE MODE PASSWORD
+    global REMOTE_DIR USERNAME debug_level
+
+    MASCLR::log_message "send_files {file_list: $file_list}" 4
+    set timeout 30 ; #used by expect to set timeout to 30 sec
+
+    spawn $FTP_CMD $FTP_OPTION $USERNAME@$DESTINATION
+
+    while 1 { expect {
+      "*assword:"  {send "$PASSWORD\r"}
+      "\n530*"     {send_user "failed login\n"; bailout 1}
+      "*ftp>"      {send_user "successful login\n";break}
+      timeout      {send_user "Remote Login timed out\n"; bailout 2}
+    } }
+
+    send "cd $REMOTE_DIR \r"
+
+    while 1 { expect {
+            "*ftp>"   {send_user "changed remote directory\n"; break}
+            timeout   {send_user "cd command timed out\n"; bailout 2}
+    } }
+
+
+    foreach file_2_transfer $file_list {
+
+        send "put $file_2_transfer\r"
+
+        while 1 { expect {
+            "*ftp>" {
+                        send_user "FILE TRANSFERED\n\n";
+                        if { $ARCHIVE_DIR != "" || $ARCHIVE_DIR != "." } {
+                            file copy $file_2_transfer $ARCHIVE_DIR
+                            file delete $file_2_transfer
+                        }
+                        break
+                    }
+            timeout     {send_user "Problem transferring file\n"; bailout 4}
+        } }
+    }
+
+    send "bye\r"
+
+}
+
+##########
+## MAIN ##
+##########
+
+## log_file
+set curdate [clock format [clock seconds] -format {%Y-%m-%d %H:%M:%S}]
+MASCLR::set_log_file_name $LOG_FILE
+MASCLR::log_message "Today is: $curdate"
+
+init
+
+set files_2_transfer {}
+foreach arg $argv {
+    if {[catch { set expand_file_list [glob $arg]} result]} {
+        MASCLR::log_message "catch result failed from (glob $arg): $result"
+    } else {
+        foreach file_2_transfer $expand_file_list {
+            lappend files_2_transfer $file_2_transfer
+        }
+    }
+}
+
+if { $files_2_transfer != {} } {
+    send_files $files_2_transfer
+}

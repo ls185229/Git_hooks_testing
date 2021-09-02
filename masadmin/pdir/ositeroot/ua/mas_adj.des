@@ -1,0 +1,66 @@
+phy_format = offset
+classifier = mas_classifier
+phy_record_checker = checksum 
+
+error_handler = mas_error_handler
+
+MSG detail 
+{
+ trans_type                   0       0     2    alpha    -        - O -
+ trans_id                     0       2    12    alpha    -        - O -
+ entity_id                    0      14    18    alpha    -        - O -
+ card_scheme                  0      32     2    alpha    -        - O -
+ mas_code                     0      34    25    alpha    -        - O -
+ mas_code_downgrade           0      59    25    alpha    -        - O -
+ nbr_of_items                 0      84    10    number   -        - O -
+ amt_original                 0      94    12    number   2        - O - 
+ add_cnt1                     0     106    10    number   -        - O -
+ add_amt1                     0     116    12    number   2        - O -
+ add_cnt2                     0     128    10    number   -        - O -
+ add_amt2                     0     138    12    number   2        - O -
+ external_trans_id            0     150    25    alpha    -        - O -
+ free_text_description        0     175   100    alpha    -        - O -
+}
+MSG FileHeader 
+{
+ trans_type                   0       0     2    alpha    -        - O -
+ file_type                    0       2     2    alpha    -        - O -
+ %file_type                   0       2     2    alpha    -        - O -
+ file_date_time               0       4    16    number   -        - O -
+ %file_date_time              0       4    16    number   -        - O -
+ activity_source              0      20    16    alpha    -        - O -
+ %activity_source             0      20    16    alpha    -        - O -
+ activity_job_name            0      36     8    alpha    -        - O -
+ %activity_job_name           0      36     8    alpha    -        - O -
+ suspend_level                0      44     1    alpha    -        - O -
+}
+MSG FileTrailer
+{
+ trans_type                   0       0     2    alpha    -        - O -
+ file_amt                     0       2    12    number   2        - O - 
+ file_cnt                     0      14    10    number   -        - O - 
+ %file_cnt                    0      14    10    number   -        - O - 
+ file_add_amt1                0      24    12    number   2        - O - 
+ file_add_cnt1                0      36    10    number   -        - O - 
+ file_add_amt2                0      46    12    number   2        - O - 
+ file_add_cnt2                0      58    10    number   -        - O - 
+}
+MSG BatchHeader 
+{
+ trans_type                   0       0     2    alpha    -        - O -
+ batch_curr                   0       2     3    alpha    -        - O -
+ %batch_curr                  0       2     3    alpha    -        - O -
+ activity_date_time           0       5    16    number   -        - O -
+ %activity_date_time          0       5    16    number   -        - O -
+}
+MSG BatchTrailer
+{
+ trans_type                   0       0     2    alpha    -        - O -
+ batch_amt                    0       2    12    number   2        - O - 
+ batch_cnt                    0      14    10    number   -        - O - 
+ %batch_cnt                   0      14    10    number   -        - O - 
+ batch_add_amt1               0      24    12    number   2        - O - 
+ batch_add_cnt1               0      36    10    number   -        - O - 
+ batch_add_amt2               0      46    12    number   2        - O - 
+ batch_add_cnt2               0      58    10    number   -        - O - 
+}

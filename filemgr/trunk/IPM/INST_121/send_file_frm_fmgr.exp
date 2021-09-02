@@ -1,0 +1,99 @@
+#!/usr/bin/env expect
+
+################################################################################
+# $Id: send_file_frm_fmgr.exp 3724 2016-04-05 22:27:58Z millig $
+# $Rev: 3724 $
+################################################################################
+#
+# File Name:  send_file_frm_fmgr.exp
+#
+# Description:  This program uploads incoming institution MasterCard report
+#               files to the Windows box for archiving after they have been
+#               processed for the day.
+#
+# Script Arguments:  None.
+#
+# Output:  None.
+#
+# Return:   0 = Success
+#          !0 = Exit with errors
+#
+# Notes:  None.
+#
+################################################################################
+
+
+set logdate [clock seconds]
+set curdate [clock format $logdate -format "%Y%m%d"]
+set logdate [clock format $logdate -format "%Y%m%d%H%M%S"]
+
+
+# Setup initial variable and such
+set IP_ADDR "dfw-prd-set-03"
+
+set USERNAME "filemgr"
+set PASSWORD "\$u3_veRe"
+
+
+# Procedure to try to exit the script cleanly
+proc bailout {error_code} {
+        send "bye\r"
+        expect {
+                "221 Session terminated" {exec sleep 2; exit $error_code}
+                timeout                  {exit 99}
+        }
+        exit 99
+};# end bailout
+
+
+
+#**** Main Code Module ****
+
+
+send_user "\n"
+send_user "<>   BEGIN transfering ---IPM FILE--- DT $logdate --\n"
+
+
+set timeout 300
+spawn ftp $IP_ADDR 8021
+set timeout 30
+
+while 1 { expect {
+    "Name*:"            {send "$USERNAME\r"}
+    "*rd:"              {send "$PASSWORD\r"}
+    "*ftp>"            {send_user "successful login\n";break}
+    timeout             {send_user "Timeout problem in login\n"; bailout 1}
+}}
+puts "about to transfer file"
+
+send "cd production/archive/mcarchive/T140 \r"
+
+while 1 { expect {
+    "*ftp>" {send_user "Change directory to IN appears to be successful\n";sleep 2; break}
+    timeout     {send_user "Timeout problem in changing to IN directory\n"; bailout 2}
+}}
+
+send "ascii \r"
+
+while 1 { expect {
+        "*ftp>" {send_user "Change directory to IN appears to be successful\n";sleep 2; break}
+        timeout         {send_user "Timeout problem in changing to IN directory\n"; bailout 2}
+}}
+
+set timeout 30
+send "mput orig*140* \r"
+
+while 1 { expect {
+        "*ftp>"        {send_user "Change directory to IN appears to be successful\n";sleep 2; break}
+        "mput*\?"       {send "y\r";sleep 2}
+        timeout         {send_user "Timeout problem in changing to IN directory\n"; bailout 2}
+}}
+
+
+
+send_user "Shutting down session\n"
+
+send "quit\r"
+send_user "() END --- Script send_base2_file.exp complete -------------------------------\n"
+
+exit 0

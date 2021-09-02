@@ -1,0 +1,143 @@
+#!/usr/bin/env expect
+
+# $Id: get_amex_tilr.exp 4911 2019-10-22 21:02:56Z bjones $
+
+# Expect script to download the TILR(EPTRN) files from AMEX
+# The files are downloaded and placed in appropriate directories
+#
+# Version 0.0 06/05/2014 Debra Evans
+#****************************************
+
+####System information variables....
+##################################################################################
+
+set sysinfo "System: $env(SYS_BOX)\n Location: $env(PWD)\n"
+set mailtolist $env(MAIL_TO)
+set mailfromlist $env(MAIL_FROM)
+
+###################################################################################
+#Email Subjects variables Priority for Clearing
+###################################################################################
+
+set msubj_c "$env(SYS_BOX) :: Priority : Critical - Clearing and Settlement"
+
+####################################################################################
+#Email Body variables Priority for Assist
+####################################################################################
+
+set mbody_c "ASSIST :: \nContact On-Call Engr. \[15 minutes or Escalate\] - Open Ticket \n\n"
+
+set logdate [clock seconds]
+set logdate [clock format $logdate -format "%Y%m%d%H%M%S"]
+
+set tilr_archive_dir "/clearing/filemgr/AMEX/SETTLEMENT/TILR/ARCHIVE"
+
+
+set tilr_filename "JETPAYPRD.EPTRN*"
+
+#~ set tilr_filename "*EPTRN*"
+
+set  filedate  [clock format [clock scan "-0 day"] -format %Y%m%d]
+
+proc bailout {message error_code} {
+    send "bye\r"
+    expect {
+        "221 Service closing control connection." {exec sleep 2; exit $error_code}
+        timeout                                   {exit 99}
+    }
+    exit 99
+};# end bailout
+
+set return_code 0
+
+puts "\n[clock format [clock seconds] -format "%Y/%m/%d %H:%M:%S" ] Beginning retrieval of AMEX TILR files"
+
+set timeout 2500
+
+spawn connection_to_amex_prod filemgr@sftp.jetpay.com
+sleep 20
+while 1 { expect {
+    "*sftp>"     {send_user "successful connection to AMEX\n";break}
+    timeout      {send_user "Timeout problem while connecting to AMEX\n"; bailout 2}
+}}
+
+send "cd outbox \r"
+sleep 20
+
+while 1 { expect {
+    "*sftp>"        {send_user "successful change directory to AMEX outbox\n"; break}
+    timeout         {send_user "Timeout problem while changing directory to AMEX outbox\n"; bailout 2}
+}}
+
+
+set timeout 5
+set settlement_found 0
+
+
+send_user "settlement_found is $settlement_found\n"
+ ####check if we have any settlement files today########
+
+send "ls $tilr_filename \r"
+sleep 20
+while 1 { expect {
+    "*sftp>    \n"       	{set settlement_found 0; break}
+    "JETPAYPRD.EPTRN*\n"	{set settlement_found 1; break}
+    timeout              	{set settlement_found 0; break}
+}}
+
+send_user "settlement_found is $settlement_found\n"
+#### NO settlement files were found ########
+if {$settlement_found == 0} {
+    send_user "!!!!!! There are no settlement files for AMEX in the secure sftp directory !!!!!!\n"
+}
+
+if {$settlement_found == 1} {
+    set timeout 2500
+
+    send "mget $tilr_filename \r"
+
+    while 1 { expect {
+        "*sftp>"        {send_user "successful file transfer of $tilr_filename\n"; break}
+        "mget*\?"       {send "y\r";sleep 2}
+        timeout         {send_user "Timeout problem while getting $tilr_filename for AMEX\n"; bailout 2}
+    }}
+}
+
+sleep 120
+
+puts "\nEnd of retrieval of AMEX TILR file(s) @ [clock format [clock seconds] -format "%m/%d/%y %H:%M:%S" ]\n"
+
+send_user "bye\n"
+
+
+puts "Beginning move of TILR file(s) to corresponding directory\n"
+
+
+##### MOVE TILR FILES TO ARCHIVE DIRECTORY #####
+
+set file_is_there 0
+
+if { [catch { set x [glob  $tilr_filename  ] } result] } {
+    puts "!!!!!! There are no tilr files for AMEX in /clearing/filemgr/AMEX directory !!!!!!\n"
+} else {
+    set file_is_there 1
+}
+
+if {$file_is_there == 1 } {
+    foreach file $x {
+
+        set out_filename $file
+
+        if { [catch {file copy $out_filename "$tilr_archive_dir/$out_filename.$filedate"} result ] } {
+            puts "err returned: $result"
+            puts "file copy of $out_filename to $tilr_archive_dir/$out_filename.$filedate FAILED \n"
+        } else {
+            puts "file copy of $out_filename to $tilr_archive_dir/$out_filename.$filedate successful \n"
+            exec rm $out_filename
+        }
+    }
+}
+
+puts "\n[clock format [clock seconds] -format "%Y/%m/%d %H:%M:%S" ] Ending retrieval of AMEX TILR files\n"
+
+exit $return_code

@@ -1,0 +1,93 @@
+#!/usr/bin/env expect
+
+################################################################################
+# $Id: upload.exp 4711 2018-09-24 17:32:35Z bjones $
+# $Rev: 4711 $
+################################################################################
+#
+# File Name:  upload.exp
+#
+# Description:  This program uploads the ACH file to the bank.
+#
+# Script Arguments:  file_2_transfer = Name of file to be uploaded.
+#                     drop_dir = Upload directory.
+#
+# Output:  None.
+#
+# Return:   0 = Success
+#          !0 = Exit with errors
+#
+# Notes:  None.
+#
+################################################################################
+
+# Setup initial variable
+set DESTINATION_MACHINE "ftp.eftbop.com"
+
+# These allow testing of this script
+set USERNAME "esqjetpay"
+#set PASSWORD "d1V3fJY"
+#set PASSWORD "t64fpJWj"
+set PASSWORD "731pm84B"
+
+set ftp_options "-o \"ProxyCommand=ssh filemgr@sftp.jetpay.com nc ftp.eftbop.com 22\" -o \"IdentityFile=/clearing/filemgr/.ssh/id_rsa.4096\" "
+
+log_file ftp.log
+
+puts "[clock format [clock seconds] -format "%Y/%m/%d %H%M%S"] Starting upload"
+
+# Procedure to try to make sure the link is terminated cleanly so the
+# ISDN line will drop quickly
+proc bailout {error_code} {
+    send "bye\r"
+    expect {
+        "221 Session terminated"    {exec sleep 2; exit $error_code}
+        timeout                     {exit 99}
+        "*ftp>"                     {exit 1}
+    }
+    exit 99
+};# end bailout
+
+#**** Main Code Module ****
+
+set file_2_transfer [lindex $argv 0]
+set drop_dir [lindex $argv 1]
+
+set timeout 300
+spawn sftp \
+    -o "ProxyCommand=ssh filemgr@sftp.jetpay.com nc ftp.eftbop.com 22" \
+    -o "IdentityFile=/clearing/filemgr/.ssh/id_rsa.4096" \
+    $USERNAME@$DESTINATION_MACHINE
+
+while 1 { expect {
+    "*assword:" {send "$PASSWORD\r"}
+    "\n530*"    {send_user "failed login\n"; bailout 1}
+    "*ftp>"     {send_user "successful login\n";break}
+    timeout     {send_user "Timeout problem\n"; bailout 2}
+}}
+
+send "cd ./$drop_dir\r"
+
+while 1 { expect {
+    "*ftp>"     {send_user "changed BINARY"; break}
+    timeout     {send_user "Problem setting to binary"; bailout 3}
+}}
+
+send "put $file_2_transfer\r"
+
+while 1 { expect {
+    "*ftp>"     {send_user "FILE TRANSFERED"; break}
+    timeout     {send_user "Problem transferring file\n"; bailout 4}
+}}
+
+send "ls -l \r"
+
+while 1 { expect {
+    "*ftp>"     {send_user "chnaged BINARY"; break}
+    timeout     {send_user "Problem with directory listing"; bailout 3}
+}}
+
+
+send "bye\r"
+
+puts "[clock format [clock seconds] -format "%Y/%m/%d %H%M%S"] Ending upload"

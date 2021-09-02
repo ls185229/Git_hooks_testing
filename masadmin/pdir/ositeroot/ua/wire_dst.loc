@@ -1,0 +1,6 @@
+location file
+
+file.record_type delimitted
+file.delimitter "\n"
+file.padding ""
+file.record_max_len 150

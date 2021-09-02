@@ -1,0 +1,27 @@
+
+# amex confirmation and reporting
+
+"SUB004.1089*" "/clearing/filemgr/AMEX/SETTLEMENT/ARCHIVE"
+
+
+#   CBNSP   disputes chargebacks
+#   EPTRN   tilr
+#   INQ02   inqueries (retrieval requests)
+#   PRBIN   bin tables
+#   SALAK
+#   SALES
+#   SALRP
+#   SCDNO
+#   SDPNO
+#   SPOAK
+#   SPORG
+#   SPORP
+
+"JETPAYPRD.CBNSP*"  "/clearing/filemgr/AMEX/DISPUTES/CBNSP/DNLOAD"
+"JETPAYPRD.EPTRN*"  "/clearing/filemgr/AMEX/SETTLEMENT/TILR/ARCHIVE"
+"JETPAYPRD.INQ02*"  "/clearing/filemgr/AMEX/DISPUTES/INQ02/DNLOAD"
+"JETPAYPRD.PRBIN*"  "/clearing/filemgr/AMEX/BIN_FILES/ARCHIVE"
+"JETPAYPRD.SA*"     "/clearing/filemgr/AMEX/ARCHIVE"
+"JETPAYPRD.SC*"     "/clearing/filemgr/AMEX/ARCHIVE"
+"JETPAYPRD.SD*"     "/clearing/filemgr/AMEX/ARCHIVE"
+"JETPAYPRD.SPO*"    "/clearing/filemgr/AMEX/MERCHANT/SPOMI/RESPONSES"

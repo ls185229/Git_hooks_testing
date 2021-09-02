@@ -1,0 +1,44 @@
+MAP file_header   : mwire_elf <> FileHeader
+{
+ "Manual Wire\n"						header
+ MAS_DAY_OF_WEEK                      	day_of_week 
+ MAS_SYS_DATE							sys_date
+ "\n\n"									blank_line
+ "Bank Name"   							column1_1
+ "City"									column1_2
+ "State"								column1_3
+ "Trans Routing Nbr"					column1_4
+ "DDA                \n"				column1_5
+ "Merchant Name"       					column2_1
+ "Merchant Number"						column2_2
+ "Processing Date"                      column2_3
+ "Deposit Amount"						column2_4
+ "Payment Seq Nbr   \n\n"				column2_5
+}
+MAP detail : mwire_elf <> detail
+{
+ MAS_BANK_NAME							bank_name
+ MAS_CITY								city
+ MAS_STATE								state
+ MAS_TRANS_ROUTING_NBR					trans_routing_nbr
+ MAS_DDA								dda
+ "\n"									next_line
+ MAS_CUSTOMER_NAME						merchant_name
+ MAS_ENTITY_ACCT_ID						merchant_number    
+ MAS_PAY_PROC_DATE						processing_date
+ MAS_PAY_AMT                         	deposit_amt
+ MAS_PAYMENT_SEQ_NBR					payment_seq_nbr
+ "\n----------------------------------------------------------------------------------------------------------"         divider_line
+}
+MAP file_trailer  : mwire_elf <> FileTrailer
+{
+ ""										spaces
+ "Total Manual Wires"					footer
+  MAS_PAY_AMT							total_amt
+}
+MAP batch_header  : mwire_elf <> BatchHeader
+{
+}
+MAP batch_trailer  : mwire_elf <> BatchTrailer
+{
+}

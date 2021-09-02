@@ -1,0 +1,18 @@
+##################################################################################################################
+# $Id: turnOff_cron.txt 4152 2017-04-19 16:50:43Z bjones $
+##################################################################################################################
+
+#                                     #
+# THESE COMMANDS ARE NEVER TURNED OFF #
+#                                     #
+* * * * * cd /clearing/filemgr/GLOBAL_CHECKS; DO_NOT_TURNOFF_ALERT_CHECK.sh > /clearing/filemgr/GLOBAL_CHECKS/LOG/cj_alert.log 2>&1
+### * * * * * cd /clearing/filemgr/TC57/; tc57_file_status_check.sh > /clearing/filemgr/TC57/LOG/cj_tc57_status.log 2>&1
+### 05 * * * * cd /clearing/filemgr/MBU/; mbu_T277.sh >> /clearing/filemgr/MBU/LOG/mbu277.log 2>&1
+### 55 * * * * cd /clearing/filemgr/MBU/; mbu_R276.sh >> /clearing/filemgr/MBU/LOG/mbu276.log 2>&1
+### 01 00,04,08,12,16,20 * * * cd /clearing/filemgr/TSYS/DNLOAD/; get_adf.sh >> /clearing/filemgr/TSYS/LOG/CRON.tsys.adf.log 2>&1
+### 05 02 * * * cd /clearing/filemgr/TSYS/DNLOAD/; get_cdf.sh >> /clearing/filemgr/TSYS/LOG/CRON.tsys.cdf.log 2>&1
+### 35 22 * * * cd /clearing/filemgr/TSYS/DNLOAD/; get_cdf.sh >> /clearing/filemgr/TSYS/LOG/CRON.tsys.cdf.log 2>&1
+
+#                                                              #
+# Please refer to .turnOn_cron.txt for additional cron entries #
+#                                                              #

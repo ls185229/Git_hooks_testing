@@ -1,0 +1,35 @@
+MAP detail : pay_elf <> detail
+{
+ "01"                                   trans_type   
+ MAS_INSTITUTION_ID						institution_id
+ MAS_ENTITY_ID							entity_id
+ MAS_ENTITY_LEVEL						entity_level
+ MAS_PAY_EFFECT_DATE  					payment_effect_dt
+ MAS_ENTITY_ACCT_ID						entity_acct_id
+ MAS_PAYMENT_METHOD_CD					payment_method_cd
+ MAS_PAYMENT_SEQ_NBR					payment_seq_nbr
+ MAS_LINK_PAY_SEQ_FLAG					link_pay_seq_flag
+ MAS_PAY_PROC_DATE  					payment_proc_dt
+ MAS_PAY_AMT    						payment_amt
+ MAS_PAYMENT_RUN						payment_run
+ MAS_TRANS_ROUTING_NBR					trans_routing_nbr
+ MAS_ACCT_NBR							acct_nbr
+ MAS_DDA_CHANGED						dda_changed
+ MAS_GL_DATE							gl_date
+}
+
+MAP file_header   : pay_elf <> FileHeader 
+{
+ "FH"                                  	trans_type       
+ "58"                                 	file_type
+ MAS_ACTIVITY_DATE_TIME                 activity_date_time 
+ "MAS"                 					activity_source
+ "POUNDER"              				activity_job_name
+}
+
+MAP file_trailer  : pay_elf <> FileTrailer
+{
+ "FT"                                  	trans_type    
+ MAS_RECORD_CNT							record_cnt
+ MAS_PAY_AMT							file_total
+}

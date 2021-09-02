@@ -1,0 +1,11 @@
+#$Id: $
+###############################################################################################################################
+#Inst # Bins # UPLOAD_path # Archive_path # filename#
+###############################################################################################################################
+CLR_DB_LOGON,masclr/masclr
+101    ,2423794601              , /clearing/filemgr/AMEX/CERT/,                              , 101.AMEX.TILR.REPORT.yyyymmdd.csv
+107    ,2423794213              , /clearing/filemgr/AMEX/CERT/,                              , 107.AMEX.TILR.REPORT.yyyymmdd.csv
+105    ,2423794387              , /clearing/filemgr/AMEX/CERT/,                              , 105.AMEX.TILR.REPORT.yyyymmdd.csv
+117    ,2423793603              , /clearing/filemgr/AMEX/CERT/,                              , 117.AMEX.TILR.REPORT.yyyymmdd.csv
+121    ,2423792589              , /clearing/filemgr/AMEX/CERT/,                              , 121.AMEX.TILR.REPORT.yyyymmdd.csv
+

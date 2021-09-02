@@ -1,0 +1,9 @@
+#$Id: ari_config.tc 2446 2013-10-07 19:20:30Z mitra $
+###############################################################################################################################
+#Inst # Bins # UPLOAD_path # Archive_path # filename#
+###############################################################################################################################
+merrick,620297 650343 650344 650357 650347 650351 620268, /clearing/filemgr/JOURNALS/ROLLUP/UPLOAD/  ,                              , ROLLUP.DISC.ARI.REPORT.yyyymmddHHMMSS.csv
+105    ,650381                                          , /clearing/filemgr/JOURNALS/INST_105/UPLOAD/,                              , 105.DISC.ARI.REPORT.yyyymmddHHMMSS.csv
+117    ,650431                                          , /clearing/filemgr/JOURNALS/INST_117/UPLOAD/,                              , 117.MERIDIAN.DISC.ARI.REPORT.yyyymmddHHMMSS.csv
+121    ,650565                                          , /clearing/filemgr/JOURNALS/INST_121/UPLOAD/,                              , 121.DISC.ARI.REPORT.yyyymmddHHMMSS.csv
+

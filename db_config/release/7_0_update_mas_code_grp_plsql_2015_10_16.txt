@@ -1,0 +1,42 @@
+anonymous block completed
+Rows added: 184
+Started at: 2015-10-16 15:12:57
+Ended at: 2015-10-16 15:13:40
+Using database: TRANSQA
+
+anonymous block completed
+Rows added: 184
+Started at: 2015-10-16 15:13:46
+Ended at: 2015-10-16 15:14:29
+Using database: TRANSQA
+
+anonymous block completed
+Rows added: 184
+Started at: 2015-10-16 15:14:49
+Ended at: 2015-10-16 15:15:35
+Using database: TRANSQA
+
+anonymous block completed
+Rows added: 204
+Started at: 2015-10-16 15:16:38
+Ended at: 2015-10-16 15:16:54
+Using database: AUTHQA
+
+anonymous block completed
+Rows added: 204
+Started at: 2015-10-16 15:17:02
+Ended at: 2015-10-16 15:17:16
+Using database: AUTHQA
+
+anonymous block completed
+Rows added: 492
+Started at: 2015-10-16 15:17:24
+Ended at: 2015-10-16 15:17:40
+Using database: CLEAR1
+
+anonymous block completed
+Rows added: 492
+Started at: 2015-10-16 15:18:04
+Ended at: 2015-10-16 15:18:20
+Using database: CLEAR1
+

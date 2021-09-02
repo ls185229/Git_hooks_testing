@@ -1,0 +1,10 @@
+#comgr sys solardev null istcomgr null null null null COMGR null 1 0 0x00000000 0 100100
+mas_fr test1 localhost null oasisvm null null OSITE_ROOT ovm/mas_fr.cfg MAS_FR null 1 0 0x0000ffff 10 001003 
+mas_val test2 localhost null oasisvm.sh null null OSITE_ROOT ovm/mas_val.cfg MAS_VAL null 1 0 0x0000ffff 10 001003 
+mas_vld test3 localhost null oasisvm null null OSITE_ROOT ovm/mas_vld.cfg MAS_VLD null 1 0 0x0000ffff 10 001003 
+mas_fee test4 localhost null oasisvm null null OSITE_ROOT ovm/mas_fee.cfg MAS_FEE null 1 0 0x0000ffff 10 001003
+mas_post test5 localhost null oasisvm null null OSITE_ROOT ovm/mas_post.cfg MAS_POST null 1 0 0x0000ffff 10 001003
+mas_daily test6 localhost null oasisvm null null OSITE_ROOT ovm/mas_daily.cfg MAS_DAILY null 1 0 0x0000ffff 10 001003 
+mas_ua  test7 localhost null oasisvm null null OSITE_ROOT ovm/mas_ua.cfg MAS_UA null 1 0 0x0000ffff 10 001003 
+mas_cntrl_ovm  test8 localhost null oasisvm null null OSITE_ROOT ovm/mas_cntrl_ovm.cfg MAS_CNTRL_OVM null 1 0 0x0000ffff 10 001003 
+mas_acc test9 localhost null oasisvm null null OSITE_ROOT ovm/mas_acc.cfg MAS_ACC null 1 0 0x0000ffff 10 001003

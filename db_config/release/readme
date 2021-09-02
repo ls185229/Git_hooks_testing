@@ -1,0 +1,10 @@
+0   Set up mas_code templates (VISA_JP_BASE_TIER1, ...)
+1   Read spreadsheet.
+1.5 Import spreadsheet into flmgr_ichg_rates_template.
+    Uses output from step 1.
+2   Merge flmgr_ichg_rates_template into flmgr_interchange_rates.
+3   Update flmgr_interchange_rates for various template_mas_code values.
+4   Update mas_codes.
+5   Update mas_code_grp.
+6   Update fee_pkg_mas_code.
+7   Update mas_fees.

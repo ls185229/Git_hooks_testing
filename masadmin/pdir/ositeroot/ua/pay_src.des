@@ -1,0 +1,25 @@
+
+phy_format = elf
+
+classifier = elf_classifier
+MSG pay_elf
+{
+#field name                         field     offset len  type   des call_back
+ MAS_INSTITUTION_ID                   19.17201.28000	0 -1 ocstring - - 
+ MAS_ENTITY_ID                        19.17201.28009	0 -1 ocstring - - 
+ MAS_ENTITY_LEVEL                     19.17201.28099	0 -1 ocstring - - 
+ MAS_ENTITY_ACCT_ID                   19.17201.28018	0 -1 ocstring - - 
+ MAS_PAYMENT_METHOD_CD                19.17201.28064	0 -1 ocstring - - 
+ MAS_PAYMENT_SEQ_NBR                  19.17201.28037	0 -1 ocstring - - 
+ MAS_LINK_PAY_SEQ_FLAG                19.17201.28096	0 -1 ocstring - - 
+ MAS_PAY_PROC_DATE                    19.17201.28068	0 -1 ocstring - - 
+ MAS_PAY_EFFECT_DATE                  19.17201.28062	0 -1 ocstring - - 
+ MAS_PAY_AMT                          19.17201.28067	0 -1 ocstring - - 
+ MAS_PAYMENT_RUN                      19.17201.28095	0 -1 ocstring - - 
+ MAS_TRANS_ROUTING_NBR                19.17201.28041	0 -1 ocstring - - 
+ MAS_ACCT_NBR                         19.17201.28066	0 -1 ocstring - - 
+ MAS_DDA_CHANGED                      19.17201.28097	0 -1 ocstring - - 
+ MAS_GL_DATE          			  	  19.17201.28028    0 -1 ocstring - -
+ MAS_ACTIVITY_DATE_TIME               19.17201.28017	0 -1 ocstring - - 
+ MAS_RECORD_CNT          			  19.17201.28073    0 -1 ocstring - -
+}

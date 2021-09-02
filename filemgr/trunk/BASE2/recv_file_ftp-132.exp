@@ -1,0 +1,113 @@
+#!/usr/bin/env expect
+
+################################################################################
+# $Id: recv_file_ftp-132.exp 4406 2017-10-27 16:30:44Z bjones $
+################################################################################
+# Expect script to download files
+#
+# Version 0.0 12/21/04 Joe Cloud
+# Version 0.1 10/27/05 Rifat Khan
+
+#****************************************
+# Stubs to test calling scripts
+#puts "Sent [lindex $argv 0]"
+#puts "Got [lindex $argv 1]"
+#exit 0
+
+#puts "Failed to send [lindex $argv 0]"
+#exit 1
+#****************************************
+#Reformated to except arguments of different connection
+#as File name , IP address, user and password
+#****************************************
+
+set logdate [clock seconds]
+set curdate [clock format $logdate -format "%Y%m%d"]
+set logdate [clock format $logdate -format "%Y%m%d%H%M%S"]
+
+
+# Setup initial variable and such
+# set IP_ADDR "dfw-prd-clr-02"
+set IP_ADDR $env(FILE_XCHNGR_VS)
+
+set USERNAME $env(FILE_XCHNGR_VS_USERNAME)
+set PASSWORD $env(FILE_XCHNGR_VS_PASSWORD)
+
+# Procedure to try to exit the script cleanly
+proc bailout {error_code} {
+        send "bye\r"
+        expect {
+                "221 Session terminated" {exec sleep 2; exit $error_code}
+                timeout                  {exit 99}
+        }
+        exit 99
+};# end bailout
+
+
+#**** Main Code Module ****
+
+if {$argc == 1} {
+    puts "Running with a date"
+    set dt [lindex $argv 0]
+} else {
+    puts "running with default"
+    set dt $curdate
+}
+
+### set dt in yymmdd format###
+set dt [string range $dt 2 end]
+
+send_user "\n"
+send_user "<>   BEGIN transfering ---IPM FILE--- DT $logdate for date-$dt--\n"
+
+set timeout 300
+spawn ftp $IP_ADDR 8021
+set timeout 30
+
+while 1 { expect {
+    "Name*:"            {send "$USERNAME\r"}
+    "*rd:"              {send "$PASSWORD\r"}
+    "*ftp>" {send_user "LOGIN SUCCESSFUL \n";sleep 2; break}
+    timeout             {send_user "Timeout problem in login\n"; bailout 1}
+}}
+
+set cib "/ep40/c425443/reports/incoming"
+send "cd $cib \r"
+while 1 { expect {
+        "*ftp>" {send_user "directory change to $cib successful\n";sleep 2; break}
+        timeout         {send_user "Timeout problem in changing to IN directory\n"; bailout 2}
+}}
+
+set cib "d$dt\*"
+send "ls $cib \r"
+
+while 1 { expect {
+        "*ftp>" {send_user "directory change to $cib successful\n";sleep 2; break}
+        timeout         {send_user "Timeout problem in changing to IN directory\n"; bailout 2}
+}}
+
+set output $expect_out(0,string)
+set cib [lindex $output 13]
+puts "Changing to Dir:$cib"
+
+send "cd \"$cib\" \r"
+
+while 1 { expect {
+        "*ftp>" {send_user "directory change to $cib successful\n";sleep 2; break}
+        timeout         {send_user "Timeout problem in changing to IN directory\n"; bailout 2}
+}}
+
+
+send "get EP747.txt \r"
+
+while 1 { expect {
+        "*ftp>" {send_user "file transfer successful\n";sleep 2; break}
+        "mget*\?"       {send "y\r";sleep 2}
+        timeout         {send_user "Timeout problem in changing to IN directory\n"; bailout 2}
+}}
+
+send_user "Shutting down session\n"
+
+send_user "() END --- Script send_base2_file.exp complete -------------------------------\n"
+
+send "quit\r"

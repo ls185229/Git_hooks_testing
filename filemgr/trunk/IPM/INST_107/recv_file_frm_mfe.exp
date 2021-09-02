@@ -1,0 +1,114 @@
+#!/usr/bin/env expect
+
+# Expect script to upload an files
+#
+# Version 0.0 12/21/04 Joe Cloud
+# Version 0.1 10/27/05 Rifat Khan
+
+#****************************************
+# Stubs to test calling scripts
+#puts "Sent [lindex $argv 0]"
+#puts "Got [lindex $argv 1]"
+#exit 0
+
+#puts "Failed to send [lindex $argv 0]"
+#exit 1
+#****************************************
+#Reformated to except arguments of different connection
+#as File name , IP address, user and password
+#****************************************
+
+set logdate [clock seconds]
+set logdate [clock format $logdate -format "%Y%m%d%H%M%S"]
+
+
+# Setup initial variable and such
+set IP_ADDR "dfw-prd-set-03"
+
+
+#set mail_list "ACH_email.list"
+
+# These allow connection with Bankcorp
+set USERNAME "filemgr"
+set PASSWORD "\$u3_veRe"
+
+
+# Procedure to try to exit the script cleanly
+proc bailout {error_code} {
+        send "bye\r"
+        expect {
+                "221 Session terminated" {exec sleep 2; exit $error_code}
+                timeout                  {exit 99}
+        }
+        exit 99
+};# end bailout
+
+
+
+#**** Main Code Module ****
+
+set file_2_send [lindex $argv 0]
+
+send_user "\n"
+send_user "<>   BEGIN transfering ---IPM FILE--- $file_2_send --- DT $logdate --\n"
+
+
+set timeout 300
+spawn ftp $IP_ADDR 8021
+set timeout 30
+
+while 1 { expect {
+    "Name*:"            {send "$USERNAME\r"}
+    "*rd:"              {send "$PASSWORD\r"}
+    "*ftp>" {send_user "Change directory to IN appears to be successful\n";sleep 2; break}
+    timeout             {send_user "Timeout problem in login\n"; bailout 1}
+}}
+puts "about to transfer file"
+
+send "cd production/mastercard/T140 \r"
+
+while 1 { expect {
+    "*ftp>" {send_user "Change directory to IN appears to be successful\n";sleep 2; break}
+    timeout     {send_user "Timeout problem in changing to IN directory\n"; bailout 2}
+}}
+
+send "binary \r"
+
+while 1 { expect {
+        "*ftp>" {send_user "Change directory to IN appears to be successful\n";sleep 2; break}
+        timeout         {send_user "Timeout problem in changing to IN directory\n"; bailout 2}
+}}
+
+
+
+set timeout 30
+send "mget TT*140* \r"
+
+while 1 { expect {
+        "*ftp>"        {send_user "Change directory to IN appears to be successful\n";sleep 2; break}
+        "mget*\?"       {send "y\r";sleep 2}
+        timeout         {send_user "Timeout problem in changing to IN directory\n"; bailout 2}
+}}
+
+send "cd ../T461 \r"
+
+while 1 { expect {
+        "*ftp>"        {send_user "Change directory to IN appears to be successful\n";sleep 2; break}
+        timeout         {send_user "Timeout problem in changing to IN directory\n"; bailout 2}
+}}
+
+send "binary \r"
+
+while 1 { expect {
+        "*ftp>" {send_user "Change directory to IN appears to be successful\n";sleep 2; break}
+        timeout         {send_user "Timeout problem in changing to IN directory\n"; bailout 2}
+}}
+
+
+send_user "Shutting down session\n"
+
+send "quit\r"
+send_user "() END --- Script send_base2_file.exp complete -------------------------------\n"
+
+
+exit 0

@@ -1,0 +1,498 @@
+1IP727010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+CLEARING CYCLE 005 - A
+>>>CLEARING CYCLE 005 - A<<<<
+1 <> 1 <> 1 <> 1
+2008-04-04
+>>>2008-04-04<<<<
+2 <> 1 <> 1 <> 1
+MEMBER ID: 00000004013
+                                                         NO DATA TO REPORT                                                           
+1IP727020-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+CLEARING CYCLE 005 - N
+>>>CLEARING CYCLE 005 - N<<<<
+1 <> 1 <> 1 <> 1
+2008-04-04
+>>>2008-04-04<<<<
+2 <> 1 <> 1 <> 1
+MEMBER ID: 00000004013
+                                                         NO DATA TO REPORT                                                           
+1IP728010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+ACCEPTANCE BRAND: DMC 
+>>>ACCEPTANCE BRAND: DMC <<<<
+1 <> 1 <> 1 <> 1
+BUSINESS SERVICE LEVEL
+>>>BUSINESS SERVICE LEVEL<<<<
+2 <> 1 <> 1 <> 1
+MEMBER ID: 00000004013
+ CURRENCY CODE :  840 - USD                                                                                                          
+                                                                                                                                     
+                                                                                                    RECON.                           
+  CYCLE                FILE ID                       FILE ID                      NET RECON          CURR.                           
+ ACTIVITY           TO MASTERCARD                FROM MASTERCARD                CURRENCY AMOUNT      CODE                            
+ ________   ____________________________   ____________________________   _______________________   _______                          
+  CYCLE 01                                                                                                                           
+  CYCLE 02                                                                                                                           
+  CYCLE 03                                                                                                                           
+  CYCLE 04  002/080404/00000004013/01283                                              1,301.81 CR   840-USD                          
+                                                                                                                                     
+  TOTAL                                                                               1,301.81 CR   840-USD                          
+                                                                                                                                     
+1IP728010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+ACCEPTANCE BRAND: DMC 
+>>>ACCEPTANCE BRAND: DMC <<<<
+1 <> 1 <> 1 <> 1
+BUSINESS SERVICE LEVEL
+>>>BUSINESS SERVICE LEVEL<<<<
+2 <> 1 <> 1 <> 1
+MEMBER ID: 00000004013
+ CURRENCY CODE :  840 - USD                                                                                                          
+                                                                                                                                     
+                                                                                                    RECON.                           
+  CYCLE                FILE ID                       FILE ID                      NET RECON          CURR.                           
+ ACTIVITY           TO MASTERCARD                FROM MASTERCARD                CURRENCY AMOUNT      CODE                            
+ ________   ____________________________   ____________________________   _______________________   _______                          
+  CYCLE 01                                                                                                                           
+  CYCLE 02                                                                                                                           
+  CYCLE 03                                                                                                                           
+  CYCLE 04  002/080404/00000004013/01283                                            117,329.97 CR   840-USD                          
+  CYCLE 04                                 001/080404/00000004013/04401                  87.73 DR   840-USD                          
+                                                                                                                                     
+  TOTAL                                                                             117,242.24 CR   840-USD                          
+                                                                                                                                     
+1IP728010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+ACCEPTANCE BRAND: MCC 
+>>>ACCEPTANCE BRAND: MCC <<<<
+1 <> 1 <> 1 <> 1
+BUSINESS SERVICE LEVEL
+>>>BUSINESS SERVICE LEVEL<<<<
+2 <> 1 <> 1 <> 1
+MEMBER ID: 00000004013
+ CURRENCY CODE :  840 - USD                                                                                                          
+                                                                                                                                     
+                                                                                                    RECON.                           
+  CYCLE                FILE ID                       FILE ID                      NET RECON          CURR.                           
+ ACTIVITY           TO MASTERCARD                FROM MASTERCARD                CURRENCY AMOUNT      CODE                            
+ ________   ____________________________   ____________________________   _______________________   _______                          
+  CYCLE 01                                                                                                                           
+  CYCLE 02                                                                                                                           
+  CYCLE 03                                                                                                                           
+  CYCLE 04  002/080404/00000004013/01283                                             15,244.63 CR   840-USD                          
+                                                                                                                                     
+  TOTAL                                                                              15,244.63 CR   840-USD                          
+                                                                                                                                     
+1IP728010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+ACCEPTANCE BRAND: MCC 
+>>>ACCEPTANCE BRAND: MCC <<<<
+1 <> 1 <> 1 <> 1
+BUSINESS SERVICE LEVEL
+>>>BUSINESS SERVICE LEVEL<<<<
+2 <> 1 <> 1 <> 1
+MEMBER ID: 00000004013
+ CURRENCY CODE :  840 - USD                                                                                                          
+                                                                                                                                     
+                                                                                                    RECON.                           
+  CYCLE                FILE ID                       FILE ID                      NET RECON          CURR.                           
+ ACTIVITY           TO MASTERCARD                FROM MASTERCARD                CURRENCY AMOUNT      CODE                            
+ ________   ____________________________   ____________________________   _______________________   _______                          
+  CYCLE 01                                 001/080404/00000004013/01101                 920.03 DR   840-USD                          
+  CYCLE 02                                 001/080404/00000004013/02201                  44.12 CR   840-USD                          
+  CYCLE 03                                                                                                                           
+  CYCLE 04  002/080404/00000004013/01283                                            801,213.96 CR   840-USD                          
+                                                                                                                                     
+  TOTAL                                                                             800,338.05 CR   840-USD                          
+                                                                                                                                     
+1IP728010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+CLEARING DAY TOTAL    
+>>>CLEARING DAY TOTAL    <<<<
+1 <> 1 <> 1 <> 1
+MEMBER ID: 00000004013
+                                                                                                                                     
+ CLEARING DAY TOTAL AS OF CLEARING CYCLE  5                                                                                          
+                                                                                                                                     
+              RECONCILIATION          NET RECONCILIATION                                                                             
+              CURRENCY  CODE           CURRENCY AMOUNT                                                                               
+              --------------          ------------------                                                                             
+                840-USD                    934,126.73 CR                                                                             
+                                                        ***END OF REPORT***                                                          
+1IP727010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+CLEARING CYCLE 005 - A
+>>>CLEARING CYCLE 005 - A<<<<
+1 <> 1 <> 1 <> 1
+2008-04-04
+>>>2008-04-04<<<<
+2 <> 1 <> 1 <> 1
+MEMBER ID: 00000004485
+                                                         NO DATA TO REPORT                                                           
+1IP727020-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+CLEARING CYCLE 005 - N
+>>>CLEARING CYCLE 005 - N<<<<
+1 <> 1 <> 1 <> 1
+2008-04-04
+>>>2008-04-04<<<<
+2 <> 1 <> 1 <> 1
+MEMBER ID: 00000004485
+                                                         NO DATA TO REPORT                                                           
+1IP142110-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+IPM MESSAGES CREATED O
+>>>IPM MESSAGES CREATED O<<<<
+1 <> 1 <> 1 <> 1
+2008-04-04
+>>>2008-04-04<<<<
+2 <> 1 <> 1 <> 1
+MEMBER ID: 00000006919
+                                                         NO DATA TO REPORT                                                           
+                                                                                                                                     
+1IP727010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+ACCEPTANCE BRAND: DMC 
+>>>ACCEPTANCE BRAND: DMC <<<<
+1 <> 1 <> 1 <> 1
+BUSINESS SERVICE LEVEL
+>>>BUSINESS SERVICE LEVEL<<<<
+2 <> 1 <> 1 <> 1
+BUSINESS SERVICE ID: 0
+>>>BUSINESS SERVICE ID: 0<<<<
+3 <> 1 <> 1 <> 1
+FILE ID: 002/080404/00
+>>>FILE ID: 002/080404/00<<<<
+4 <> 1 <> 1 <> 1
+MEMBER ID: 00000010279
+>>>MEMBER ID: 00000010279<<<<
+6 <> 0 <> 0 <> 0
+                                                                                                                                     
+ MASTERCARD SETTLED                                                     RECON                         FEE                            
+                                                                         CURR                         CURR                           
+ TRANS. FUNC. PROC.CODE       IRD   COUNTS               RECON AMOUNT    CODE       TRANS FEE         CODE                           
+ ------------ --------------- --- -------- -------------------------- ------- ----------------------- -------                        
+ FIRST PRES.  PURCHASE   ORIG 25        31                  271.63 CR 840-USD                 5.55 DR 840-USD                        
+              PURCHASE   ORIG 26        12                  253.58 CR 840-USD                 4.28 DR 840-USD                        
+              PURCHASE   ORIG 70        11                  640.78 CR 840-USD                 8.46 DR 840-USD                        
+              PURCHASE   ORIG 78         3                  142.53 CR 840-USD                 2.87 DR 840-USD                        
+              PURCHASE   ORIG 92         1                  324.59 CR 840-USD                 5.57 DR 840-USD                        
+ ------------ --------------- --- -------- -------------------------- ------- ----------------------- -------                        
+ FIRST PRES.  TOTAL                     58                1,633.11 CR 840-USD                26.73 DR 840-USD                        
+                                                                                                                                     
+ INTRAREGIONAL                                                                                                                       
+ MASTERCARD SETTLED                                                                                                                  
+ BUSINESS SERVICE ID SUBTOTAL           58                1,633.11 CR 840-USD                26.73 DR 840-USD                        
+1IP727010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+ACCEPTANCE BRAND: MCC 
+>>>ACCEPTANCE BRAND: MCC <<<<
+1 <> 1 <> 1 <> 1
+BUSINESS SERVICE LEVEL
+>>>BUSINESS SERVICE LEVEL<<<<
+2 <> 1 <> 1 <> 1
+BUSINESS SERVICE ID: 0
+>>>BUSINESS SERVICE ID: 0<<<<
+3 <> 1 <> 1 <> 1
+FILE ID: 002/080404/00
+>>>FILE ID: 002/080404/00<<<<
+4 <> 1 <> 1 <> 1
+MEMBER ID: 00000010279
+>>>MEMBER ID: 00000010279<<<<
+6 <> 0 <> 0 <> 0
+                                                                                                                                     
+ MASTERCARD SETTLED                                                     RECON                         FEE                            
+                                                                         CURR                         CURR                           
+ TRANS. FUNC. PROC.CODE       IRD   COUNTS               RECON AMOUNT    CODE       TRANS FEE         CODE                           
+ ------------ --------------- --- -------- -------------------------- ------- ----------------------- -------                        
+ FIRST PRES.  PURCHASE   ORIG 73         1                   80.55 CR 840-USD                 0.95 DR 840-USD                        
+ ------------ --------------- --- -------- -------------------------- ------- ----------------------- -------                        
+ FIRST PRES.  TOTAL                      1                   80.55 CR 840-USD                 0.95 DR 840-USD                        
+                                                                                                                                     
+ INTERREGIONAL                                                                                                                       
+ MASTERCARD SETTLED                                                                                                                  
+ BUSINESS SERVICE ID SUBTOTAL            1                   80.55 CR 840-USD                 0.95 DR 840-USD                        
+1IP727010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+ACCEPTANCE BRAND: MCC 
+>>>ACCEPTANCE BRAND: MCC <<<<
+1 <> 1 <> 1 <> 1
+BUSINESS SERVICE LEVEL
+>>>BUSINESS SERVICE LEVEL<<<<
+2 <> 1 <> 1 <> 1
+BUSINESS SERVICE ID: 0
+>>>BUSINESS SERVICE ID: 0<<<<
+3 <> 1 <> 1 <> 1
+FILE ID: 002/080404/00
+>>>FILE ID: 002/080404/00<<<<
+4 <> 1 <> 1 <> 1
+MEMBER ID: 00000010279
+>>>MEMBER ID: 00000010279<<<<
+6 <> 0 <> 0 <> 0
+                                                                                                                                     
+ MASTERCARD SETTLED                                                     RECON                         FEE                            
+                                                                         CURR                         CURR                           
+ TRANS. FUNC. PROC.CODE       IRD   COUNTS               RECON AMOUNT    CODE       TRANS FEE         CODE                           
+ ------------ --------------- --- -------- -------------------------- ------- ----------------------- -------                        
+ FIRST PRES.  PURCHASE   ORIG RA        39                1,243.55 CR 840-USD                25.88 DR 840-USD                        
+              PURCHASE   ORIG RL         1                   15.00 CR 840-USD                 0.29 DR 840-USD                        
+              PURCHASE   ORIG RQ         1                   29.78 CR 840-USD                 0.72 DR 840-USD                        
+              PURCHASE   ORIG 02         1                  174.25 CR 840-USD                 3.75 DR 840-USD                        
+              PURCHASE   ORIG 04         4                  304.32 CR 840-USD                 5.76 DR 840-USD                        
+              PURCHASE   ORIG 06         1                    6.39 CR 840-USD                 0.13 DR 840-USD                        
+              PURCHASE   ORIG 23         1                   21.42 CR 840-USD                 0.41 DR 840-USD                        
+              PURCHASE   ORIG 58        13                  412.76 CR 840-USD                 8.59 DR 840-USD                        
+              PURCHASE   ORIG 60         1                   29.70 CR 840-USD                 0.62 DR 840-USD                        
+              PURCHASE   ORIG 65        11                  360.55 CR 840-USD                12.11 DR 840-USD                        
+              PURCHASE   ORIG 68         2                  129.16 CR 840-USD                 3.72 DR 840-USD                        
+              PURCHASE   ORIG 70        19                1,771.80 CR 840-USD                30.38 DR 840-USD                        
+              PURCHASE   ORIG 75         1                   10.58 CR 840-USD                 0.42 DR 840-USD                        
+              PURCHASE   ORIG 78         2                1,459.67 CR 840-USD                28.33 DR 840-USD                        
+              PURCHASE   ORIG 96         7                  548.85 CR 840-USD                13.64 DR 840-USD                        
+ ------------ --------------- --- -------- -------------------------- ------- ----------------------- -------                        
+ FIRST PRES.  TOTAL                    104                6,517.78 CR 840-USD               134.75 DR 840-USD                        
+                                                                                                                                     
+ INTRAREGIONAL                                                                                                                       
+ MASTERCARD SETTLED                                                                                                                  
+ BUSINESS SERVICE ID SUBTOTAL          104                6,517.78 CR 840-USD               134.75 DR 840-USD                        
+1IP727010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+ACCEPTANCE BRAND: MCC 
+>>>ACCEPTANCE BRAND: MCC <<<<
+1 <> 1 <> 1 <> 1
+BUSINESS SERVICE LEVEL
+>>>BUSINESS SERVICE LEVEL<<<<
+2 <> 1 <> 1 <> 1
+BUSINESS SERVICE ID: 0
+>>>BUSINESS SERVICE ID: 0<<<<
+3 <> 1 <> 1 <> 1
+FILE ID: 002/080404/00
+>>>FILE ID: 002/080404/00<<<<
+4 <> 1 <> 1 <> 1
+MEMBER ID: 00000010279
+>>>MEMBER ID: 00000010279<<<<
+6 <> 0 <> 0 <> 0
+                                                                                                                                     
+                                                                                                                                     
+ NON-FINANCIAL DETAIL                              COUNTS                                                                            
+ ORIGINALS:                                                                                                                          
+                FINANCIAL DETAIL ADDENDUM          0000014                                                                           
+1IP727010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+CLEARING CYCLE 005 - A
+>>>CLEARING CYCLE 005 - A<<<<
+1 <> 1 <> 1 <> 1
+2008-04-04
+>>>2008-04-04<<<<
+2 <> 1 <> 1 <> 1
+ACCEPTANCE BRAND : MCC
+>>>ACCEPTANCE BRAND : MCC<<<<
+3 <> 1 <> 1 <> 1
+BUSINESS SERVICE LEVEL
+>>>BUSINESS SERVICE LEVEL<<<<
+4 <> 1 <> 1 <> 1
+MEMBER ID: 00000010279
+>>>MEMBER ID: 00000010279<<<<
+6 <> 0 <> 0 <> 0
+ CURRENCY CODE : 840-USD                                                                                                             
+                                                                                                                                     
+ BUSINESS                                                                                                                            
+ SERVICE                               ORIG/                                                                                         
+     ID            FILE ID             RVSL          RECON. AMOUNT                   TRANSACTION FEE                                 
+ -------- ---------------------------- ----        -------------------              -------------------                              
+ 010501   002/080404/00000010279/01284 ORIG                    80.55 CR                         0.95 DR                              
+                                                                                                                                     
+                             GRAND TOTAL                       80.55 CR                         0.95 DR                              
+                                                                                                                                     
+ ACCEPTANCE BRAND : DMC                                                                                                              
+ BUSINESS SERVICE LEVEL :INTRAREGIONAL                                                                                               
+ MEMBER ID: 00000010279                                                                                                              
+ CURRENCY CODE : 840-USD                                                                                                             
+                                                                                                                                     
+ BUSINESS                                                                                                                            
+ SERVICE                               ORIG/                                                                                         
+     ID            FILE ID             RVSL          RECON. AMOUNT                   TRANSACTION FEE                                 
+ -------- ---------------------------- ----        -------------------              -------------------                              
+ 010001   002/080404/00000010279/01284 ORIG                 1,633.11 CR                        26.73 DR                              
+                                                                                                                                     
+                             GRAND TOTAL                    1,633.11 CR                        26.73 DR                              
+                                                                                                                                     
+ ACCEPTANCE BRAND : MCC                                                                                                              
+ BUSINESS SERVICE LEVEL :INTRAREGIONAL                                                                                               
+ MEMBER ID: 00000010279                                                                                                              
+ CURRENCY CODE : 840-USD                                                                                                             
+                                                                                                                                     
+ BUSINESS                                                                                                                            
+ SERVICE                               ORIG/                                                                                         
+     ID            FILE ID             RVSL          RECON. AMOUNT                   TRANSACTION FEE                                 
+ -------- ---------------------------- ----        -------------------              -------------------                              
+ 010001   002/080404/00000010279/01284 ORIG                 6,517.78 CR                       134.75 DR                              
+                                                                                                                                     
+                             GRAND TOTAL                    6,517.78 CR                       134.75 DR                              
+                                                                                                                                     
+1IP727020-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+CLEARING CYCLE 005 - N
+>>>CLEARING CYCLE 005 - N<<<<
+1 <> 1 <> 1 <> 1
+2008-04-04
+>>>2008-04-04<<<<
+2 <> 1 <> 1 <> 1
+MEMBER ID: 00000010279
+>>>MEMBER ID: 00000010279<<<<
+4 <> 0 <> 0 <> 0
+                                                         NO DATA TO REPORT                                                           
+1IP728010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+ACCEPTANCE BRAND: DMC 
+>>>ACCEPTANCE BRAND: DMC <<<<
+1 <> 1 <> 1 <> 1
+BUSINESS SERVICE LEVEL
+>>>BUSINESS SERVICE LEVEL<<<<
+2 <> 1 <> 1 <> 1
+MEMBER ID: 00000010279
+>>>MEMBER ID: 00000010279<<<<
+4 <> 0 <> 0 <> 0
+ CURRENCY CODE :  840 - USD                                                                                                          
+                                                                                                                                     
+ BUSINESS                                                                                           RECON.                           
+ SERVICE               FILE ID                       FILE ID                      NET RECON          CURR.                           
+    ID              TO MASTERCARD                FROM MASTERCARD                CURRENCY AMOUNT      CODE                            
+ ________   ____________________________   ____________________________   _______________________   _______                          
+  010001    002/080404/00000010279/01284                                              1,633.11 CR   840-USD                          
+                                                                                                                                     
+  TOTAL                                                                               1,633.11 CR   840-USD                          
+                                                                                                                                     
+1IP728010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+ACCEPTANCE BRAND: MCC 
+>>>ACCEPTANCE BRAND: MCC <<<<
+1 <> 1 <> 1 <> 1
+BUSINESS SERVICE LEVEL
+>>>BUSINESS SERVICE LEVEL<<<<
+2 <> 1 <> 1 <> 1
+MEMBER ID: 00000010279
+>>>MEMBER ID: 00000010279<<<<
+4 <> 0 <> 0 <> 0
+ CURRENCY CODE :  840 - USD                                                                                                          
+                                                                                                                                     
+ BUSINESS                                                                                           RECON.                           
+ SERVICE               FILE ID                       FILE ID                      NET RECON          CURR.                           
+    ID              TO MASTERCARD                FROM MASTERCARD                CURRENCY AMOUNT      CODE                            
+ ________   ____________________________   ____________________________   _______________________   _______                          
+  010501    002/080404/00000010279/01284                                                 80.55 CR   840-USD                          
+                                                                                                                                     
+  TOTAL                                                                                  80.55 CR   840-USD                          
+                                                                                                                                     
+1IP728010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+ACCEPTANCE BRAND: MCC 
+>>>ACCEPTANCE BRAND: MCC <<<<
+1 <> 1 <> 1 <> 1
+BUSINESS SERVICE LEVEL
+>>>BUSINESS SERVICE LEVEL<<<<
+2 <> 1 <> 1 <> 1
+MEMBER ID: 00000010279
+>>>MEMBER ID: 00000010279<<<<
+4 <> 0 <> 0 <> 0
+ CURRENCY CODE :  840 - USD                                                                                                          
+                                                                                                                                     
+ BUSINESS                                                                                           RECON.                           
+ SERVICE               FILE ID                       FILE ID                      NET RECON          CURR.                           
+    ID              TO MASTERCARD                FROM MASTERCARD                CURRENCY AMOUNT      CODE                            
+ ________   ____________________________   ____________________________   _______________________   _______                          
+  010001    002/080404/00000010279/01284                                              6,517.78 CR   840-USD                          
+                                                                                                                                     
+  TOTAL                                                                               6,517.78 CR   840-USD                          
+                                                                                                                                     
+1IP728010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+ACCEPTANCE BRAND: DMC 
+>>>ACCEPTANCE BRAND: DMC <<<<
+1 <> 1 <> 1 <> 1
+BUSINESS SERVICE LEVEL
+>>>BUSINESS SERVICE LEVEL<<<<
+2 <> 1 <> 1 <> 1
+MEMBER ID: 00000010279
+>>>MEMBER ID: 00000010279<<<<
+4 <> 0 <> 0 <> 0
+ CURRENCY CODE :  840 - USD                                                                                                          
+                                                                                                                                     
+                                                                                                    RECON.                           
+  CYCLE                FILE ID                       FILE ID                      NET RECON          CURR.                           
+ ACTIVITY           TO MASTERCARD                FROM MASTERCARD                CURRENCY AMOUNT      CODE                            
+ ________   ____________________________   ____________________________   _______________________   _______                          
+  CYCLE 01                                                                                                                           
+  CYCLE 02                                                                                                                           
+  CYCLE 03                                                                                                                           
+  CYCLE 04                                 001/080404/00000004013/04401                   2.87 DR   840-USD                          
+  CYCLE 05  002/080404/00000010279/01284                                              1,633.11 CR   840-USD                          
+                                                                                                                                     
+  TOTAL                                                                               1,630.24 CR   840-USD                          
+                                                                                                                                     
+1IP728010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+ACCEPTANCE BRAND: MCC 
+>>>ACCEPTANCE BRAND: MCC <<<<
+1 <> 1 <> 1 <> 1
+BUSINESS SERVICE LEVEL
+>>>BUSINESS SERVICE LEVEL<<<<
+2 <> 1 <> 1 <> 1
+MEMBER ID: 00000010279
+>>>MEMBER ID: 00000010279<<<<
+4 <> 0 <> 0 <> 0
+ CURRENCY CODE :  840 - USD                                                                                                          
+                                                                                                                                     
+                                                                                                    RECON.                           
+  CYCLE                FILE ID                       FILE ID                      NET RECON          CURR.                           
+ ACTIVITY           TO MASTERCARD                FROM MASTERCARD                CURRENCY AMOUNT      CODE                            
+ ________   ____________________________   ____________________________   _______________________   _______                          
+  CYCLE 01                                                                                                                           
+  CYCLE 02                                                                                                                           
+  CYCLE 03                                                                                                                           
+  CYCLE 04                                                                                                                           
+  CYCLE 05  002/080404/00000010279/01284                                                 80.55 CR   840-USD                          
+                                                                                                                                     
+  TOTAL                                                                                  80.55 CR   840-USD                          
+                                                                                                                                     
+1IP728010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+ACCEPTANCE BRAND: MCC 
+>>>ACCEPTANCE BRAND: MCC <<<<
+1 <> 1 <> 1 <> 1
+BUSINESS SERVICE LEVEL
+>>>BUSINESS SERVICE LEVEL<<<<
+2 <> 1 <> 1 <> 1
+MEMBER ID: 00000010279
+>>>MEMBER ID: 00000010279<<<<
+4 <> 0 <> 0 <> 0
+ CURRENCY CODE :  840 - USD                                                                                                          
+                                                                                                                                     
+                                                                                                    RECON.                           
+  CYCLE                FILE ID                       FILE ID                      NET RECON          CURR.                           
+ ACTIVITY           TO MASTERCARD                FROM MASTERCARD                CURRENCY AMOUNT      CODE                            
+ ________   ____________________________   ____________________________   _______________________   _______                          
+  CYCLE 01                                                                                                                           
+  CYCLE 02                                                                                                                           
+  CYCLE 03                                                                                                                           
+  CYCLE 04                                                                                                                           
+  CYCLE 05  002/080404/00000010279/01284                                              6,517.78 CR   840-USD                          
+                                                                                                                                     
+  TOTAL                                                                               6,517.78 CR   840-USD                          
+                                                                                                                                     
+1IP728010-AA                                           MASTERCARD WORLDWIDE                                       RUN DATE: 04/04/08 
+CLEARING DAY TOTAL    
+>>>CLEARING DAY TOTAL    <<<<
+1 <> 1 <> 1 <> 1
+MEMBER ID: 00000010279
+>>>MEMBER ID: 00000010279<<<<
+3 <> 0 <> 0 <> 0
+                                                                                                                                     
+ CLEARING DAY TOTAL AS OF CLEARING CYCLE  5                                                                                          
+                                                                                                                                     
+              RECONCILIATION          NET RECONCILIATION                                                                             
+              CURRENCY  CODE           CURRENCY AMOUNT                                                                               
+              --------------          ------------------                                                                             
+                840-USD                      8,228.57 CR                                                                             
+                                                        ***END OF REPORT***                                                          
+1IP857010-AA                                           MASTERCARD WORLDWIDE                                      RUN DATE: 2008/04/04
+ERROR DETAIL - INPUT S
+>>>ERROR DETAIL - INPUT S<<<<
+1 <> 1 <> 1 <> 1
+2008/04/04
+>>>2008/04/04<<<<
+2 <> 1 <> 1 <> 1
+
+>>><<<<
+3 <> 1 <> 1 <> 1
+FILE ID: 002/08-04-04/
+>>>FILE ID: 002/08-04-04/<<<<
+4 <> 1 <> 1 <> 1
+PROCESSING MODE: P
+>>>PROCESSING MODE: P<<<<
+5 <> 1 <> 1 <> 1
+
+>>><<<<
+6 <> 1 <> 1 <> 1
+                                           *** FILE PROCESSED  - NO ERRORS ENCOUNTERED ***                                           
+

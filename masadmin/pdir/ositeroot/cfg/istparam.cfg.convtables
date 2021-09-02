@@ -1,0 +1,87 @@
+#
+# Copyright (C) 2004 eFunds Corporation ("eFunds").  All Rights Reserved.  
+# eFunds Canada Corporation is an authorized user. 
+# 
+# IST is a registered trademark of eFunds Corporation.  Other brand or
+# product names are trademarks or registered trademarks of their respective
+# holders. 
+# 
+# The information contained herein is the unpublished proprietary property
+# of eFunds.  Except as specifically authorized in writing by eFunds, the
+# holder of this document shall: i) keep all information contained herein
+# confidential, and ii) protect the information, in whole or in part, from
+# disclosure and dissemination to all third parties. 
+# 
+# This document and the software described in it are furnished under license
+# and may be used or copied only in accordance with the terms of such license.
+# This document is supplied for information purposes only, is subject to
+# change without notice, and should not be construed as a commitment by
+# either eFunds Corporation or eFunds Canada Corporation. 
+#
+# @(#) istparam.cfg.convtables 1.2 04/04/19 15:09:12
+
+#
+# The following are default values the convertion tables will contain.
+# The customized values should be added to file $OSITE_ROOT/cfg/istparam.cfg.
+#
+
+special.character
+{
+	x20 ! " # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \ ] 
+	^ _ ` { | } ~
+}
+
+ascii.to.ebcdic
+{
+#	---   ---   ---   ---   ---   ---   ---   ---   ---   ---
+#	  0	    1	  2	    3	  4	    5	  6     7     8     9
+#	---   ---   ---   ---   ---   ---   ---   ---   ---   ---
+	x00   x01   x02   x03   x37   x2d   x2e   x2f   x16   x05
+	x25   x0b   x0c   x0d   x0e   x0f   x10   x11   x12   x13
+	x3c   x3d   x32   x26   x18   x19   x3f   x27   x22   x1d
+	x1e   x1f
+	x40   x5a   x7f   x7b   x5b   x6c   x50   x7d   x4d   x5d
+	x5c   x4e   x6b   x60   x4b   x61   xf0   xf1   xf2   xf3
+	xf4   xf5   xf6   xf7   xf8   xf9   x7a   x5e   x4c   x7e
+	x6e   x6f
+	x7c   xc1   xc2   xc3   xc4   xc5   xc6   xc7   xc8   xc9
+	xd1   xd2   xd3   xd4   xd5   xd6   xd7   xd8   xd9   xe2
+	xe3   xe4   xe5   xe6   xe7   xe8   xe9   x4a   xe0   x5a
+	x5f   x6d   x79   x81   x82   x83   x84   x85   x86   x87
+	x88   x89   x91   x92   x93   x94   x95   x96   x97   x98
+	x99   xa2   xa3   xa4   xa5   xa6   xa7   xa8   xa9   xc0
+	x80   xd0   xa1   x07
+}
+
+ebcdic.to.ascii
+{
+#	---   ---   ---   ---   ---   ---   ---   ---   ---   ---
+#	  0	    1	  2	    3	  4	    5	  6     7     8     9
+#	---   ---   ---   ---   ---   ---   ---   ---   ---   ---
+	x00   x01   x02   x03   x00   x09   x00   x7f   x00   x00
+	x00   x0b   x0c   x0d   x0e   x0f   x10   x11   x12   x13
+	x00   x00   x08   x00   x18   x19   x00   x00   x1c   x1d
+	x1e   x1f   x00   x00   x1c   x00   x00   x0a   x17   x1b
+	x00   x00   x00   x00   x00   x05   x06   x07   x00   x00
+	x16   x00   x00   x00   x00   x04   x00   x00   x00   x00
+	x14   x15   x00   x1a   x20   x00   x00   x00   x00   x00
+	x00   x00   x00   x00   x5b   x2e   x3c   x28   x2b   x7c
+	x26   x00   x00   x00   x00   x00   x00   x00   x00   x00
+	x21   x24   x28   x29   x3b   x5e   x2d   x2f   x00   x00
+	x00   x00   x00   x00   x00   x00   x7c   x2c   x25   x5f
+	x3e   x3f   x00   x00   x00   x00   x00   x00   x00   x00
+	x00   x60   x3a   x23   x40   x27   x3d   x22   x7c   x61
+	x62   x63   x64   x65   x66   x67   x68   x69   x00   x00
+	x00   x00   x00   x00   x00   x6a   x6b   x6c   x6d   x6e
+	x6f   x70   x71   x72   x00   x00   x00   x00   x00   x00
+	x00   x7e   x73   x74   x75   x76   x77   x78   x79   x7a
+	x00   x00   x00   x00   x00   x00   x00   x00   x00   x00
+	x00   x00   x00   x00   x00   x00   x00   x00   x00   x00
+	x00   x00   x7b   x41   x42   x43   x44   x45   x46   x47
+	x48   x49   x00   x00   x00   x00   x00   x00   x7d   x4a
+	x4b   x4c   x4d   x4e   x4f   x50   x51   x52   x00   x00
+	x00   x00   x00   x00   x5c   x00   x53   x54   x55   x56
+	x57   x58   x59   x5a   x00   x00   x00   x00   x00   x00
+	x30   x31   x32   x33   x34   x35   x36   x37   x38   x39
+	x00   x00   x00   x00   x00   x00
+}

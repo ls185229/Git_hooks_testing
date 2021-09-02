@@ -1,0 +1,296 @@
+#!/usr/local/bin/tclsh
+#/clearing/filemgr/.profile
+
+#Execution: woot_chargeback_report.tcl
+
+################################################################################
+#
+#    File Name -woot_chargeback_report.tcl
+#
+#    Description -This s a custom report for woot to help them match chargebacks to their transactions.
+#
+#    Arguments - $1 Date to run the report.  If no argument, then defaults to today's date.  EX. 20130204
+#
+################################################################################
+# $Id: $
+# $Rev: $
+# $Author: $
+################################################################################
+
+#######################################################################################################################
+
+#Environment veriables.......
+
+set box $env(SYS_BOX)
+set clrpath $env(CLR_OSITE_ROOT)
+set maspath $env(MAS_OSITE_ROOT)
+set mailtolist $env(MAIL_TO)
+set mailfromlist $env(MAIL_FROM)
+set clrdb $env(IST_DB)
+set authdb $env(ATH_DB)
+
+#Email Subjects variables Priority wise
+
+set msubj_c "$box :: Priority : Critical - Clearing and Settlement"
+set msubj_u "$box :: Priority : Urgent - Clearing and Settlement"
+set msubj_h "$box :: Priority : High - Clearing and Settlement"
+set msubj_m "$box :: Priority : Medium - Clearing and Settlement"
+set msubj_l "$box :: Priority : Low - Clearing and Settlement"
+
+
+#Email Body Headers variables for assist
+
+set mbody_c "ASSIST :: \nContact On-Call Engr. \[15 minutes or Escalate\] - Open Ticket \n\n"
+set mbody_u "ASSIST :: \nContact On-Call Engr. \[60 minutes or Escalate\] - Open Ticket \n\n"
+set mbody_h "ASSIST :: \nInform On-Call/Available Engr. \[Day Time 7 days of the week\] - Open Ticket \n\n"
+set mbody_m "ASSIST :: \nInform Available Engr. \[Day Time 5 working days of week\] - Open Ticket \n\n"
+set mbody_l "ASSIST :: \nAssign Ticket to the appropriate Engr. \[24/7 - 365 days\] - Open Ticket \n\n"
+
+#System information variables....
+
+set sysinfo "System: $box\n Location: $env(PWD) \n\n"
+
+#######################################################################################################################
+
+package require Oratcl
+
+
+################################################################################
+#
+#    Procedure Name - readCfgFile
+#
+#    Description - Get the DB variables
+#
+#    Arguments - 
+#
+#    Return -
+#
+###############################################################################
+proc readCfgFile {} {
+   global clr_db_logon
+   global auth_db_logon
+   global clr_db
+   global auth_db
+   global Shortname_list
+
+   
+   set cfg_file_name WOOT.cfg1
+
+   set clr_db_logon ""
+   set clr_db ""
+   set auth_db_logon ""
+   set auth_db ""
+
+   if {[catch {open $cfg_file_name r} file_ptr]} {
+      puts "File Open Err:Cannot open config file $cfg_file_name"
+      exit 1
+   }
+
+   while { [set line [gets $file_ptr]] != {}} {
+      set line_parms [split $line ,]
+      switch -exact -- [lindex  $line_parms 0] {
+         "CLR_DB_LOGON" {
+            set clr_db_logon [lindex $line_parms 1]
+         }
+         "CLR_DB" {
+            set clr_db [lindex $line_parms 1]
+         }
+         "AUTH_DB_LOGON" {
+            set auth_db_logon [lindex $line_parms 1]
+         }
+         "AUTH_DB" {
+            set auth_db [lindex $line_parms 1]
+         }
+         "SHORTNAME_LIST" {
+            set Shortname_list [lindex $line_parms 1]
+         }
+         default {
+            puts "Unknown config parameter [lindex $line_parms 0]"
+         }
+      }
+   }
+
+   close $file_ptr
+
+   if {$clr_db_logon == ""} {
+      puts "Unable to find CLR_DB_LOGON params in $cfg_file_name, exiting..."
+      exit 2
+   }
+
+}
+
+#################################
+# connect_to_db
+#  handles connections to the database
+#################################
+
+proc connect_to_db {} {
+    global auth_logon_handle mas_logon_handle
+   global clr_db_logon
+   global auth_db_logon
+   global clr_db
+   global auth_db
+
+
+                if {[catch {set auth_logon_handle [oralogon $auth_db_logon@$auth_db]} result] } {
+                        puts "Encountered error $result while trying to connect to DB"
+                                exit 1
+                } else {
+                        puts "COnnected"
+                }
+                if {[catch {set mas_logon_handle [oralogon $clr_db_logon@$clr_db]} result] } {
+                        puts "Encountered error $result while trying to connect to DB"
+                                exit 1
+                } else {
+                        puts "COnnected"
+                }
+
+};# end connect_to_db
+
+puts "woot_chargeback_report.tcl.tcl Started"
+if { [lindex $argv 0] == "" } {
+  set today_date [clock format [clock seconds] -format "%d-%b-%Y"]
+  set Query_sql "Select substr(pan,0,6)||'******'||substr(pan,13,4) as pan,
+			arn,
+			idm.trans_seq_nbr,
+			merch_id,
+			vs.mbr_msg_txt,
+			tid,
+			amt_recon/100 as amt_recon
+		 from in_draft_main idm,
+                      visa_adn vs
+		where tid in ('010103015101','010103015302','010103015102','010103015301','010103005301','010103005302')
+			and merch_id in ('402529211000143','402529211000182','402529211000199','402529211000202')
+			and activity_dt > '$today_date'
+			and vs.trans_seq_nbr = idm.trans_seq_nbr"
+
+} else {
+  set today_date "28-JUN-13"
+  set tomorrow_date "01-AUG-13"
+  set Query_sql "Select substr(pan,0,6)||'******'||substr(pan,13,4) as pan,
+                        arn,
+                        idm.trans_seq_nbr,
+                        merch_id,
+                        vs.mbr_msg_txt,
+			activity_dt,
+			tid,
+			amt_recon/100 as amt_recon
+                 from in_draft_main idm,
+                      visa_adn vs
+                where tid in ('010103015101','010103015302','010103015102','010103015301','010103005301','010103005302')
+                        and merch_id in ('402529211000143','402529211000182','402529211000199','402529211000202')
+                        and activity_dt < '$tomorrow_date'
+                        and activity_dt > '$today_date'
+                        and vs.trans_seq_nbr = idm.trans_seq_nbr"
+}
+set fileName "Woot-Chargeback-$today_date.csv"
+
+readCfgFile
+connect_to_db
+set auth_sql [oraopen $auth_logon_handle]
+set mas_sql [oraopen $mas_logon_handle]
+
+set header "Card number,Original Amount, Chargeback Amount, Authorization time,ARN,Transaction ID,Processor Case,Account Number,Description\r\b"
+orasql $mas_sql $Query_sql
+set body " "
+puts first
+while {[orafetch $mas_sql -dataarray mas_query -indexbyname] != 1403 } {
+  set Query_sql "select amount,authdatetime,transaction_id from tranhistory where arn = '$mas_query(ARN)'"
+  orasql $auth_sql $Query_sql
+  orafetch $auth_sql -dataarray auth_query -indexbyname
+  append body "$mas_query(PAN),$auth_query(AMOUNT),$mas_query(AMT_RECON),$auth_query(AUTHDATETIME),\'$mas_query(ARN),\'$auth_query(TRANSACTION_ID),$mas_query(TRANS_SEQ_NBR),$mas_query(MERCH_ID),$mas_query(MBR_MSG_TXT),$mas_query(ACTIVITY_DT),$mas_query(TID)\r\n"
+}
+
+if { [lindex $argv 0] == "" } {
+  set today_date [clock format [clock seconds] -format "%d-%b-%Y"]
+  set Query_sql "Select substr(pan,0,6)||'******'||substr(pan,13,4) as pan,
+                        arn,
+                        idm.trans_seq_nbr,
+                        merch_id,
+                        em.msg_text,
+			tid,
+			amt_recon/100 as amt_recon
+                 from in_draft_main idm,
+                        in_draft_emc em
+                where tid in ('010103015101','010103015302','010103015102','010103015301','010103005301','010103005302')
+                        and merch_id in ('402529211000143','402529211000182','402529211000199','402529211000202')
+                        and activity_dt > '$today_date'
+                        and em.trans_seq_nbr = idm.trans_seq_nbr"
+
+} else {
+  set today_date "28-JUN-13"
+  set tomorrow_date "01-AUG-13"
+  set Query_sql "Select substr(pan,0,6)||'******'||substr(pan,13,4) as pan,
+                        arn,
+                        idm.trans_seq_nbr,
+                        merch_id,
+                        em.msg_text,
+			activity_dt,
+			tid,
+			amt_recon/100 as amt_recon
+                 from in_draft_main idm,
+                        in_draft_emc em
+                where tid in ('010103015101','010103015302','010103015102','010103015301','010103005301','010103005302')
+                        and merch_id in ('402529211000143','402529211000182','402529211000199','402529211000202')
+                        and activity_dt > '$today_date'
+                        and activity_dt < '$tomorrow_date'
+                        and em.trans_seq_nbr = idm.trans_seq_nbr"
+}
+
+orasql $mas_sql $Query_sql
+while {[orafetch $mas_sql -dataarray mas_query -indexbyname] != 1403 } {
+  set Query_sql "select amount,authdatetime,transaction_id from tranhistory where arn = '$mas_query(ARN)'"
+  orasql $auth_sql $Query_sql
+  orafetch $auth_sql -dataarray auth_query -indexbyname
+  append body "$mas_query(PAN),$auth_query(AMOUNT),$mas_query(AMT_RECON),$auth_query(AUTHDATETIME),\'$mas_query(ARN),\'$auth_query(TRANSACTION_ID),$mas_query(TRANS_SEQ_NBR),$mas_query(MERCH_ID),$mas_query(MSG_TEXT),$mas_query(ACTIVITY_DT),$mas_query(TID)\r\n"
+}
+
+if { [lindex $argv 0] == "" } {
+  set today_date [clock format [clock seconds] -format "%d-%b-%Y"]
+  set Query_sql "Select substr(pan,0,6)||'******'||substr(pan,13,4) as pan,
+                        arn,
+                        idm.trans_seq_nbr,
+                        merch_id,
+			tid,
+			amt_recon/100 as amt_recon
+                 from in_draft_main idm
+                where tid in ('010103015101','010103015302','010103015102','010103015301','010103005301','010103005302')
+                        and merch_id in ('402529211000143','402529211000182','402529211000199','402529211000202')
+                        and activity_dt > '$today_date'
+                        and card_scheme = '08'"
+
+} else {
+  set today_date "28-JUN-13"
+  set tomorrow_date "01-AUG-13"
+  set Query_sql "Select substr(pan,0,6)||'******'||substr(pan,13,4) as pan,
+                        arn,
+                        idm.trans_seq_nbr,
+                        merch_id,
+			activity_dt,
+			tid,
+			amt_recon/100 as amt_recon
+                 from in_draft_main idm
+                where tid in ('010103015101','010103015302','010103015102','010103015301','010103005301','010103005302')
+                        and merch_id in ('402529211000143','402529211000182','402529211000199','402529211000202')
+                        and activity_dt > '$today_date'
+                        and activity_dt < '$tomorrow_date'
+                        and card_scheme = '08'"
+}
+
+orasql $mas_sql $Query_sql
+puts second
+while {[orafetch $mas_sql -dataarray mas_query -indexbyname] != 1403 } {
+  set Query_sql "select amount,authdatetime,transaction_id from tranhistory where arn = '$mas_query(ARN)'"
+  orasql $auth_sql $Query_sql
+  orafetch $auth_sql -dataarray auth_query -indexbyname
+  append body "$mas_query(PAN),$auth_query(AMOUNT),$mas_query(AMT_RECON),$auth_query(AUTHDATETIME),\'$mas_query(ARN),\'$auth_query(TRANSACTION_ID),$mas_query(TRANS_SEQ_NBR),$mas_query(MERCH_ID),,$mas_query(ACTIVITY_DT),$mas_query(TID)\r\n"
+}
+
+
+exec echo $header >> $fileName
+exec echo $body >> $fileName
+
+exec mutt -a /clearing/filemgr/JOURNALS/WOOT/$fileName -s "WOOT Chargeback Report for $today_date" -- clearing@jetpay.com < $fileName
+exec mv $fileName ARCHIVE
+
+exit 0 

@@ -1,0 +1,19 @@
+
+phy_format = elf
+phy_record_checker = wire
+classifier = elf_classifier
+MSG wire_elf
+{
+#field name                         field     offset len  type   des call_back
+ MAS_PAY_EFFECT_DATE                  19.17201.28062	0 -1 ocstring - - 
+ MAS_PAY_AMT                          19.17201.28067	0 -1 ocstring - - 
+ MAS_RECORD_CNT                       19.17201.28073	0 -1 ocstring - - 
+ MAS_TRANS_ID                         19.17201.28074	0 -1 ocstring - - 
+ MAS_BATCH_SEQ                        19.17201.28075	0 -1 ocstring - - 
+ MAS_USER_ID                          19.17201.28076	0 -1 ocstring - - 
+ MAS_AUTH_CODE                        19.17201.28077	0 -1 ocstring - - 
+ MAS_ITEM_REF                         19.17201.28078	0 -1 ocstring - - 
+ MAS_SOURCE_ID                        19.17201.28079	0 -1 ocstring - - 
+ MAS_REPEAT_CODE                      19.17201.28080	0 -1 ocstring - - 
+ MAS_TEST_CODE                        19.17201.28081	0 -1 ocstring - - 
+}

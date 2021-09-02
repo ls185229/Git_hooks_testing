@@ -1,0 +1,5 @@
+location mailbox
+mailbox.name MAS_UA_IN
+mailbox.target_name MAS_UA_IN
+mailbox.gps_route_recv no
+mailbox.gps_route_send no 
