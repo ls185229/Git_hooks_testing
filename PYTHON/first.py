@@ -4,5 +4,5 @@ Doc string
 '''
 
 print("Hello world")
-print("New test ")
+print("New test")
 print("New change")
