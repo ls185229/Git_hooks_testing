@@ -1,2 +1,0 @@
-find /clearing/filemgr -type f -print >> filemgr_file_tree_output
-

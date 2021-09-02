@@ -1,2 +1,0 @@
-sftp -o "ProxyCommand ssh sftp.jetpay.com nc 12.10.219.115 22" -o "IdentityFile=/clearing/filemgr/.ssh/id_rsa_private.optblue" JETPAYPRD@12.10.219.115
-

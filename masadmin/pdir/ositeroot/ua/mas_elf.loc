@@ -1,4 +1,0 @@
-location mailbox
-mailbox.name MAS_FR
-mailbox.gps_route_recv no
-mailbox.gps_route_send no

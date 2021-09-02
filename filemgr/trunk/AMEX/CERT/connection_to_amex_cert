@@ -1,2 +1,0 @@
-sftp -o "ProxyCommand ssh sftp.jetpay.com nc fsgatewaytest.aexp.com 22" -o "IdentityFile=/clearing/filemgr/.ssh/id_rsa.optblue" JETPAYEAPTST@fsgatewaytest.aexp.com
-

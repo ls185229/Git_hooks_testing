@@ -1,5 +1,0 @@
-May 2014 PCI Non Compliance total
-
-file        33,056.10 
-duplicate      -28.95 
-Total       33,027.15 

@@ -1,1 +1,0 @@
-This repository holds the code for the IST/MAS supporting scripts.

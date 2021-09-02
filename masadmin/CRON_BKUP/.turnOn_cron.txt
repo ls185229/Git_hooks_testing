@@ -1,5 +1,0 @@
-##################################################################################################################
-# $Id: .turnOn_cron.txt 2781 2015-02-16 22:43:48Z bjones $
-##################################################################################################################
-14 17 * * * /clearing/masadmin/tcl_codes/grep_mas_stop.sh >> /clearing/masadmin/tcl_codes/cj_stopmas.log 2>&1
-20 17 * * * /clearing/masadmin/tcl_codes/grep_mas_start.sh >> /clearing/masadmin/tcl_codes/cj_startmas.log 2>&1

@@ -1,2 +1,0 @@
-mas_txn_count_sum_file_v13.tcl,teihost,@transp1,masclr,@masclr,
-
